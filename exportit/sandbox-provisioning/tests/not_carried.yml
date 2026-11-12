@@ -1,0 +1,67 @@
+---
+# Script lines that no task replaces, and why. tests/test_traceability.py
+# requires every line of the scripts that does something to be either named by
+# a task or listed here.
+
+- file: setup-instance.sh
+  lines: L6 L11
+  why: >-
+    Sourcing the versions and the function library. The versions are
+    group_vars/all.yml and the functions are the roles.
+
+- file: setup-instance.sh
+  lines: L37
+  why: >-
+    Sourcing Spack's shell set-up into the script's shell. The tasks call
+    Spack by its path, so nothing has to be sourced.
+
+- file: setup-instance.sh
+  lines: L57
+  why: >-
+    The time stamp for the fallback image name. group_vars/all.yml makes the
+    same name.
+
+- file: funcs-setup-instance.sh
+  lines: L145
+  why: >-
+    Loads environment modules into the script's shell. Each task that needs
+    the module command loads it for itself.
+
+- file: funcs-setup-instance.sh
+  lines: L177
+  why: >-
+    Switches to the stock network-latency profile. Thirty lines later the
+    script switches to its own profile, which includes that one, so this
+    switch has no lasting effect.
+
+- file: funcs-setup-instance.sh
+  lines: L250
+  why: >-
+    Shows the service's status in the log. It does not stop the script,
+    whatever it shows.
+
+- file: funcs-setup-instance.sh
+  lines: L917
+  why: Lists the installed Intel packages for the log.
+
+- file: funcs-setup-instance.sh
+  lines: L1075
+  why: >-
+    Empties the package manager's cache a second time. node-image.yml empties
+    it before the image is taken.
+
+- file: create_image.sh
+  lines: L34
+  why: >-
+    Installs boto3 for the login user. The base_system role has already done
+    that, as the script's own setup_environment has.
+
+- file: funcs-setup-instance.sh
+  lines: L958
+  why: >-
+    Adds spack-public again without a scope. Without a scope Spack v1.2.0
+    looks at the merged configuration, finds the name (its own defaults
+    and install_spack both define it) and stops with "already exists", so
+    the command never has an effect; the script does not notice. The
+    binary mirror it names is the one the spack role adds to the site
+    scope.

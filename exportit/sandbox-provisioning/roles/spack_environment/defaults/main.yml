@@ -1,0 +1,25 @@
+---
+# The script names the environment and its target as literals; they are not
+# taken from the target variable in environment-vars.sh.
+spack_environment_dir: "{{ sandbox_environments_dir }}/rhel10-x86_64_v3"
+
+spack_environment_settings:
+  - "modules:default:enable:[tcl]"
+  - "concretizer:targets:granularity:generic"
+  - "packages:all:require:[target=x86_64_v3]"
+
+spack_environment_compiler: "intel-oneapi-compilers@{{ oneapi_version }}"
+
+# What build_spack-environment adds. Its list of NCEP libraries is empty in
+# the script, so these two are all.
+spack_environment_specs:
+  - "esmf@{{ esmf_version }}+pnetcdf+mpi ^intel-oneapi-mpi@{{ intel_mpi_version }} ^zlib-ng+compat %{{ spack_environment_compiler }}"
+  - "petsc+mpi %{{ spack_environment_compiler }}"
+
+# Where Spack writes Tcl module files unless told otherwise. It is used only
+# to tell whether regenerating them changed anything.
+spack_environment_modules_root: "{{ spack_dir }}/share/spack/modules"
+
+# The build compiles everything and takes hours. Ansible starts it, lets go of
+# the connection and asks after it once a minute, for at most this long.
+spack_environment_build_timeout: 86400

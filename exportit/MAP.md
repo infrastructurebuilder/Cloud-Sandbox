@@ -13,15 +13,17 @@ staged in [INPROGRESS/TODO.md](../INPROGRESS/TODO.md).
 ## Units
 
 "State" is one of: *planned* (assigned, nothing copied), *copied*
-(the copy exists and is checked against its source), *relocated*
-(never used here: nothing leaves this repository).
+(the copy exists and is checked against its source), *translated*
+(rewritten in another form, with the originals carried beside it and
+tests that hold the two together), *relocated* (never used here:
+nothing leaves this repository).
 
 | Unit | Copy | Source paths | Stage | State |
 | --- | --- | --- | ---: | --- |
 | `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` without `plotting/`; root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
 | `cloudflow-plotting` | [cloudflow-plotting/](cloudflow-plotting/) | `cloudflow/plotting/`, `cloudflow/setup.py`, `cloudflow/plotting_reqs.reference`, `cloudflow/tests/test.plotting.py` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
 | cloudflow's documentation | `exportit/cloudflow/docs/` | `docs/source/` | [8](../INPROGRESS/STAGE-8.md) | planned |
-| `sandbox-provisioning` | `exportit/sandbox-provisioning/` | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, the `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | planned |
+| `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
 | `sandbox-terraform` | `exportit/sandbox-terraform/` | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | planned |
 | `sandbox-models` | `exportit/sandbox-models/` | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | planned |
 | `sandbox-configs` | `exportit/sandbox-configs/` | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | planned |
@@ -290,10 +292,188 @@ It expects nothing from the other units. `cloudflow` depends on it.
 
 ## sandbox-provisioning
 
-Planned. [Stage 3](../INPROGRESS/STAGE-3.md) fills this section. It is
-a translation and not a copy: each function of
-`funcs-setup-instance.sh` becomes an Ansible role, and this section
-will list function to role, variable to variable and file to file.
+Translated on 2026-11-12 by [stage 3](../INPROGRESS/STAGE-3.md). The
+project's own description is
+[sandbox-provisioning/README.md](sandbox-provisioning/README.md).
+
+This unit is not a copy of anything. It is Ansible that does what
+`scripts/setup-instance.sh` does. The scripts it replaces travel with
+it, unchanged, so that every task can name the lines it replaces and
+the tests can compare the two.
+
+### Where its files come from
+
+From [sandbox-provisioning.map](sandbox-provisioning.map): 9 files.
+
+| Source | In the unit |
+| --- | --- |
+| `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.sh`, `create_image.py` | `legacy/`, unchanged, as the reference the tests read |
+| `scripts/system/tmux.conf` | `roles/base_system/files/tmux.conf` |
+| `scripts/system/.vimrc` | `roles/user_shell/files/vimrc` |
+| `scripts/system/prefect-server.service` | `roles/prefect_server/files/prefect-server.service` |
+| `scripts/system/profile.d.zippy_efa.sh` | `roles/efa_driver/files/zippy_efa.sh` |
+
+Three role files are text that the script writes with `tee` or
+`echo`: `mpi_ssh/files/sandbox-local-net.conf`,
+`intel_oneapi/files/oneAPI.repo` and `hpc_tuning/files/tuned.conf`. A
+test requires each to equal the script's lines byte for byte.
+
+The other 84 files under `scripts/` stay with `sandbox-ops`
+([stage 7](../INPROGRESS/STAGE-7.md)). That includes
+`scripts/system/etc.ssh.ssh_config.d/sandbox-local-net.conf`, which
+nothing installs and whose rules differ from the script's.
+
+### Function to role
+
+`site.yml` imports the roles in the order `setup-instance.sh` calls
+the functions; a test checks the order.
+
+| Role | Function, lines of `funcs-setup-instance.sh` | Named tasks and blocks |
+| --- | --- | ---: |
+| `sandbox_paths` | `setup_paths`, 264-299 | 5 |
+| `user_shell` | `setup_aliases`, 1518-1560 | 3 |
+| `base_system` | `setup_environment`, 20-165 | 29 |
+| `prefect_server` | `setup_prefect-server`, 219-260 | 10 |
+| `mpi_ssh` | `setup_ssh_mpi`, 1340-1443 | 5 |
+| `efa_driver` | `install_efa_driver`, 498-589 | 13 |
+| `fsx_lustre_client` | `install_fsx_driver`, 1042-1079 | 4 |
+| `python_user_env` | `install_python_modules_user`, 1210-1249 | 1 |
+| `spack` | `install_spack`, 630-704 | 9 |
+| `intel_oneapi` | `install_intel_oneapi_dnf` and `add_spack_site_external`, 884-963 and 708-733 | 7 |
+| `spack_environment` | `create_spack-environment` and `build_spack-environment`, 737-766 and 770-826 | 8 |
+| `hpc_tuning` | `configure_optimizations`, 169-214 | 4 |
+| `node-image.yml` | `setup-instance.sh` 52-75, `create_image.sh`, `create_image.py` | 14 |
+
+Every task carries `# Replaces <script> L<n>` or `# New: <why>`.
+[tests/test_traceability.py](sandbox-provisioning/tests/test_traceability.py)
+fails if a task has neither, if the lines it names lie outside its
+role's function, or if a line of the scripts that does something is
+neither replaced nor listed with its reason in
+[tests/not_carried.yml](sandbox-provisioning/tests/not_carried.yml)
+(ten entries).
+
+### Variable to variable
+
+[group_vars/all.yml](sandbox-provisioning/group_vars/all.yml) holds
+each of the 21 variables that `environment-vars.sh` exports, under a
+lower-case name, with the script's name in a comment.
+[tests/test_parity.py](sandbox-provisioning/tests/test_parity.py) runs
+the script in `bash` and the playbook's variables through
+`ansible-playbook`, and compares the results. It covers every version,
+the build-job count for 1, 2, 3, 8 and 96 processors, the three cache
+settings, the pip list, both dnf package lists, the Intel modules,
+Spack's externals, providers, settings and specs, and the Lustre
+repository edits for three kernels.
+
+Values the script takes from its surroundings became variables too:
+the login user (`sandbox_user`, `ec2-user`), the EFS mount and
+directories, and the prompt's site name.
+
+### The script's accidents, and what was done with each
+
+The operator chose to keep the script's behaviour, accidents
+included, and to write each one down.
+
+| What the script does | Here |
+| --- | --- |
+| Sets `EFA_MINAMAL`, tests `EFA_MINIMAL`, so the minimal EFA install always runs | `efa_driver_minimal: true`; both branches are translated |
+| `SPACK_CACHEONLY=-1`, so Spack never uses binary caches and compiles everything | `spack_cache_only: -1` |
+| Exports `SPACK_MIRROR`, `SPACK_KEY_URL`, `SPACK_KEY`; nothing uses them | Kept as variables; nothing uses them |
+| Updates every package and builds the drivers without a reboot | The same; the `efa_driver` role prints a warning when the running kernel is not the newest installed |
+| Turns off the Lustre repository's signature check | The same |
+| Installs a Prefect server that does not start (FastAPI too new) | **Corrected:** `fastapi<0.155` (operator's decision) |
+| `alternatives --set python`, which its own comment says fails | Run, with failure allowed |
+| Writes the module search path into `/etc/environment-modules/modulespath` before the package that owns that file is installed, "only once" | The same order and the same once; the write may fail as it does in the script, and the container test reports whether the line arrived. In the container it did not |
+| Edits `/etc/dnf.conf` | The same file. It does not exist on AlmaLinux 10, where the edit does nothing; this was not checked on RHEL |
+| Its tcsh guard can never match, so the aliases are appended on every run; `ulimit`, ssh rules and the authorised key are also appended every run | Each line written once |
+| A second `spack mirror add spack-public` with no scope, which always stops with "already exists" on Spack v1.2.0 | Not carried; reason in `not_carried.yml` |
+| `tuned-adm profile network-latency`, then its own profile thirty lines later | Only the second switch |
+| `create_image.py` uses region `us-east-2` whatever the node's region | Not carried: `node-image.yml` uses the node's own region (decision 5) |
+| `create_image.py` snapshots every attached volume and uses the first | Only the root volume |
+| A failed step still ends with a node image registered | Stops at the first failure; SELinux is turned back on and the Prefect server restarted in any case |
+
+### What it expects
+
+From **sandbox-terraform**: a RHEL 10 x86_64 head node, the EFS volume
+mounted at `/mnt/efs/fs1` with `/save` linked to it, the IAM role
+that allows snapshots and image registration (today
+`AmazonEC2FullAccess`), and the `ami_name` and project tag. The
+playbook checks the operating system and the mount, and stops if
+either is wrong.
+
+Provides: what the script provides. The software under `/save` (Spack,
+the environment, module files) reaches compute nodes through the EFS
+mount; everything else through the node image.
+
+### The first-boot script
+
+[first-boot/init_template.tpl](sandbox-provisioning/first-boot/init_template.tpl)
+is `terraform/init_template.tpl` with its last step replaced. It
+installs `ansible-core`, runs `ansible-pull` against the provisioning
+repository at a version, then runs `node-image.yml`. It stops before
+the image if the playbook fails. Terraform would have to pass two more
+values, `provisioning_repo` and `provisioning_version`;
+[stage 4](../INPROGRESS/STAGE-4.md) owns that change. It still clones
+Cloud-Sandbox, because cloudflow runs from that checkout.
+
+### Found while testing
+
+- **The script's Prefect server does not start today.** `pip install
+  prefect==3.7.8` brings in FastAPI 0.162. The server of Prefect 3.7.8
+  fails at import with any FastAPI from 0.155 on (`Body() got an
+  unexpected keyword argument 'min_items'`); 0.139 to 0.154 work. The
+  unit's systemd file restarts it every five seconds without end. This
+  is the script's behaviour on any node built now. By the operator's
+  decision (2026-11-12) the role installs Prefect with
+  `fastapi<0.155`: the one deliberate departure from the script,
+  undone by setting `prefect_server_extra_requirements: []`.
+- **On Spack v1.2.0, `spack-public` already exists** in Spack's
+  defaults, as a source-only mirror. The script's add creates a binary
+  mirror of the same name in the site scope, which takes precedence.
+- **The two `compiler find` steps undo each other.** Run without the
+  Intel modules, the `install_spack` step removes the Intel compilers
+  that `install_intel_oneapi_dnf` registered; that function then adds
+  them back. The script does this on every second run. The `spack`
+  role loads the Intel modules when they exist, so a second run
+  changes nothing.
+
+### How it was tested, and what was not
+
+| Check | Where | Result on 2026-11-12 |
+| --- | --- | --- |
+| Syntax, `ansible-lint` production profile, `shellcheck`, `ruff`, `pyright` | `just test` | pass |
+| Traceability and parity with the scripts (310 tests) | `just test` | pass |
+| Eight roles (all but the four below) applied with `ansible-pull` to an AlmaLinux 10 container, twice; the second run must change nothing; the result is checked | `just full-test` | pass: 49 changes, then 0 |
+| `efa_driver`, `fsx_lustre_client`, `spack_environment`, `hpc_tuning`, `node-image.yml` | nowhere | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
+| Anything on RHEL, or on AWS | nowhere | **not proved** |
+| The first-boot script | nowhere | **not proved**: it needs a real EFS volume |
+| Whether the playbook leaves the same node the script does | nowhere | **not proved** |
+
+[docs/LIVE-PROOF.md](sandbox-provisioning/docs/LIVE-PROOF.md) is the
+procedure that would settle the last four rows. It costs a head node
+for several hours. It has not been run either.
+
+Two guesses in the untested roles are marked where they are made. The
+`efa_driver` role reads the installer's record in
+`/opt/amazon/efa_installed_packages` to skip a second install; if the
+record's form differs, the installer simply runs every time, as in the
+script. The `spack_environment` role reports a change in module files
+by hashing Spack's default module directory; if the files are
+elsewhere, it reports no change but still regenerates them.
+
+### What a real relocation would change
+
+- Create the repository, extract with `just export-filter
+  sandbox-provisioning`, and keep `legacy/` until the live proof has
+  been run, then delete it with the tests that read it.
+- In Cloud-Sandbox: replace `terraform/init_template.tpl` with the
+  first-boot script, pass the two new values, and delete the five
+  scripts and the nine sibling entry scripts that are now tags.
+- The nine sibling scripts are not translated. Three of them call
+  functions that exist nowhere.
+
+`just export-prove sandbox-provisioning` passed on 2026-11-12: the
+nine source files, with 15 commits of history.
 
 ## sandbox-terraform
 

@@ -1,0 +1,56 @@
+# sandbox-provisioning: what scripts/setup-instance.sh does, as Ansible.
+# Read by exportit/tools/export.py; described in exportit/MAP.md.
+#
+# This unit is a translation, not a copy. The scripts it translates are
+# carried along unchanged under legacy/, so that every task can name the lines
+# it replaces and the tests can compare the two. The few files the script
+# installs as they are become role files.
+#
+# The rest of scripts/ belongs to sandbox-ops (stage 7), so nothing here says
+# "covers scripts/".
+
+# The scripts that the roles replace.
+copy scripts/setup-instance.sh          legacy/setup-instance.sh
+copy scripts/funcs-setup-instance.sh    legacy/funcs-setup-instance.sh
+copy scripts/environment-vars.sh        legacy/environment-vars.sh
+copy scripts/create_image.sh            legacy/create_image.sh
+copy scripts/create_image.py            legacy/create_image.py
+
+# Files the script installs unchanged.
+copy scripts/system/tmux.conf                 roles/base_system/files/tmux.conf
+copy scripts/system/.vimrc                    roles/user_shell/files/vimrc
+copy scripts/system/prefect-server.service    roles/prefect_server/files/prefect-server.service
+copy scripts/system/profile.d.zippy_efa.sh    roles/efa_driver/files/zippy_efa.sh
+
+# Files that exist only in the unit.
+new README.md
+new LICENSE                 # a copy of the repository's LICENSE
+new Justfile
+new pyproject.toml
+new uv.lock
+new .python-version
+new .ansible-lint
+new ansible.cfg
+new requirements.yml
+new site.yml
+new node-image.yml
+new group_vars/
+new inventories/
+new first-boot/
+new docs/
+new tests/
+new roles/sandbox_paths/tasks/
+new roles/user_shell/tasks/
+new roles/base_system/tasks/
+new roles/base_system/defaults/
+new roles/prefect_server/tasks/
+new roles/prefect_server/defaults/
+new roles/mpi_ssh/
+new roles/efa_driver/tasks/
+new roles/efa_driver/defaults/
+new roles/fsx_lustre_client/
+new roles/python_user_env/
+new roles/spack/
+new roles/intel_oneapi/
+new roles/spack_environment/
+new roles/hpc_tuning/

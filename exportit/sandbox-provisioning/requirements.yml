@@ -1,0 +1,6 @@
+---
+# site.yml needs nothing but ansible-core. node-image.yml needs amazon.aws,
+# held to the series that supports the ansible-core 2.16 that RHEL 10 ships.
+collections:
+  - name: amazon.aws
+    version: ">=9.0.0,<10.0.0"
