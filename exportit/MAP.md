@@ -26,7 +26,7 @@ nothing leaves this repository).
 | `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
-| `sandbox-configs` | `exportit/sandbox-configs/` | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | planned |
+| `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
 | `sandbox-ops` | `exportit/sandbox-ops/` | the rest of `scripts/`, `misc/`, `jupyterhub/` | [7](../INPROGRESS/STAGE-7.md) | planned |
 | `cloud-sandbox` (umbrella) | `exportit/cloud-sandbox/` | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/`, `TODO`, `.github/`, `LICENSE`, `.gitignore` | [8](../INPROGRESS/STAGE-8.md) | planned |
 | not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/` | [8](../INPROGRESS/STAGE-8.md) | planned |
@@ -779,7 +779,111 @@ re-record, rather than with 53 differences.
 
 ## sandbox-configs
 
-Planned. [Stage 6](../INPROGRESS/STAGE-6.md) fills this section.
+Copied on 2026-11-12 by [stage 6](../INPROGRESS/STAGE-6.md). The
+project's own description is
+[sandbox-configs/README.md](sandbox-configs/README.md).
+
+### Where its files go
+
+From [sandbox-configs.map](sandbox-configs.map): all 130 files of
+`job.configs/` (80) and `cluster.configs/` (50), unchanged, under the
+same directory names. By the operator's decisions the copies keep
+their identifiers, and the templates and examples stay in the same
+unit as the site data. No patches.
+
+New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
+`.python-version`, `schema/` and `tests/`.
+
+### The schema
+
+[schema/jobs.json](sandbox-configs/schema/jobs.json) and
+[schema/clusters.json](sandbox-configs/schema/clusters.json) name, for
+each of the 17 `JOBTYPE`s and the two platforms, every key cloudflow
+reads, whether it is required, optional or conditional, and the line
+that reads it. They are written from the code, not by hand:
+[tools/configs_schema.py](tools/configs_schema.py) reads
+`JobFactory.py` and `ClusterFactory.py` for the dispatch and each
+class's `parseConfig()` for the keys, with Python's own parser. Two
+cases needed care, and each has a test: `table_name` is read under
+`if 'table_name' in cfDict` whose `else` raises, so it is required;
+`EXPNAME` is guarded the same way but only for LiveOcean, so it is
+conditional. `just configs-schema` writes the files again; the tools
+tests fail when they differ from what the code reads, or when a line
+named no longer reads its key.
+
+### What the files are
+
+Every file is catalogued in
+[tests/catalogue.json](sandbox-configs/tests/catalogue.json) with its
+kind (job, cluster, other), its role and whether cloudflow can read
+it; the unit's test fails when any of that changes.
+
+| Role | Files |
+| --- | ---: |
+| template (named so, or holding placeholders) | 3 |
+| site (an AWS identifier, or a path in one person's directory) | 71 |
+| example (anything else that is a description) | 48 |
+| helper scripts, notes, pointers | 8 |
+
+### Where the cluster values come from
+
+This gives C7 of [ANALYSIS.md](../INPROGRESS/ANALYSIS.md) its owners:
+`region`, `key_name`, `sg_ids`, `subnet_id` and `placement_group` come
+from `sandbox-terraform`'s outputs; `image_id` from
+`sandbox-provisioning`'s `node-image.yml`; `table_name` from the
+operator (made by hand, supplied as configuration); the rest from the
+person who writes the description. The README has the table.
+
+### Found
+
+- **23 of the 122 descriptions cannot be read by today's cloudflow.**
+  Three are not JSON: two have a trailing comma
+  (`IOOS/ioos.nosofs.cfg`, `IOOS/nosofs.config`) and
+  `IOOS/current.system` is a fragment. Six cluster descriptions lack
+  `table_name`, which `AWSCluster` now insists on, **among them
+  `cluster.configs/template.ioos`, the template a new site copies**.
+  The four CORA job descriptions lack `GRID`; six forecast and
+  hindcast descriptions lack `SAVEDIR`; three experiments lack keys
+  their class reads. The catalogue gives each.
+- **The site data describes many deployments, not one.** The 40 AWS
+  cluster descriptions name 19 different images, 13 sets of security
+  groups, 8 subnets and 13 placement groups. Only 4 agree on all four
+  with `IOOS/current.system`, the hand-kept copy of the latest
+  deployment's values. The rest point at resources that may no longer
+  exist; nothing here can tell, since nothing is checked against AWS.
+- `IOOS/current.system` and `IOOS/current.image_id` are read by
+  nothing; they are notes in the shape of data.
+- Two files, `IOOS/liveocean.ioos` and `noaa.cora.config`, hold the
+  name of another description, as a symbolic link would; cloudflow
+  would try to read them as JSON and fail.
+- Three key names are in use: `ioos-sandbox`, `rsa_sandbox_key`, and
+  one named after a person.
+
+### How it is checked
+
+| Check | Where | Result on 2026-11-12 |
+| --- | --- | --- |
+| Every file is as catalogued: kind, role, readable or why not | `just test` | pass, 130 files |
+| Every schema key names a line of cloudflow's code | `just test` | pass |
+| The schema is what the code reads, and each line named reads its key | `tools`' `just test` | pass |
+| Extraction with history | root `just full-test` | the same 130 files, with 4 commits of history |
+
+### What a real relocation would change
+
+- Extract with `just export-filter sandbox-configs`.
+- Split it by owner, now that the catalogue says which file is which:
+  the 3 templates and 48 examples could travel with cloudflow, the 71
+  site files belong to the site that runs them.
+- Repair or retire the 23 unreadable descriptions, and add
+  `table_name` to the template first.
+- Have Terraform write a complete cluster-description fragment
+  (with `region` and `table_name`) instead of `current.system` being
+  kept by hand.
+- Move the schema writer into cloudflow, so that the schema is
+  published with the code that reads it.
+- In Cloud-Sandbox: delete `job.configs/` and `cluster.configs/`, and
+  update the paths in the documentation
+  ([stage 8](../INPROGRESS/STAGE-8.md)).
 
 ## sandbox-ops
 

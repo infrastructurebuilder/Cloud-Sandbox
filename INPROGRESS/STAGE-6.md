@@ -1,7 +1,8 @@
 # Stage 6: job and cluster descriptions as an independent unit
 
-*Status:* planned 2026-11-12. Waits for validation and "do 6".
-Better after [stage 2](STAGE-2.md), which states the schema.
+*Status:* executed 2026-11-12; waits for validation. The decisions are
+under [Decisions taken](#decisions-taken); the result under
+[Outcome](#outcome).
 
 ## Why
 
@@ -45,6 +46,12 @@ image id).
    node image, so that C7 has an owner.
 6. The configs section of [MAP.md](../exportit/MAP.md).
 
+## Decisions taken
+
+1. **Identifiers:** the copies keep them, byte-identical; no patches.
+2. **One unit or two:** one unit; templates, examples and site data
+   together, sorted by the catalogue.
+
 ## Out of scope
 
 Changing any description. Validating identifiers against AWS.
@@ -58,3 +65,26 @@ schema names the line of code that reads it.
 ## Sizing and branch
 
 130 files copied, about 6 written. Branch `feature/stage-6-configs`.
+
+## Outcome
+
+- [exportit/sandbox-configs/](../exportit/sandbox-configs/): all 130
+  files, unchanged, under their own directory names, with a README,
+  `Justfile` and tests.
+- The schema (item 1) is written from cloudflow's code by
+  [tools/configs_schema.py](../exportit/tools/configs_schema.py),
+  not by hand: 17 `JOBTYPE`s and 2 platforms, every key with the line
+  that reads it. A tools test fails when the code and the schema part.
+- Every file classified (item 2) by written rules and recorded in a
+  catalogue: 3 templates, 48 examples, 71 site files, 8 others. The
+  unit's test fails when a file's kind, role or readability changes.
+- Item 4's test, "every description parses and has the required
+  keys", became "every description is as recorded": 99 of 122 are
+  readable, 23 are not, each with its reason, since the copies are not
+  edited.
+- Item 5: the owners of each cluster value are in the README and
+  [MAP.md](../exportit/MAP.md#where-the-cluster-values-come-from).
+- Found: the cluster template a new site copies lacks `table_name`,
+  which cloudflow now requires; the 40 AWS cluster descriptions span
+  19 images and 13 placement groups, and only 4 match the latest
+  deployment. Details in [MAP.md](../exportit/MAP.md#sandbox-configs).

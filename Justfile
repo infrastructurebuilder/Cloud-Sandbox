@@ -7,7 +7,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Projects under exportit/, in dependency order.
-units := "tools cloudflow-plotting cloudflow sandbox-provisioning sandbox-terraform " + model_units
+units := "tools cloudflow-plotting cloudflow sandbox-provisioning sandbox-terraform sandbox-configs " + model_units
 
 # The model recipes: one unit per model, and what they share (stage 5).
 model_units := "model-common model-adcirc-cora model-eccofs model-liveocean model-necofs model-nosofs model-secofs model-ucla-roms model-ufscoastal"
@@ -33,7 +33,7 @@ build: (each "build")
 test: export-check (each "test")
 
 # Everything in test, plus the slow tests and the extraction proof for each copied unit.
-full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform")
+full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs")
     for unit in {{ model_units }}; do just export-prove "$unit"; done
 
 # Nothing is published from this repository.
@@ -55,3 +55,7 @@ export-filter name:
 # Extract a unit from a throw-away clone and compare the result with the copy.
 export-prove name:
     {{ export_tool }} prove {{ name }}
+
+# Write sandbox-configs' schema again from cloudflow's code (after a change in what it reads).
+configs-schema:
+    uv run --project exportit/tools python exportit/tools/configs_schema.py --write
