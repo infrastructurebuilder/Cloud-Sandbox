@@ -1,0 +1,21 @@
+# sandbox-configs: the job and cluster descriptions that cloudflow reads.
+# Read by exportit/tools/export.py; described in exportit/MAP.md.
+#
+# Both directories, every file, unchanged and with their identifiers in them
+# (stage 6, decision 1), templates and site data together (decision 2). They
+# keep their names, so that the paths in cloudflow's documentation still hold.
+
+covers job.configs/
+covers cluster.configs/
+copy job.configs/        job.configs/
+copy cluster.configs/    cluster.configs/
+
+# Files that exist only in the unit.
+new README.md
+new LICENSE                # a copy of the repository's LICENSE
+new Justfile
+new pyproject.toml
+new uv.lock
+new .python-version
+new schema/                # written by exportit/tools/configs_schema.py from cloudflow's code
+new tests/
