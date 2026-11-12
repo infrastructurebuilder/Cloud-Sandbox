@@ -1,0 +1,53 @@
+# Cloud-Sandbox: the entry point for building and checking this repository.
+#
+# The original tree (cloudflow/, scripts/, terraform/, models/ ...) has no
+# build and no tests of its own. What can be built and tested are the units
+# copied into exportit/; each has its own Justfile and this one runs them all.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# Projects under exportit/, in dependency order.
+units := "tools cloudflow-plotting cloudflow"
+
+export_tool := "uv run --project exportit/tools python exportit/tools/export.py"
+
+# List the targets.
+default:
+    @just --list
+
+# Run one target in every project under exportit/.
+[private]
+each target:
+    for unit in {{ units }}; do echo "== $unit: {{ target }}"; just --justfile "exportit/$unit/Justfile" {{ target }}; done
+
+# One-time setup: create every project's environment.
+init: (each "init")
+
+# Build every project's artifacts.
+build: (each "build")
+
+# The acceptance bar: the copies match their sources; lint, type-check and fast tests pass everywhere.
+test: export-check (each "test")
+
+# Everything in test, plus the slow tests and the extraction proof for each copied unit.
+full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow")
+
+# Nothing is published from this repository.
+release: full-test
+    @echo "Cloud-Sandbox: nothing to release"
+
+# Copy units into exportit/ by their mapping files (all units when none is named).
+export *names:
+    {{ export_tool }} copy {{ names }}
+
+# Check every copy against its source and its mapping file.
+export-check:
+    {{ export_tool }} check
+
+# Print the git filter-repo directives that would extract a unit with its history.
+export-filter name:
+    @{{ export_tool }} filter {{ name }}
+
+# Extract a unit from a throw-away clone and compare the result with the copy.
+export-prove name:
+    {{ export_tool }} prove {{ name }}

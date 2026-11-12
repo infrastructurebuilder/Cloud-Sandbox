@@ -1,0 +1,85 @@
+#!/bin/bash
+
+set -e       # exit immediately on error
+set -x       # verbose with command expansion
+set -u       # forces exit on undefined variables
+
+# Load the available modules on the head node
+module purge
+module use -a /mnt/efs/fs1/save/environments/spack.v0.22.5/share/spack/modules/linux-rhel8-x86_64
+
+module load intel-oneapi-compilers/2023.1.0-gcc-11.2.1-3rbcwfi
+module load intel-oneapi-mpi/2021.12.1-intel-2021.9.0-6nra3z4
+module load hdf5/1.14.3-intel-2021.9.0-jjst2zs
+module load netcdf-c/4.9.2-intel-2021.9.0-vkckbzk
+module load netcdf-fortran/4.6.1-intel-2021.9.0-cpxxwci
+
+# System Paths: Point dynamic linker and Libfabric to AWS EFA libraries
+export LD_LIBRARY_PATH="/opt/amazon/efa/lib64:$LD_LIBRARY_PATH"
+export FI_PROVIDER_PATH="/opt/amazon/efa/lib64/libfabric"
+
+# Fabric Control: Force Intel MPI to use AWS system Libfabric over EFA
+export I_MPI_OFI_LIBRARY_INTERNAL=0
+export FI_PROVIDER="efa"
+export I_MPI_FABRICS="ofi"
+export I_MPI_OFI_PROVIDER="efa"
+
+# Force Hydra to send a SIGKILL (9) instead of a SIGTERM (15) to all ranks
+export I_MPI_JOB_ABORT_SIGNAL=9
+
+# Ensure the job terminates immediately if any process exits with a non-zero status
+export I_MPI_JOB_TIMEOUT_SIGNAL=9
+
+# Instructs Intel MPI to continuously check socket connection health
+export I_MPI_HEARTBEAT=1
+export I_MPI_EXTRA_TIMEOUT=60
+
+export MODEL_DIR=$1
+export EXEC=$2
+
+
+echo "---" 
+echo "------------------------"
+echo "ADCIRC model working directory is $MODEL_DIR"
+echo "------------------------"
+cd $MODEL_DIR
+
+SECONDS=0
+
+echo "--- " 
+echo "--- Running ADCIRC -----------------"
+echo "---"
+
+echo "---"
+echo "------------------------"
+
+echo "------------------------"
+echo "--- "
+echo "--- ADCPREP : Partmesh -----------------"
+echo "---"
+
+$EXEC/adcprep --np ${NPROCS} --partmesh
+echo "---"
+echo "------------------------"
+echo "---"
+echo "--- ADCPREP : Prepall -----------------"
+echo "---"
+$EXEC/adcprep --np ${NPROCS} --prepall
+echo "---"
+
+echo "------------------------"
+echo "---"
+echo "--- PADCIRC :  -----------------"
+echo "---"
+mpirun $MPIOPTS $EXEC/padcirc
+echo "---"
+echo "------------------------"
+
+
+if [ $? -ne 0 ]; then
+  echo "ERROR returned from mpirun"
+else
+  echo "ADCIRC model has succesfully completed on the cloud!"
+  duration=$SECONDS
+  echo "ADCIRC simulation took $((duration / 60)) minutes and $((duration % 60)) seconds elapsed."
+fi

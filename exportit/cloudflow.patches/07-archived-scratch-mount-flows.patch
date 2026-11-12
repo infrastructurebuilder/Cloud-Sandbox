@@ -1,0 +1,33 @@
+--- a/src/cloudflow/workflows/archived/old.scratch_mount_flows.py
++++ b/src/cloudflow/workflows/archived/old.scratch_mount_flows.py
+@@ -152,6 +152,8 @@
+ 
+         # Setup the post job
+         plotjob = tasks.job_init(postmach, postjobfile)
++
++        storage_service = tasks.storage_init(provider)
+ 
+         # Start the machine
+         pmStarted = ctasks.cluster_start(postmach)
+@@ -291,7 +293,7 @@
+ 
+         storage_service = tasks.storage_init(provider)
+         # Optionally inject a user supplied python script
+-        #notebook = 'specify'
++        notebook = 'specify'
+         #notebook = 'cloudflow/inject/kenny/cloud_sandbot.py'
+         injected = tasks.fetchpy_and_run(plotjob, storage_service, notebook)
+ 
+@@ -427,12 +429,7 @@
+     else:
+         return "FAILED"
+ 
+-    print(result)
+ 
+-    if result == "PASSED":
+-        nbutils.inject(pyfile, storage_provider)
+-
+-
+ def handler(signal_received, frame):
+     print('SIGINT or CTRL-C detected. Exiting gracefully')
+     raise signals.FAIL()
