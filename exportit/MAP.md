@@ -24,7 +24,7 @@ nothing leaves this repository).
 | `cloudflow-plotting` | [cloudflow-plotting/](cloudflow-plotting/) | `cloudflow/plotting/`, `cloudflow/setup.py`, `cloudflow/plotting_reqs.reference`, `cloudflow/tests/test.plotting.py` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
 | cloudflow's documentation | `exportit/cloudflow/docs/` | `docs/source/` | [8](../INPROGRESS/STAGE-8.md) | planned |
 | `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
-| `sandbox-terraform` | `exportit/sandbox-terraform/` | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | planned |
+| `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `sandbox-models` | `exportit/sandbox-models/` | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | planned |
 | `sandbox-configs` | `exportit/sandbox-configs/` | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | planned |
 | `sandbox-ops` | `exportit/sandbox-ops/` | the rest of `scripts/`, `misc/`, `jupyterhub/` | [7](../INPROGRESS/STAGE-7.md) | planned |
@@ -407,8 +407,9 @@ mount; everything else through the node image.
 
 ### The first-boot script
 
-[first-boot/init_template.tpl](sandbox-provisioning/first-boot/init_template.tpl)
-is `terraform/init_template.tpl` with its last step replaced. It
+[init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl)
+(written in stage 3, moved to the Terraform unit in stage 4) is
+`terraform/init_template.tpl` with its last step replaced. It
 installs `ansible-core`, runs `ansible-pull` against the provisioning
 repository at a version, then runs `node-image.yml`. It stops before
 the image if the playbook fails. Terraform would have to pass two more
@@ -477,7 +478,107 @@ nine source files, with 15 commits of history.
 
 ## sandbox-terraform
 
-Planned. [Stage 4](../INPROGRESS/STAGE-4.md) fills this section.
+Copied on 2026-11-12 by [stage 4](../INPROGRESS/STAGE-4.md). The
+project's own description is
+[sandbox-terraform/README.md](sandbox-terraform/README.md).
+
+### Where its files go
+
+From [sandbox-terraform.map](sandbox-terraform.map): all 22 files of
+`terraform/`, unchanged, to the root of the unit. The copy tool
+learned to place a directory at a unit's root (`copy terraform/ ./`)
+for this; the extraction directive is `terraform/==>`.
+
+By the operator's decision everything is kept, including the example
+settings and the old copies; the README sorts them into module,
+examples, policies, helpers, sketch and history. `mysettings.tfvars`
+holds placeholders already (addresses like `72.0.162.256`, a dummy
+key). `config.s3.tfbackend` names one site's state bucket,
+`cloud-sandbox-tfstate`.
+
+New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
+`.python-version`, `tests/`, and
+[init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl).
+
+### The first-boot template
+
+Written in stage 3 and moved here in stage 4, because it is rendered by
+Terraform's `templatefile()`. By the operator's decision it sits beside
+the copied `init_template.tpl` and `main.tf` is not changed. The README
+gives the change that would switch over: two variables,
+`provisioning_repo` and `provisioning_version`, and the new file name
+in the head node's `user_data`.
+[tests/test_template.py](sandbox-terraform/tests/test_template.py)
+renders both templates through `terraform console`: the old one with
+the five values `main.tf` passes, the new one with those five plus the
+two new ones, and it fails if either new value is left out. So the
+change in the README is complete, as far as the template goes.
+
+### What it provides: the interface
+
+The values a cluster description for cloudflow needs, and where each
+comes from:
+
+| Key in a cluster description | Comes from |
+| --- | --- |
+| `region` | `var.preferred_region` |
+| `key_name` | `var.key_name`; output `key_name` |
+| `sg_ids` | the three security groups `base_sg`, `ssh_ingress`, `efs_sg`; output `aws_security_groups` |
+| `subnet_id` | the head node's subnet; output `aws_subnet` |
+| `placement_group` | output `aws_placement_group` |
+| `image_id` | not Terraform: `node-image.yml` in `sandbox-provisioning`, on the head node |
+| `table_name` | **nobody** (see below) |
+| `nodeType`, `nodeCount`, `tags`, `vm_retry_delay`, `vm_max_retries`, `platform` | the person who writes the description |
+
+Today the first four reach a cluster description by hand: Terraform
+writes them as a JSON fragment into `deployment_info.txt`, and
+`scp.terraform.output.sh` copies that file to the head node.
+
+**Found:** nothing in the repository creates the DynamoDB table that
+`AWSCluster` refuses to start without, or deploys the two Lambda
+functions that terminate nodes left running. The role is given
+`AmazonDynamoDBFullAccess_v2`; the table and the functions are made by
+hand. A real split has to give them an owner, most naturally this
+unit.
+
+It expects nothing from the other units. `sandbox-provisioning` runs on
+the node it creates.
+
+### How it is checked
+
+The operator chose `terraform`, at 1.9.8 through tfenv, and to
+validate what can be validated and count the rest. No test plans,
+applies or calls AWS.
+
+| Check | Where | Result on 2026-11-12 |
+| --- | --- | --- |
+| Terraform 1.9.8 is what runs | `just test` | pass |
+| The root module and `remote-state/` validate | `just test` | pass |
+| `fmt -check` would rewrite exactly the nine recorded files | `just test` | pass |
+| Both templates render with what `main.tf` passes, the new one with two more values | `just test` | pass |
+| `pipeline/` and `modules/` still fail to validate, for the recorded reason | `just full-test` | pass |
+| Extraction with history | `just full-test` | the same 22 files, with 44 commits |
+
+Things noticed and left as they are:
+
+- The root module pins the AWS provider to `~> 3.47` (it resolves to
+  3.76.1, the last 3.x). `remote-state/` pins nothing and gets 6.x.
+- `random` and `local` are used but not declared in
+  `required_providers`.
+- OpenTofu 1.12 accepts `variables.tf` as formatted; Terraform 1.9.8
+  does not. Both validate both modules.
+- The policy files are not used by the module, which attaches six AWS
+  managed policies, `AmazonEC2FullAccess` among them.
+
+### What a real relocation would change
+
+- Extract with `just export-filter sandbox-terraform`.
+- Make the two-variable change from the README and point
+  `provisioning_repo` at the relocated `sandbox-provisioning`.
+- Decide where the site's settings and backend file live: they would
+  no longer sit in a shared repository.
+- In Cloud-Sandbox: delete `terraform/` and update `DEPLOYMENT.md`
+  ([stage 8](../INPROGRESS/STAGE-8.md)).
 
 ## sandbox-models
 

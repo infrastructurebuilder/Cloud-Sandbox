@@ -36,8 +36,8 @@ was done about each, and what has not been proved.
 ## How it is applied
 
 **At first boot, by the node to itself.**
-[first-boot/init_template.tpl](first-boot/init_template.tpl) is the
-head node's first-boot script. After it has mounted the EFS volume it
+[init_template.ansible.tpl](../sandbox-terraform/init_template.ansible.tpl),
+in the Terraform unit, is the head node's first-boot script. After it has mounted the EFS volume it
 runs:
 
 ```sh

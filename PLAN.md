@@ -2,9 +2,9 @@
 
 ## Reconstruction into independent units (2026-11-12)
 
-*Status:* stages 1 (analysis and plan), 2 (cloudflow) and 3
-(provisioning as Ansible) executed, waiting for validation. Stages 4
-to 8 planned.
+*Status:* stages 1 (analysis and plan), 2 (cloudflow), 3
+(provisioning as Ansible) and 4 (Terraform) executed, waiting for
+validation. Stages 5 to 8 planned.
 
 Cloud-Sandbox is being taken apart into units that could each live in
 their own repository: the cloudflow workflow engine, head-node

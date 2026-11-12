@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The head node's first-boot script, for Terraform's templatefile().
 #
-# This is terraform/init_template.tpl with its last step replaced. Where that
+# This is init_template.tpl, beside it, with its last step replaced. Where that
 # file runs scripts/setup-instance.sh from the clone of the monorepo, this one
 # applies the Ansible playbooks, fetched by ansible-pull from their own
 # repository, and stops without making an image if they fail.
@@ -15,7 +15,7 @@
 #   provisioning_version  the branch, tag or commit to apply
 #
 # Not run anywhere yet: it needs a real EFS volume. The ansible-pull command
-# is the one that tests/container/converge.sh runs.
+# is the one that sandbox-provisioning/tests/container/converge.sh runs.
 set -x
 
 # Files made with a looser umask would make Ansible ignore its own ansible.cfg.

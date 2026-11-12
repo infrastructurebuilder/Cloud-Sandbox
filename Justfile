@@ -7,7 +7,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Projects under exportit/, in dependency order.
-units := "tools cloudflow-plotting cloudflow sandbox-provisioning"
+units := "tools cloudflow-plotting cloudflow sandbox-provisioning sandbox-terraform"
 
 export_tool := "uv run --project exportit/tools python exportit/tools/export.py"
 
@@ -30,7 +30,7 @@ build: (each "build")
 test: export-check (each "test")
 
 # Everything in test, plus the slow tests and the extraction proof for each copied unit.
-full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow") (export-prove "sandbox-provisioning")
+full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform")
 
 # Nothing is published from this repository.
 release: full-test
