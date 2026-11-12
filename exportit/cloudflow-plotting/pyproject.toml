@@ -1,0 +1,52 @@
+[project]
+name = "cloudflow-plotting"
+version = "0.3.1"
+description = "Plotting for ROMS and FVCOM model output, installed as cloudflow.plotting"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+authors = [{ name = "RPS North America" }]
+dependencies = [
+    "matplotlib>=3.10.6",
+    "netCDF4>=1.7.2",
+    "numpy>=2.3.2",
+    "pillow>=12.2.0",
+    "pyproj>=3.7.2",
+]
+
+[project.optional-dependencies]
+# What hlfs.py imports when it is run as a script.
+hlfs = ["boto3>=1.40.22", "cartopy", "cmocean", "pandas", "scipy", "xarray"]
+
+[dependency-groups]
+dev = ["pyright>=1.1.400", "pytest>=8", "ruff>=0.12"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+# There is deliberately no src/cloudflow/__init__.py: cloudflow is a namespace
+# that this distribution shares with the cloudflow distribution.
+[tool.hatch.build.targets.wheel]
+packages = ["src/cloudflow"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["B", "C4", "D", "E", "F", "I", "N", "PL", "PTH", "RUF", "SIM", "UP", "W"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "PLR2004"]
+
+[tool.pyright]
+include = ["tests"]
+typeCheckingMode = "standard"
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: builds and installs the wheel; run by full-test only"]

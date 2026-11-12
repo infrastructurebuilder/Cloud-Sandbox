@@ -1,7 +1,10 @@
 # Stage 2: cloudflow as an independent project
 
-*Status:* planned 2026-11-12. The operator asked for it to be executed
-straight after [stage 1](STAGE-1.md); its decisions are asked first.
+*Status:* executed 2026-11-12 on `feature/stage-2-cloudflow`;
+committed locally, not pushed, not merged. Waits for the operator's
+validation. The decisions were asked first and are recorded under
+[Decisions taken](#decisions-taken); the outcome is under
+[Outcome](#outcome).
 
 ## Why
 
@@ -91,6 +94,29 @@ without a live sandbox (couplings C1 to C4 and defects F1 to F5 in
    cloudflow expects from the other units, and the commands that
    would extract it with its history.
 
+## Decisions taken
+
+Asked one at a time on 2026-11-12, before execution.
+
+1. **Layout:** `src/cloudflow/`.
+2. **Fidelity:** byte-identical copies; only new files are added.
+3. **The bar:** new files pass `ruff` and `pyright` in full. Copied
+   code must compile and import. In addition, the 13 undefined names
+   that `ruff` finds in the copied code are corrected in the copy.
+   That is the one exception to decision 2. It touches eight files,
+   each correction is kept as a patch file beside the mapping file,
+   and the copy check applies the patches before it compares.
+4. **Plotting:** a second project, `exportit/cloudflow-plotting/`,
+   which cloudflow depends on. The copied code imports it as
+   `cloudflow.plotting`, so both projects install into one `cloudflow`
+   namespace. A consequence: the empty `cloudflow/__init__.py` is not
+   carried over, because a namespace shared by two distributions
+   cannot have one.
+5. **Lambda functions:** inside the package, where they are today
+   (`src/cloudflow/cluster/`). They read their settings from the
+   environment when imported, so the import test names them as
+   skipped.
+
 ## Out of scope
 
 - The Sphinx sources under `docs/source/`. They belong to cloudflow
@@ -108,8 +134,31 @@ without a live sandbox (couplings C1 to C4 and defects F1 to F5 in
 - `git status` shows no change outside `exportit/`, `INPROGRESS/`,
   `PLAN.md` and the new root `Justfile`.
 
+## Outcome
+
+- Two projects: [exportit/cloudflow/](../exportit/cloudflow/) (188
+  files copied) and
+  [exportit/cloudflow-plotting/](../exportit/cloudflow-plotting/) (10
+  files copied). Two empty files are left behind, with reasons, in
+  [cloudflow.map](../exportit/cloudflow.map).
+- Eight patches correct the 13 undefined names: seven files in
+  cloudflow, one in cloudflow-plotting.
+- [exportit/tools/export.py](../exportit/tools/export.py) makes and
+  checks the copies, prints the `git filter-repo` directives, and
+  rehearses the extraction on a throw-away clone.
+- `just test` and `just full-test` pass at the repository root. The
+  extraction rehearsal gives the same 188 files with 112 commits of
+  history, and the same 10 files with 14 commits.
+- Every module of the copied code imports, except four that are
+  listed with their reasons in
+  [test_modules.py](../exportit/cloudflow/tests/test_modules.py).
+- Found on the way and left alone, because they are defects of the
+  originals: `workflow_main.py` calls three flows that do not exist,
+  and 651 lint findings remain. They are in
+  [MAP.md](../exportit/MAP.md#defects-found-and-left-as-they-are).
+
 ## Sizing and branch
 
-About 200 files copied, about 10 written. Branch
-`feature/stage-2-cloudflow`, cut from `feature/stage-1-analysis`
-because stage 1 is not merged yet; commits local.
+198 files copied, 41 written. Branch `feature/stage-2-cloudflow`, cut
+from `feature/stage-1-analysis` because stage 1 is not merged yet;
+commits local.

@@ -1,0 +1,61 @@
+# cloudflow: the workflow engine as an installable project.
+# Read by exportit/tools/export.py; described in exportit/MAP.md.
+
+covers cloudflow/
+covers setup.py
+covers setup-plotting.sh
+covers CLOUDFLOW.md
+covers PREFECTv3.md
+covers LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md
+
+# The package. cloudflow/plotting/ belongs to the cloudflow-plotting unit.
+copy cloudflow/cluster/      src/cloudflow/cluster/
+copy cloudflow/job/          src/cloudflow/job/
+copy cloudflow/services/     src/cloudflow/services/
+copy cloudflow/utils/        src/cloudflow/utils/
+copy cloudflow/workflows/    src/cloudflow/workflows/
+
+# Empty today. Left out so that cloudflow is a namespace that the
+# cloudflow-plotting distribution can add cloudflow.plotting to.
+drop cloudflow/__init__.py
+
+# Empty today. The project has a new README.
+drop cloudflow/README.md
+
+# Scripts that drive a live sandbox. They are not tests that pytest can run.
+copy cloudflow/tests/forecast.workflow.cbofs.py        legacy-tests/forecast.workflow.cbofs.py
+copy cloudflow/tests/hindcast.worflow.seccofs.py       legacy-tests/hindcast.worflow.seccofs.py
+copy cloudflow/tests/hindcast.workflow.cbofs.py        legacy-tests/hindcast.workflow.cbofs.py
+copy cloudflow/tests/hindcast.workflow.eccofs.py       legacy-tests/hindcast.workflow.eccofs.py
+copy cloudflow/tests/hindcast.workflow.liveocean.py    legacy-tests/hindcast.workflow.liveocean.py
+copy cloudflow/tests/test.romsUtil.py                  legacy-tests/test.romsUtil.py
+
+# Material that travels with the code but is not installed.
+copy cloudflow/notebooks/    notebooks/
+copy cloudflow/notes/        notes/
+copy cloudflow/somenotes/    notes/somenotes/
+copy cloudflow/docs/         docs/
+copy cloudflow/CLOUDFLOW_MODEL_EXECUTION_INSTRUCTIONS.md           docs/CLOUDFLOW_MODEL_EXECUTION_INSTRUCTIONS.md
+copy cloudflow/CLOUDFLOW_PYTHON_MODEL_EXECUTION_INSTRUCTIONS.md    docs/CLOUDFLOW_PYTHON_MODEL_EXECUTION_INSTRUCTIONS.md
+copy cloudflow/ZOMBIE_JOB_CHECKLIST.md                             docs/ZOMBIE_JOB_CHECKLIST.md
+copy CLOUDFLOW.md            docs/CLOUDFLOW.md
+copy PREFECTv3.md            docs/PREFECTv3.md
+copy LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md    docs/LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md
+copy cloudflow/cron_nosofs.sh         examples/cron/cron_nosofs.sh
+copy cloudflow/cron_rand_nosofs.sh    examples/cron/cron_rand_nosofs.sh
+copy cloudflow/python_minimal_requirements.txt          requirements/python_minimal_requirements.txt
+copy cloudflow/pip_freeze.reference                     requirements/pip_freeze.reference
+copy cloudflow/cloudflow_miniforge3_installation.yml    requirements/cloudflow_miniforge3_installation.yml
+
+# Superseded by pyproject.toml and the Justfile; kept for the record.
+copy setup.py             legacy/setup.py
+copy setup-plotting.sh    legacy/setup-plotting.sh
+
+# Files that exist only in the unit.
+new README.md
+new LICENSE               # a copy of the repository's LICENSE
+new pyproject.toml
+new uv.lock
+new Justfile
+new .python-version
+new tests/

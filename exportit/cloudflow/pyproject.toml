@@ -1,0 +1,66 @@
+[project]
+name = "cloudflow"
+version = "1.6.0b0"
+description = "Workflows for cloud based numerical weather prediction"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+authors = [{ name = "RPS North America" }]
+# The lower bounds are the versions in requirements/python_minimal_requirements.txt.
+dependencies = [
+    "boto3>=1.40.22",
+    "botocore>=1.40.22",
+    "cloudflow-plotting",
+    "dask>=2026.1.0",
+    "distributed",
+    "prefect>=3.6.29",
+]
+
+[project.optional-dependencies]
+# dask-ssh, which the cluster tasks start, needs paramiko.
+ssh = ["paramiko"]
+# cloudflow/workflows/python_examples.py
+examples = ["numpy", "pandas", "s3fs", "xarray"]
+# cloudflow/utils/notebook.py
+notebook = ["ipykernel", "nbconvert", "nbformat", "notebook", "requests"]
+
+[project.scripts]
+cloudflow = "cloudflow.workflows.workflow_main:main"
+
+[dependency-groups]
+dev = ["pyright>=1.1.400", "pytest>=8", "ruff>=0.12"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+# There is deliberately no src/cloudflow/__init__.py: cloudflow is a namespace
+# that this distribution shares with cloudflow-plotting.
+[tool.hatch.build.targets.wheel]
+packages = ["src/cloudflow"]
+
+[tool.uv.sources]
+cloudflow-plotting = { path = "../cloudflow-plotting" }
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["B", "C4", "D", "E", "F", "I", "N", "PL", "PTH", "RUF", "SIM", "UP", "W"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "PLR2004"]
+
+[tool.pyright]
+include = ["tests"]
+extraPaths = ["tests"]
+typeCheckingMode = "standard"
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+markers = ["slow: builds and installs the wheels; run by full-test only"]

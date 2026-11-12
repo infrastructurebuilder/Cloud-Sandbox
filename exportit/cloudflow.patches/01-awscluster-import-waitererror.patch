@@ -1,0 +1,11 @@
+--- a/src/cloudflow/cluster/AWSCluster.py
++++ b/src/cloudflow/cluster/AWSCluster.py
+@@ -12,7 +12,7 @@
+ from pathlib import Path
+ 
+ import boto3
+-from botocore.exceptions import ClientError
++from botocore.exceptions import ClientError, WaiterError
+ 
+ # Mapping from AWS region codes to the long-form display names required by the
+ # AWS Pricing API.  The Pricing API uses the human-readable region label shown

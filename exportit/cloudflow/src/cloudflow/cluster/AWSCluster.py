@@ -1,0 +1,925 @@
+"""
+Cluster implementation for AWS EC2 clusters.
+"""
+
+import time
+import json
+import logging
+import math
+import inspect
+import getpass
+
+from pathlib import Path
+
+import boto3
+from botocore.exceptions import ClientError, WaiterError
+
+# Mapping from AWS region codes to the long-form display names required by the
+# AWS Pricing API.  The Pricing API uses the human-readable region label shown
+# in the console, not the short region identifier (e.g. "us-east-2").
+_REGION_LONG_NAMES = {
+    "us-east-1":      "US East (N. Virginia)",
+    "us-east-2":      "US East (Ohio)",
+}
+import prefect
+
+# from cloudflow.cluster import AWSHelper
+from cloudflow.cluster import AWSHelper
+from cloudflow.cluster.Cluster import Cluster
+
+__copyright__ = "Copyright © 2025 Tetra Tech, Inc. All rights reserved."
+__license__ = "BSD 3-Clause"
+
+MAX_MINUTES = 2 * 60
+
+log = logging.getLogger('workflow')
+
+homedir = Path.home()
+timelog = logging.getLogger('qops_timing')
+timelog.setLevel(logging.INFO)
+timelog.propagate = False
+
+fh = logging.FileHandler(f"{homedir}/cluster_runtime.log")
+formatter = logging.Formatter(' %(asctime)s  %(levelname)s | %(message)s')
+fh.setFormatter(formatter)
+
+# To avoid duplicate entries, only have one handler
+if not timelog.hasHandlers():
+    timelog.addHandler(fh)
+
+#####  Includes recommended or tested types only  !!!!!!!
+#      Should be number of physical CPU cores, not vCPUs,
+#          Graviton and AMD CPUs do not support SMT (simultaneous multi-threading)
+""" Defines supported types of instances and the number of cores of each. Currently only certain AWS EC2 types are
+    supported.
+"""
+awsTypes = {
+            'c5.large': 1,      'c5.xlarge': 2, 'c5.2xlarge': 4, 'c5.4xlarge': 8, 'c5.9xlarge': 18,
+            'c5.12xlarge': 24,  'c5.18xlarge': 36, 'c5.24xlarge': 48, 'c5.metal': 36,
+
+            'c5a.large': 1, 'c5a.xlarge': 2, 'c5a.2xlarge': 4, 'c5a.4xlarge': 8, 'c5a.24xlarge': 48,
+
+            'c5n.large': 1,     'c5n.xlarge': 2, 'c5n.2xlarge': 4, 'c5n.4xlarge': 8, 'c5n.9xlarge': 18,
+            'c5n.18xlarge': 36, 'c5n.24xlarge': 48, 'c5n.metal': 36,
+
+            'c6i.12xlarge': 24,
+
+            'c7i.12xlarge': 24, 'c7i.48xlarge': 96,
+
+            'hpc6a.48xlarge': 96,
+
+            'hpc6id.32xlarge': 64,
+
+            'hpc7a.48xlarge': 96,
+
+            'hpc7a.96xlarge': 192,
+
+            'hpc8a.96xlarge': 192,
+
+            'r7iz.32xlarge': 64,
+
+            # The below are in vCPUs not CPU cores
+            'x2idn.24xlarge': 96, 'x2idn.32xlarge': 128, 'r7i.xlarge': 2, 'r7i.8xlarge': 16 }
+
+
+class AWSCluster(Cluster):
+    """
+    Implementation of the Cluster interface for AWS
+
+    Attributes
+    ----------
+    platform  : str
+        The cloud provider. This will always be 'AWS' for this implementation.
+
+    nodeType  : str
+        EC2 instance type.
+
+    nodeCount : int
+        Number of instances in this cluster.
+
+    NPROCS    : int
+        Total number of processors in this cluster.
+
+    PPN       : int
+        Number of processors (physical cores) per node.
+
+    vm_retry_delay : int
+        The number of seconds that a user wants to wait to allow AWS resources to be freed up before attempting to grab ec2 resources
+
+    vm_max_retries : int
+        The number of retries a user wants to attempt on waiting for AWS resources to be available
+
+    tags      : list of dictionary/s of str
+        Specific tags to attach to the resources provisioned.
+
+    image_id  : str
+        AWS EC2 AMI - Amazon Machine Image
+
+    key_name  : str
+         Private key used for SSH access to the instance. This should be configured when creating the AMI.
+
+    sg_ids    : list of str
+        Security group ids
+
+    subnet_id : str
+        VPC subnet ID to run in
+
+    placement_group : str
+        The cluster placement group to use.
+
+    daskscheduler : Popen
+        a reference to the Dask scheduler process started on the cluster
+
+    daskworker : Popen
+        a reference to the Dask worker process started on the cluster
+    """
+
+    def __init__(self, configfile):
+        """ Constructor
+
+        Parameters
+        ----------
+        configfile : str
+          A JSON configuration file containing the required parameters for this class.
+
+        Returns
+        -------
+        AWSCluster
+            An initialized instance of this class.
+        """
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        self.platform = 'AWS'
+        self.__configfile = configfile
+        self.__state = None  # This could be an enumeration of none, running, stopped, error
+
+        # Only save what we need
+        self.instances = []
+        self.__start_time = time.time()
+        self.region = ""
+        self.nodeType = ''
+        self.nodeCount = 0
+        self.NPROCS = 0
+        self.PPN = 0
+        self.vm_retry_delay = 300
+        self.vm_max_retries = 5
+        self.tags = []
+        self.image_id = ''
+        self.key_name = ''
+        self.sg_ids = []
+        self.subnet_id = ''
+        self.placement_group = ''
+        self.username = getpass.getuser()
+        self.table_name = ''
+        # Can add this to the cluster config if so desired - Lambda sweeper function can use it or some other hard value
+        self.minutes_max = 120
+        # self.hosts = ''
+
+        # Cached on-demand rate (USD/hr per node) fetched from the Pricing API
+        # during start().  Stored here so terminate() can compute the actual
+        # cost without a second API call.  None means the rate was unavailable.
+        self._per_node_hourly_rate = None
+
+        cfDict = self.readConfig(configfile)
+        self.parseConfig(cfDict)
+
+        self.PPN = AWSHelper.getPPN(self.nodeType, awsTypes)
+        self.NPROCS = self.nodeCount * self.PPN
+
+        self.daskscheduler = None
+        self.daskworker = None
+
+        log.info(f"nodeCount: {self.nodeCount}  PPN: {self.PPN}")
+
+
+    def _estimate_and_print_cost(self):
+        """ Query the AWS Pricing API and print hourly / daily cost estimates
+            for the cluster configuration read from the cluster config file.
+
+            The Pricing API is a global service whose endpoint lives in
+            us-east-1 regardless of the region where instances will run.
+            Results are for Linux on-demand pricing with no pre-installed
+            software, which is the billing model used by this sandbox.
+
+            If the API call fails for any reason (e.g. no network access,
+            missing IAM permission) a warning is logged and the method returns
+            without raising so that the cluster start is not blocked.
+        """
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        # Convert the short region code to the long name the Pricing API needs.
+        region_long = _REGION_LONG_NAMES.get(self.region)
+        if region_long is None:
+            log.warning(f"Cost estimate skipped: no long-name mapping for region '{self.region}'")
+            return
+
+        try:
+            # The Pricing API endpoint is always us-east-1.
+            pricing_client = boto3.client("pricing", region_name="us-east-1")
+
+            # Fetch all on-demand price list entries that match this instance
+            # type and region.  We request Linux / no-preinstalled-sw / Used
+            # capacity to match the sandbox billing model.  We do NOT filter on
+            # tenancy here because HPC instance types (hpc6a, hpc7a …) are
+            # billed under "Dedicated" tenancy while most compute types use
+            # "Shared", and filtering on the wrong value returns an empty list.
+            response = pricing_client.get_products(
+                ServiceCode="AmazonEC2",
+                Filters=[
+                    {"Type": "TERM_MATCH", "Field": "instanceType",     "Value": self.nodeType},
+                    {"Type": "TERM_MATCH", "Field": "operatingSystem",  "Value": "Linux"},
+                    {"Type": "TERM_MATCH", "Field": "preInstalledSw",   "Value": "NA"},
+                    {"Type": "TERM_MATCH", "Field": "capacitystatus",   "Value": "Used"},
+                    {"Type": "TERM_MATCH", "Field": "location",         "Value": region_long},
+                ],
+                MaxResults=100,
+            )
+
+        except Exception as e:
+            log.warning(f"Cost estimate skipped: AWS Pricing API call failed – {e}")
+            return
+
+        # Walk the returned price-list items and collect every on-demand
+        # USD/hr price found.  There may be more than one entry when the same
+        # instance type appears under multiple tenancy models (Shared vs.
+        # Dedicated).  We keep the lowest non-zero price as a conservative
+        # best-case estimate and the highest as a worst-case bound.
+        prices_per_hour = []
+
+        for price_item_str in response.get("PriceList", []):
+            try:
+                price_item = json.loads(price_item_str)
+                on_demand_terms = price_item.get("terms", {}).get("OnDemand", {})
+
+                for term in on_demand_terms.values():
+                    for dimension in term.get("priceDimensions", {}).values():
+                        usd_str = dimension.get("pricePerUnit", {}).get("USD", "0")
+                        usd = float(usd_str)
+                        # Skip free-tier / $0 placeholder entries
+                        if usd > 0:
+                            prices_per_hour.append(usd)
+
+            except (KeyError, ValueError, json.JSONDecodeError) as parse_err:
+                # Skip malformed entries rather than crashing
+                log.debug(f"Cost estimate: could not parse price item – {parse_err}")
+                continue
+
+        if not prices_per_hour:
+            log.warning(
+                f"Cost estimate skipped: no on-demand USD price found for "
+                f"{self.nodeType} in {self.region} ({region_long})."
+            )
+            return
+
+        # Use the lowest price found as the per-node on-demand rate.
+        # For HPC types (hpc6a, hpc7a) there is typically only one entry so
+        # min == max == the actual rate.
+        per_node_hourly = min(prices_per_hour)
+        per_node_daily  = per_node_hourly * 24
+
+        # Persist the per-node rate on the instance so terminate() can
+        # multiply it by the real elapsed hours to report the actual cost.
+        self._per_node_hourly_rate = per_node_hourly
+
+        # Scale up to the full cluster (nodeCount nodes running in parallel).
+        cluster_hourly  = per_node_hourly * self.nodeCount
+        cluster_daily   = per_node_daily  * self.nodeCount
+
+        # Print a clearly delimited cost-estimate block so it is easy to spot
+        # in the workflow logs.
+        print("\n===============================================================")
+        print("  ESTIMATED CLUSTER COST  (on-demand, Linux, no pre-installed SW)")
+        print("===============================================================")
+        print(f"  Instance type : {self.nodeType}")
+        print(f"  Region        : {self.region}  ({region_long})")
+        print(f"  Node count    : {self.nodeCount}")
+        print(f"  Per-node rate : ${per_node_hourly:.4f} / hr")
+        print(f"  Cluster cost  : ${cluster_hourly:.4f} / hr  |  ${cluster_daily:.2f} / day")
+        print("  NOTE: Estimate is for on-demand pricing only.")
+        print("        Actual charges depend on run time and AWS billing.")
+        print("===============================================================\n")
+
+        # Also emit to the workflow log so the estimate is preserved in log files.
+        log.info(
+            f"Cost estimate – {self.nodeCount}x {self.nodeType} @ {self.region}: "
+            f"${cluster_hourly:.4f}/hr  |  ${cluster_daily:.2f}/day"
+        )
+
+    ########################################################################
+
+    def getState(self):
+        """ Returns the cluster state. Not currently used. """
+        return self.__state
+
+    def setState(self, state):
+        """ Set the cluster state. Not currently used."""
+        self.__state = state
+        return self.__state
+
+    ########################################################################
+
+    def memorable_tags(self, tags : list):
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        # Using Prefect 3, has built in unique name generator
+        flow_run_name = prefect.runtime.flow_run.name
+        suffix=f"-{flow_run_name}"
+
+        if not any(tag["Key"] == "Name" for tag in tags):
+            raise ValueError("No 'Name' tag found")
+
+        for tag in tags:
+            if tag["Key"] == "Name":
+                tag["Value"] = tag["Value"] + suffix
+                print("\n***************************************************************")
+                print(f"Your cluster name: {tag['Value']}")
+                print("***************************************************************\n")
+                log.info(f"Your cluster Name: {tag['Value']}")
+
+        return tags
+
+
+    ########################################################################
+    """ Implemented abstract methods """
+    ########################################################################
+
+
+    def parseConfig(self, cfDict):
+        """ Parses the configuration dictionary to class attributes
+
+        Parameters
+        ----------
+        cfDict : dict
+          Dictionary containing this cluster parameterized settings.
+
+        """
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        self.platform = cfDict['platform']
+        self.region = cfDict['region']
+        self.nodeType = cfDict['nodeType']
+        self.nodeCount = cfDict['nodeCount']
+
+        try:
+            self.vm_retry_delay = cfDict['vm_retry_delay']
+        except KeyError:
+
+            print(
+                f"Cluster configuration variable vm_retyr_delay was not specified by user. "
+                "Defaulting to value of {self.vm_retry_delay} seconds."
+            )
+        try:
+            self.vm_max_retries = cfDict['vm_max_retries']
+        except KeyError:
+            print(
+                f'Cluster configuration variable vm_max_retries was not specified by user. '
+                'Defaulting to value of {self.vm_max_retries} number of retries.'
+            )
+
+        self.tags = self.memorable_tags(cfDict['tags'])
+        self.image_id = cfDict['image_id']
+        self.key_name = cfDict['key_name']
+        self.sg_ids = cfDict['sg_ids']
+        self.subnet_id = cfDict['subnet_id']
+        self.placement_group = cfDict['placement_group']
+
+        # Enforce DynamoDB table usage
+        if 'table_name' in cfDict:
+            self.table_name = cfDict['table_name']
+            ddb_client = boto3.client('dynamodb', region_name=self.region)
+            try:
+                ddb_client.describe_table(TableName=self.table_name)
+            except ClientError as e:
+                if e.response['Error']['Code'] == 'ResourceNotFoundException':
+                    log.error(f"DynamoDB table does not exists - {self.table_name}")
+                    raise
+                else:
+                    raise 
+        else:
+            log.error("ERROR !!!!!! NO DB table specified for ZOMBIE node protection !!!!!!")
+            raise ValueError("DynamoDB table_name is required but not provided")
+
+        # This is used to with EC2 policy to restrict ec2 visibility to current subnet
+        self.tags.append({ "Key": "ApprovedSubnet", "Value": f"{self.subnet_id}" })
+
+        print(f"self.tags: {self.tags}")
+
+        return
+
+    ########################################################################
+
+
+    def getCoresPN(self):
+        """ Get the number of cores per node in this cluster.
+
+        Returns
+        -------
+        self.PPN : int
+            the number of cores per node in this cluster. Assumes a heterogenous cluster. """
+
+        return self.PPN
+
+
+    ########################################################################
+
+
+    def create_instances(self):
+        """ Provision the configured cluster in the cloud.
+
+        Returns 
+        instances : list of EC2.Intance
+            the list of Instances started. See boto3 documentation.
+        """
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        ec2 = boto3.resource('ec2', region_name=self.region)
+
+        # Programmatically determine these options
+        max_network_cards = AWSHelper.maxNetworkCards(self.nodeType, self.region)
+        log.debug(f"max_network_cards: {max_network_cards}")
+ 
+        smt_supported = AWSHelper.supportsThreadsPerCoreOption(self.nodeType, self.region)
+        log.debug(f"smt_supported: {smt_supported}")
+        # hpc6a and hpc7a and some others do not support the CpuOptions={ 'ThreadsPerCore': option }
+ 
+        if self.nodeType in ['x2idn.24xlarge', 'x2idn.32xlarge']:
+            # EFA supported:           NO                  YES
+  
+            response = ec2.create_instances(
+              ImageId=self.image_id,
+              InstanceType=self.nodeType,
+              KeyName=self.key_name,
+              MinCount=self.nodeCount,
+              MaxCount=self.nodeCount,
+              TagSpecifications=[
+                  {   
+                      'ResourceType': 'instance',
+                      'Tags': self.tags
+                  }
+              ],
+              Placement=self.__placementGroup(),
+              NetworkInterfaces=self.__netInterfaces(count = 1)
+            )
+        elif not smt_supported: # Does NOT support CpuOptions ThreadsPerCore option
+            response = ec2.create_instances(
+              ImageId=self.image_id,
+              InstanceType=self.nodeType,
+              KeyName=self.key_name,
+              MinCount=self.nodeCount,
+              MaxCount=self.nodeCount,
+              TagSpecifications=[
+                  {
+                      'ResourceType': 'instance',
+                      'Tags': self.tags
+                  }
+              ],
+              Placement=self.__placementGroup(),
+              NetworkInterfaces=self.__netInterfaces(count = max_network_cards)
+            )
+        else:  # supports the ThreadsPerCore option and setting it to 1
+            response = ec2.create_instances(
+              ImageId=self.image_id,
+              InstanceType=self.nodeType,
+              KeyName=self.key_name,
+              MinCount=self.nodeCount,
+              MaxCount=self.nodeCount,
+              TagSpecifications=[
+                  {
+                      'ResourceType': 'instance',
+                      'Tags': self.tags
+                  }
+              ],
+              Placement=self.__placementGroup(),
+              NetworkInterfaces=self.__netInterfaces(count = max_network_cards),
+              CpuOptions={
+                  'CoreCount': self.PPN,
+                  'ThreadsPerCore': 1
+              }
+            )
+ 
+        # response should be an array/list of ec2 instances, see boto3 documentation for spec
+        instances = response
+
+        return instances
+
+
+    ########################################################################
+
+
+    def __save_instance_data(self, instances):
+        """ Prefect 3 can't serialize and cache EC2 Instance type
+            so we save the essential EC2 Instance data here.
+            All of the other fields are standard types or serializable
+            TODO: tags, user and start_time do not need to be saved here
+        """
+
+        self.instances = []
+        for instance in instances:
+            instance_data = {
+                "instance_id": instance.instance_id,
+                "instance_type": instance.instance_type,
+                "state": instance.state['Name'],
+                "host": instance.private_ip_address,
+                "tags": self.tags,
+                "user": self.username,
+                "start_time": self.__start_time
+            }
+            print(json.dumps(instance_data))
+            self.instances.append(instance_data)
+
+
+    def __put_instance_records(self, instance_ids: list[str]):
+        """ Keeps track of the instances that have been started.
+            Adds an entry to DB.
+        """
+
+        ddb = boto3.resource("dynamodb", region_name=self.region)
+        table = ddb.Table(self.table_name)
+
+        now = int(time.time())
+        for tag in self.tags:
+            if tag["Key"] == "Name":
+                name_tag = tag["Value"]
+
+        mm = int(self.minutes_max)
+        if mm < 1:
+            log.warn("minutes-max must be >= 1")
+        if mm > MAX_MINUTES:
+            log.warn(f"minutes-max must be <= {MAX_MINUTES}")
+   
+        with table.batch_writer() as batch:
+            for iid in instance_ids:
+                db_table={
+                    "instance-id": iid,
+                    "name-tag": name_tag,
+                    "instance-type": self.nodeType,
+                    "start-time": now,
+                    "human-time": time.strftime('%Y-%m-%d %H:%M %Z'),
+                    "minutes-max": mm,
+                    "username": self.username
+                }
+                log.info(f"DB_table output for head node based on instance id {iid}: {db_table}")
+                batch.put_item(Item=db_table) 
+
+
+    def __delete_instance_records(self, instance_ids: list[str]):
+        """ Removes the instance from the DB when it is terminated normally
+        """
+
+        ddb = boto3.resource("dynamodb", region_name=self.region)
+        table = ddb.Table(self.table_name)
+
+        with table.batch_writer() as batch:
+            for iid in instance_ids:
+                batch.delete_item(Key={"instance-id": iid})
+
+ 
+    def start(self):
+        """ Provision the configured cluster in the cloud.
+        """
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        # Print on-demand cost estimates before provisioning so the user can
+        # see what the cluster will cost before any charges are incurred.
+        self._estimate_and_print_cost()
+
+        ec2 = boto3.resource('ec2', region_name=self.region)
+
+        instances = []
+        try:
+           instances = self.create_instances()
+
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'InsufficientInstanceCapacity':
+
+                 print(
+                     f"AWS Insufficent Instance Capacity has been detected, Will attempt to wait "
+                     "{self.vm_retry_delay} seconds at the start. A 10% exponential backoff on the "
+                     "delay time will be implemented over each retry interval. Cloudflow will retry "
+                     "{self.vm_max_retries} times over to see if we can obtain the user requested AWS resources."
+                 )
+                 retries = 0
+
+                 while retries < self.vm_max_retries:
+                     try:
+                         instances = self.create_instances()
+                         break  
+                     except ClientError as e:
+                         if e.response['Error']['Code'] == 'InsufficientInstanceCapacity':
+                             retries += 1
+                             if(retries == self.vm_max_retries):
+                                 print(
+                                     f"Insufficient capacity. Number of retries ({self.vm_max_retries}) "
+                                     "has been reached. Cloudflow will now shutdown due to lack of AWS "
+                                     "resources requested by user."
+                                 )
+                                 raise
+                             else:
+                                 # Implement an 10% exponential backoff of the time delay starting from the user specified endpoint
+                                 if(retries>1):
+                                     self.vm_retry_delay = int(self.vm_retry_delay * math.exp(0.10 * self.vm_max_retries))
+                                     print(
+                                         f"Insufficient capacity. Retrying in {self.vm_retry_delay} seconds... "
+                                         "(Attempt {retries}/{self.vm_max_retries})"
+                                     )
+                                     time.sleep(self.vm_retry_delay)
+                                 else:
+                                     print(
+                                         f"Insufficient capacity. Retrying in {self.vm_retry_delay} seconds... "
+                                         "(Attempt {retries}/{self.vm_max_retries})"
+                                     )
+                                     time.sleep(self.vm_retry_delay)
+                         else:
+                             # Re-raise the exception if it's not a capacity issue
+                             log.exception('ClientError exception in createCluster' + str(e))
+                             raise
+            else:
+                log.exception('ClientError exception in createCluster' + str(e))
+                raise
+
+
+        log.info('AWS resources have been allocated for cloudflow job. Waiting for nodes to enter running state ...')
+
+
+        # If there hasn't been a table setup for this deployment
+        if not self.table_name:
+            pass
+        else:
+            instance_ids = [i.instance_id for i in instances]
+            self.__put_instance_records(instance_ids)
+   
+
+        # Make sure the nodes are running before returning
+        try:
+            client = boto3.client('ec2', self.region)
+            waiter = client.get_waiter('instance_running')
+        except ClientError as e:
+            log.error(f"AWS Client Error: {e}")
+            raise
+
+        try:
+            for instance in instances:
+                waiter.wait(
+                    InstanceIds=[instance.instance_id],
+                    WaiterConfig={
+                        'Delay': 10,
+                        'MaxAttempts': 6
+                    }
+                )
+        except WaiterError as e:
+            print(f"Waiter failed: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+        # Wait a little more. sshd can be slow to start "Connection refused" error
+        # "System is booting up. Unprivileged users are not permitted to log in yet. Please come back later.
+        sleeptime=150
+        log.info(f"Waiting an additional {sleeptime} seconds for nodes to fully initialize ...")
+        time.sleep(sleeptime)
+
+        # Assume the nodes are ready, set to False if not
+        ready = True
+
+        # if any instance is not running, ready=False
+        inum = 1
+
+        for instance in instances:
+            state = ec2.Instance(instance.instance_id).state['Name']
+            print('instance ' + str(inum) + ' : ' + state)
+            if state != 'running':
+                ready = False
+            inum += 1
+
+        if not (ready):
+            self.terminate()
+            raise Exception('Nodes did not start within time limit... terminating them...')
+
+        self.__start_time = time.time()
+
+        self.__save_instance_data(instances)
+
+        return
+
+
+
+    def terminate(self):
+        """ Shutdown and remove the EC2 Instances in this cluster.
+            Also terminates any associated Dask Worker and Scheduler processes.
+
+        Returns
+        -------
+        responses : list of dict
+            a list of the responses from EC2.Instance.terminate(). See boto3 documentation.
+        """
+
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        self.terminateDaskWorker()
+
+        # Terminate any running dask scheduler
+        self.terminateDaskScheduler()
+
+        log.info(f"Terminating instances: {self.instances}")
+
+        responses = []
+
+        try:
+            ec2 = boto3.resource('ec2', region_name=self.region)
+
+            for instance in self.instances:
+                ec2_instance = ec2.Instance(instance.get("instance_id"))
+                response = ec2_instance.terminate()['TerminatingInstances']
+                responses.append(response)
+
+            end_time = time.time()
+            elapsed = end_time - self.__start_time
+            mins = math.ceil(elapsed / 60.0)
+            hrs = mins / 60.0
+            nodetype = self.nodeType
+            nodecnt = self.nodeCount
+
+            nametag = next((item["Value"] for item in self.tags if item["Key"] == "Name"), "No nametag")
+            print(f"timelog: {nametag}: {mins} minutes - {nodecnt} x {nodetype}")
+            timelog.info(f"{nametag}: {mins} minutes - {nodecnt} x {nodetype}")
+
+            # Compute and print the actual run cost using the on-demand rate
+            # fetched from the Pricing API at cluster start.  We use the real
+            # elapsed hours (not a daily estimate) so the figure reflects the
+            # true billable duration of this run.
+            if self._per_node_hourly_rate is not None:
+                # Actual cluster cost = rate × nodes × hours actually used.
+                # hrs is already derived from the same elapsed/mins calculation
+                # above, so this is consistent with the runtime log entry.
+                actual_cluster_cost = self._per_node_hourly_rate * nodecnt * hrs
+
+                # Emit the actual cost to the same cluster_runtime.log so every
+                # run has its timing and cost in one place without needing a
+                # separate file.
+                timelog.info(
+                    f"{nametag}: actual cost – {nodecnt}x {nodetype} × {hrs:.3f} hrs "
+                    f"@ ${self._per_node_hourly_rate:.4f}/node/hr = ${actual_cluster_cost:.4f}"
+                )
+
+                # Also print to stdout so the cost appears in the cloudflow
+                # console output immediately after the cluster is torn down.
+                print("\n===============================================================")
+                print("  ACTUAL CLUSTER COST  (on-demand, Linux, based on real runtime)")
+                print("===============================================================")
+                print(f"  Cluster name  : {nametag}")
+                print(f"  Instance type : {nodetype}")
+                print(f"  Node count    : {nodecnt}")
+                print(f"  Elapsed time  : {mins} minutes  ({hrs:.3f} hrs)")
+                print(f"  Per-node rate : ${self._per_node_hourly_rate:.4f} / hr")
+                print(f"  ACTUAL COST   : ${actual_cluster_cost:.4f}")
+                print("  NOTE: On-demand rate only; Reserved/Spot pricing will differ.")
+                print("===============================================================\n")
+            else:
+                # Rate was unavailable (Pricing API failed at start time);
+                # log a note so the absence of cost data is explicit.
+                log.warning(
+                    "Actual cost could not be calculated: on-demand rate was not "
+                    "retrieved from the Pricing API when the cluster was started."
+                )
+
+        except Exception as e:
+            log.exception('ERROR!!!!!!  Exception while trying to terminate compute nodes!!!!\n \
+                           MANUALLY VERIFY INSTANCES ARE TERMINATED !!!!!!!!!!!!!!!!!!!!!!!!' + str(e))
+            raise
+
+
+        # Delete the ddb entries since these have been terminated
+        if not self.table_name:
+            pass
+        else:
+            instance_ids = []
+
+            for instance_data in self.instances:
+                instance_id = instance_data["instance_id"]
+                instance_ids.append(instance_id)
+
+            #self.__delete_instance_records(instance_ids)
+
+        return responses
+
+
+
+    def getHosts(self):
+        """ Get the list of hosts in this cluster
+
+        Returns
+        -------
+        hosts : list of str
+            list of private dns names
+        """
+        hosts = []
+        log.debug(f"In: {self.__class__.__name__} : {inspect.currentframe().f_code.co_name}")
+
+        for instance in self.instances:
+            hosts.append(instance.get("host"))
+        return hosts
+
+
+    def getHostsCSV(self):
+        """ Get a comma separated list of hosts in this cluster
+
+        Returns
+        -------
+        hosts : str
+            a comma separated list of private dns names
+        """
+
+        hosts = ''
+
+        instcnt = len(self.instances)
+        cnt = 0
+        for instance in self.instances: 
+            cnt += 1
+            host = instance.get("host")
+            # no comma on last host
+            if cnt == instcnt:
+                hosts += host
+            else:
+                hosts += host + ','
+        return hosts
+
+
+    # PT: added this for serialization but not completely tested
+    def dict(self):
+       return {
+         "platform"     : self.platform,
+         "__configfile" : self.__configfile,
+         "__state"      : self.__state,
+         "__start_time" : self.__start_time,
+         "instances"  : self.instances,
+         "region" : self.region,
+         "nodeType" : self.nodeType,
+         "nodeCount" : self.nodeCount,
+         "NPROCS" : self.NPROCS,
+         "PPN" : self.PPN,
+         "vm_retry_delay" : self.vm_retry_delay,
+         "vm_max_retries" : self.vm_max_retries,
+         "tags" : self.tags,
+         "image_id" : self.image_id,
+         "key_name" : self.key_name,
+         "sg_ids" : self.sg_ids,
+         "subnet_id" : self.subnet_id,
+         "placement_group" : self.placement_group,
+         "daskscheduler" : self.daskscheduler,
+         "daksworker" : self.daskworker
+       }
+
+
+    def __placementGroup(self):
+        """ most current generation instance types support placement groups now """
+
+        group = {'GroupName': self.placement_group}
+
+        return group
+
+
+
+    def __netInterfaces(self, count=1):
+        """ Specify an efa enabled network interface if supported by node type.
+            Also attaches security groups """
+
+        # Some newer types require 2 network devices for EFA 
+        if count > 2 or count == 0:
+            raise Exception(f"__netInterfaces: not expecting {count} network cards")
+
+        efa_supported = AWSHelper.supportsEFA(self.nodeType, self.region)
+
+        interfaces = []
+
+        for idx in range(count):
+        
+            interface = {
+              'AssociatePublicIpAddress': False,
+              'DeleteOnTermination': True,
+              'Description': 'Sandbox node network adaptor via cloudflow boto3 api',
+              'DeviceIndex': idx,
+              'NetworkCardIndex': idx,
+              'Groups': self.sg_ids,
+              'SubnetId': self.subnet_id
+            }
+
+            # otherwise will use default
+            if efa_supported:
+                interface['InterfaceType'] = 'efa'
+
+            interfaces.append(interface)
+
+        log.debug(f"net.interfaces: {json.dumps(interfaces, indent=4)}")
+
+        return interfaces
+
+    ########################################################################
+
+
+if __name__ == '__main__':
+    pass

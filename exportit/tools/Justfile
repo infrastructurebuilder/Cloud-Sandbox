@@ -1,0 +1,35 @@
+# exportit/tools: the tool that copies units into exportit/ and checks them.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# List the targets.
+default:
+    @just --justfile {{ justfile() }} --list
+
+# Install the tool's development dependencies.
+init:
+    uv sync
+
+# Nothing to compile: the tool runs from source.
+build:
+    @echo "tools: nothing to build"
+
+# Lint and format check.
+lint:
+    uv run ruff check .
+    uv run ruff format --check .
+
+# Type-check; any error fails.
+typecheck:
+    uv run pyright
+
+# Lint, type-check and the tool's own tests.
+test: lint typecheck
+    uv run pytest -q
+
+# The tool has no slow tests of its own.
+full-test: test
+
+# Nothing is published from here.
+release: full-test
+    @echo "tools: nothing to release"
