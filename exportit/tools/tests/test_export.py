@@ -203,3 +203,21 @@ def test_filter_refuses_renames_that_chain(repo: Path, capsys: pytest.CaptureFix
     (repo / "exportit/lib.map").write_text("\n".join([*chained, "new README.md", ""]))
     assert run(repo, "filter", "lib") == 1
     assert "filter-repo would move pkg/a.py to docs/top.txt/a.py" in capsys.readouterr().err
+
+
+def test_a_directory_can_be_copied_to_the_root_of_a_unit(
+    repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (repo / "exportit/plot.map").write_text("copy pkg/plot/ ./\n")
+    assert run(repo, "copy") == 0
+    assert (repo / "exportit/plot/p.py").read_text() == SOURCES["pkg/plot/p.py"]
+    assert run(repo, "check") == 0
+    capsys.readouterr()
+    assert run(repo, "filter", "plot") == 0
+    assert capsys.readouterr().out.split() == ["pkg/plot/", "pkg/plot/==>"]
+
+
+def test_a_file_cannot_be_copied_to_the_root_itself(repo: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    (repo / "exportit/plot.map").write_text(PLOT_MAP + "copy top.txt ./\n")
+    assert run(repo, "check") == 1
+    assert "a directory must be copied to a directory" in capsys.readouterr().err

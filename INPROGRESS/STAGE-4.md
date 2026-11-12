@@ -1,7 +1,9 @@
 # Stage 4: Terraform as an independent unit
 
-*Status:* planned 2026-11-12. Waits for validation and "do 4".
-Depends on [stage 3](STAGE-3.md) for the first-boot template.
+*Status:* executed 2026-11-12 on `feature/stage-4-terraform`; committed
+locally, not pushed, not merged. Waits for the operator's validation.
+The decisions are under [Decisions taken](#decisions-taken); the
+result is under [Outcome](#outcome).
 
 ## Why
 
@@ -50,6 +52,21 @@ copies, and notes.
    **YOUR DECISION (tool):** validate with `terraform`, as the
    repository's documents say (default), or with `tofu`.
 
+## Decisions taken
+
+Asked one at a time on 2026-11-12, after a survey (both `terraform`
+and `tofu` validate the root module and `remote-state/`; `pipeline/`
+and `modules/` do not validate; `fmt -check` flags several files).
+
+1. **Template:** the new first-boot template beside the copied one;
+   `main.tf` not changed; the switch described.
+2. **Site data:** kept in the Terraform copy as examples, old copies
+   included.
+3. **Tool:** `terraform`, pinned to 1.9.8 through tfenv.
+4. **The bar for copied Terraform** (surfaced in the survey): validate
+   what can be validated; the unformatted files and the two fragments
+   are named lists that fail when they change.
+
 ## Out of scope
 
 Running `plan` or `apply`. Changing any resource.
@@ -60,6 +77,30 @@ Running `plan` or `apply`. Changing any resource.
 covers every tracked file under `terraform/`; the map's Terraform
 section is complete.
 
+## Outcome
+
+- [exportit/sandbox-terraform/](../exportit/sandbox-terraform/): all
+  22 files of `terraform/`, unchanged, at the unit's root, with a
+  README, `Justfile` and tests.
+- The first-boot template written in stage 3 moved here from
+  `sandbox-provisioning/first-boot/` as `init_template.ansible.tpl`,
+  since Terraform renders it. One copy, no drift.
+- The copy tool can now place a directory at a unit's root (`./`),
+  with two new tests; extraction renames `terraform/` to the root.
+- Tests: Terraform 1.9.8 runs; both modules validate; the nine
+  unformatted files are as recorded (Terraform flags `variables.tf`
+  too, OpenTofu does not); both templates render, the new one needing
+  exactly `provisioning_repo` and `provisioning_version`; the two
+  fragments still fail. Extraction: 22 files, 44 commits.
+- Found: nothing creates the DynamoDB table cloudflow needs or deploys
+  the Lambda functions; the interface table is in
+  [MAP.md](../exportit/MAP.md#what-it-provides-the-interface).
+  Afterwards the operator decided the table stays made by hand and is
+  supplied as configuration; MAP.md records it.
+- Netrc workaround removed from the provisioning `Justfile` first, at
+  the operator's request (separate commit on stage 3's branch).
+
 ## Sizing and branch
 
-22 files copied, about 5 written. Branch `feature/stage-4-terraform`.
+22 files copied, 9 written, 1 moved. Branch `feature/stage-4-terraform`,
+cut from `feature/stage-3-ansible`; commits local.

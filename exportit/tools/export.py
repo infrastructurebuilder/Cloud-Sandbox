@@ -8,7 +8,8 @@ directive::
     drop   <source>           the file is deliberately not carried over
     new    <path>             a file that exists only in the unit
 
-A path that ends in ``/`` stands for everything beneath it. When several
+A path that ends in ``/`` stands for everything beneath it; as a destination,
+``./`` is the root of the unit. When several
 ``copy`` or ``drop`` directives match a file, the longest source wins, and that
 is also how a file is shared out between two units.
 
@@ -117,6 +118,8 @@ def parse_map(path: Path) -> Unit:
             source, dest = args
             if source.endswith("/") != dest.endswith("/"):
                 raise MapError(f"{where}: a directory must be copied to a directory")
+            if dest == "./":
+                dest = ""
             unit.rules.append(Rule(unit.name, source, dest, number))
         elif verb == "drop" and len(args) == 1:
             unit.rules.append(Rule(unit.name, args[0], None, number))
@@ -340,7 +343,9 @@ def filter_directives(units: dict[str, Unit], plan: Plan, name: str, tracked: li
                 f"{name}.map:{rule.line}: {rule.source} also holds files of another unit "
                 f"or dropped files (for example {strays[0]}); list its files one by one"
             )
-    renames = [(rule.source, rule.dest) for rule in copies if rule.dest and rule.source != rule.dest]
+    renames = [
+        (rule.source, rule.dest) for rule in copies if rule.dest is not None and rule.source != rule.dest
+    ]
     for dest, source in plan.files[name].items():
         result = renamed_by_filter_repo(source, renames)
         if result != dest:

@@ -1,0 +1,19 @@
+# sandbox-terraform: the network, EFS volume, IAM role and head node.
+# Read by exportit/tools/export.py; described in exportit/MAP.md.
+#
+# The whole of terraform/ goes to the root of the unit, unchanged: the module,
+# the remote-state module, the example settings, the Image Builder sketch and
+# the old copies (decision 2 of stage 4).
+
+covers terraform/
+copy terraform/    ./
+
+# Files that exist only in the unit.
+new README.md
+new LICENSE                    # a copy of the repository's LICENSE
+new Justfile
+new pyproject.toml
+new uv.lock
+new .python-version
+new init_template.ansible.tpl  # the first-boot script that runs the Ansible playbooks
+new tests/

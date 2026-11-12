@@ -3,3 +3,6 @@
 __pycache__/
 dist/
 .collections/
+.terraform/
+.terraform.lock.hcl
+.terraform-plugins/

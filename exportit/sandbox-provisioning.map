@@ -36,7 +36,6 @@ new site.yml
 new node-image.yml
 new group_vars/
 new inventories/
-new first-boot/
 new docs/
 new tests/
 new roles/sandbox_paths/tasks/

@@ -1,0 +1,35 @@
+[project]
+name = "sandbox-terraform"
+version = "0.1.0"
+description = "Terraform for a Cloud Sandbox: network, EFS volume, IAM role and head node"
+requires-python = ">=3.12"
+dependencies = []
+
+# Python is only the test harness; the module itself is plain Terraform.
+[dependency-groups]
+dev = ["pyright>=1.1.400", "pytest>=8", "ruff>=0.12"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["B", "C4", "D", "E", "F", "I", "N", "PL", "PTH", "RUF", "SIM", "UP", "W"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "PLR2004"]
+
+[tool.pyright]
+include = ["tests"]
+extraPaths = ["tests"]
+typeCheckingMode = "standard"
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+markers = ["slow: initialises throw-away copies, which downloads providers; run by full-test only"]

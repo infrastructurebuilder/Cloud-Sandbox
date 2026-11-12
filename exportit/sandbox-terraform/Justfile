@@ -1,0 +1,48 @@
+# sandbox-terraform: the network, EFS volume, IAM role and head node of a sandbox.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# The Terraform that checks the module (stage 4, decision 3). tfenv reads this;
+# a terraform installed without tfenv ignores it, and the tests then say which
+# version ran.
+export TFENV_TERRAFORM_VERSION := "1.9.8"
+export CHECKPOINT_DISABLE := "1"
+export TF_IN_AUTOMATION := "1"
+# Providers are downloaded once and kept here.
+export TF_PLUGIN_CACHE_DIR := justfile_directory() / ".terraform-plugins"
+
+# List the targets.
+default:
+    @just --justfile {{ justfile() }} --list
+
+# Create the test environment and initialise both modules without a backend (downloads providers; no AWS).
+init:
+    uv sync
+    mkdir -p "$TF_PLUGIN_CACHE_DIR"
+    terraform init -backend=false -input=false -no-color
+    terraform -chdir=remote-state init -backend=false -input=false -no-color
+
+# Nothing to compile: Terraform is applied as it is.
+build:
+    @echo "sandbox-terraform: nothing to build"
+
+# Lint and format-check the tests.
+lint:
+    uv run ruff check tests
+    uv run ruff format --check tests
+
+# Type-check the tests; any error fails.
+typecheck:
+    uv run pyright
+
+# Lint, type-check; both modules validate, formatting and templates are as known. No AWS call.
+test: lint typecheck
+    uv run pytest -q -m "not slow"
+
+# Everything in test, and the two fragments still fail as recorded (downloads providers).
+full-test: test
+    uv run pytest -q -m slow
+
+# Nothing is published from a copy inside Cloud-Sandbox.
+release: full-test
+    @echo "sandbox-terraform: nothing to release from exportit/; see exportit/MAP.md"
