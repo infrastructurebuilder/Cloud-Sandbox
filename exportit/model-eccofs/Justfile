@@ -1,0 +1,36 @@
+# model-eccofs: ECCOFS (ROMS) from the NOSOFS code package: fetch, build, data.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# List the targets.
+default:
+    @just --justfile {{ justfile() }} --list
+
+# Check that the tools the tests need are here (bash 4 or later, shellcheck).
+init:
+    @bash -c '((BASH_VERSINFO[0] >= 4))' || { echo "model-eccofs: the tests need bash 4 or later on PATH" >&2; exit 1; }
+    @command -v shellcheck >/dev/null || { echo "model-eccofs: install shellcheck (brew install shellcheck; dnf install ShellCheck)" >&2; exit 1; }
+    @echo "model-eccofs: bash $(bash -c 'echo $BASH_VERSION'), shellcheck $(shellcheck --version | sed -n 's/^version: //p')"
+
+# Nothing to compile here: the recipes build the model on a sandbox, by hand.
+build:
+    @echo "model-eccofs: nothing to build"
+
+# The test harness itself has no shellcheck findings.
+lint:
+    shellcheck tests/check-scripts.sh
+
+# Every script parses (bash -n); shellcheck's findings are as recorded. Nothing is fetched or built.
+test: lint
+    tests/check-scripts.sh
+
+# There are no slower checks: no model is built or run here.
+full-test: test
+
+# Write the shellcheck counts again, after reviewing a change in them.
+record:
+    tests/check-scripts.sh --record
+
+# Nothing is published from a copy inside Cloud-Sandbox.
+release: full-test
+    @echo "model-eccofs: nothing to release from exportit/; see exportit/MAP.md"

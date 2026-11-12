@@ -1,0 +1,14 @@
+# model-ufscoastal: the recipe that fetches, builds and runs ufscoastal on a sandbox.
+# Read by exportit/tools/export.py; described in exportit/MAP.md.
+#
+# One unit per model (stage 5, decision 1). The model's directory goes to the
+# root of the unit, unchanged; files shared by several models are in model-common.
+
+covers models/ufscoastal/
+copy models/ufscoastal/    ./
+
+# Files that exist only in the unit.
+new UNIT.md        # what this unit is, where it came from, how it is checked
+new LICENSE      # a copy of the repository's LICENSE
+new Justfile
+new tests/

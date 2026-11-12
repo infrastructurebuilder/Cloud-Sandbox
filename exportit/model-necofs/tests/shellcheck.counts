@@ -1,0 +1,9 @@
+# Findings of shellcheck per script, written by tests/check-scripts.sh --record.
+# Recorded with shellcheck version 0.11.0
+9	hindcasts/build_necofs.sh
+6	hindcasts/get_src.sh
+3	hindcasts/get_testcase_inputs.sh
+18	hindcasts/run/orig.runscript_hot
+4	tidal_barotropic/build.sh
+30	tidal_barotropic/run/run_col
+30	tidal_barotropic/run/run_hot

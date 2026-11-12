@@ -25,7 +25,7 @@ nothing leaves this repository).
 | cloudflow's documentation | `exportit/cloudflow/docs/` | `docs/source/` | [8](../INPROGRESS/STAGE-8.md) | planned |
 | `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
-| `sandbox-models` | `exportit/sandbox-models/` | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | planned |
+| `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
 | `sandbox-configs` | `exportit/sandbox-configs/` | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | planned |
 | `sandbox-ops` | `exportit/sandbox-ops/` | the rest of `scripts/`, `misc/`, `jupyterhub/` | [7](../INPROGRESS/STAGE-7.md) | planned |
 | `cloud-sandbox` (umbrella) | `exportit/cloud-sandbox/` | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/`, `TODO`, `.github/`, `LICENSE`, `.gitignore` | [8](../INPROGRESS/STAGE-8.md) | planned |
@@ -224,8 +224,9 @@ counts every such place per file, and a test fails if one is added.
   server; and Python with cloudflow installed. Today provisioning
   installs cloudflow's dependencies from its own list; after a
   relocation it would install the `cloudflow` distribution.
-- **`sandbox-models`:** model executables and module files where the
-  launcher scripts look for them.
+- **The model units:** model executables and module files where the
+  launcher scripts look for them; [the install
+  contract](#the-install-contract) lists every such path.
 - **`sandbox-terraform`:** the security groups, subnet, key name and
   placement group that a cluster description names.
 - **AWS:** credentials, and a DynamoDB table named in the cluster
@@ -589,9 +590,192 @@ Things noticed and left as they are:
 - In Cloud-Sandbox: delete `terraform/` and update `DEPLOYMENT.md`
   ([stage 8](../INPROGRESS/STAGE-8.md)).
 
-## sandbox-models
+## The model units
 
-Planned. [Stage 5](../INPROGRESS/STAGE-5.md) fills this section.
+Copied on 2026-11-12 by [stage 5](../INPROGRESS/STAGE-5.md). By the
+operator's decision there is one unit per model, and a ninth,
+`model-common`, for what several of them share. Each unit's own
+description is its `UNIT.md`: two of the models already have a
+`README.md` of their own, so the new file needed another name, and all
+nine use the same one.
+
+### Where the files go
+
+Every model directory goes, unchanged, to the root of its unit. The
+counts are of shell scripts (a `#!` line naming `sh` or `bash`, or a
+name ending in `.sh`) and of shellcheck 0.11.0's findings in them.
+
+| Unit | Mapping file | Source | Files | Scripts | Findings |
+| --- | --- | --- | ---: | ---: | ---: |
+| [model-adcirc-cora](model-adcirc-cora/UNIT.md) | [map](model-adcirc-cora.map) | `models/adcirc-cora/`; `patches/adcirc-cora/` to `patches/` | 57 | 15 | 647 |
+| [model-eccofs](model-eccofs/UNIT.md) | [map](model-eccofs.map) | `models/eccofs/` | 13 | 6 | 31 |
+| [model-liveocean](model-liveocean/UNIT.md) | [map](model-liveocean.map) | `models/liveocean/` | 10 | 6 | 52 |
+| [model-necofs](model-necofs/UNIT.md) | [map](model-necofs.map) | `models/necofs/` | 17 | 7 | 100 |
+| [model-nosofs](model-nosofs/UNIT.md) | [map](model-nosofs.map) | `models/nosofs/` | 9 | 5 | 42 |
+| [model-secofs](model-secofs/UNIT.md) | [map](model-secofs.map) | `models/secofs/` | 16 | 7 | 39 |
+| [model-ucla-roms](model-ucla-roms/UNIT.md) | [map](model-ucla-roms.map) | `models/ucla-roms/` | 4 | 3 | 19 |
+| [model-ufscoastal](model-ufscoastal/UNIT.md) | [map](model-ufscoastal.map) | `models/ufscoastal/` | 17 | 4 | 13 |
+| [model-common](model-common/UNIT.md) | [map](model-common.map) | `models/modulefiles/`, `models/utils/`, `models/TODO`, `models/compilation.notes`, `models/mpiopts.note` | 6 | 0 | 0 |
+| | | | **149** | **53** | **943** |
+
+New in each unit: `UNIT.md`, `LICENSE` (a copy of the repository's),
+`Justfile` and `tests/`. No patches: the copies are byte-identical,
+and by the operator's decision their findings are counted, not fixed.
+
+### What each recipe fetches, needs and installs
+
+The detail, with the scripts that do each step, is in each `UNIT.md`.
+
+| Model | Fetches from | Needs from provisioning | Installs to |
+| --- | --- | --- | --- |
+| adcirc-cora | `s3://ioos-cloud-sandbox/public/cora-adcirc/`: a built ADCIRC, a run tree, the 2018 forcing. ADCIRC's source is not fetched | `model-common`'s module file: Spack's oneAPI 2023.1, Intel MPI 2021.12.1, HDF5, NetCDF; `cmake` | `/save/$USER`; ADCIRC to `$ADCIRCHome/work` |
+| eccofs | GitHub `asascience-open/NOSOFS-Code-Package` (`v3.6.6.dev`); fixed fields and forcing from `ioos-sandbox-use2` | its own module file: oneAPI 2023.1, MKL, Intel MPI 2021.12.1, NetCDF, METIS, libpng, NCEP libraries | `/save/$USER/nosofs.v3.6.6`, shared with nosofs |
+| liveocean | GitHub `asascience/LiveOcean`, `parkermac/LO`, `asascience/LO_roms_user`, `parkermac/LO_roms_source_alt`, `myroms/roms`; data from `ioos-sandbox-use2` | its own module file: oneAPI 2023.1, MKL, netcdf-fortran | `/save/$USER/LiveOcean` |
+| necofs | GitHub `FVCOM-GitHub/FVCOM` (`v4.4.8`); inputs from `ioos-sandbox-use2` | its own module file: oneAPI 2023.1, PETSc 3.21.1, METIS, NetCDF | `/save/$USER/necofs/NECOFS_v2.4/hindcast/FVCOMv4.4.8` |
+| nosofs | GitHub `asascience-open/NOSOFS-Code-Package` (`v3.6.6.dev`); fixed fields from `ioos-sandbox-use2` or NCO `nwprod` | its own module file: as eccofs, plus parallel-netcdf and ParallelIO | `/save/$USER/nosofs.v3.6.6` |
+| secofs | GitHub `jduckerOWP/schism` (`v5.13.0_NOS_Sandbox`); inputs from `ioos-sandbox-use2`, and from VIMS with a password | its own module file: Intel 2024.2.1, MKL, Intel MPI 2021.13 under `intel/...` names that Spack does not make, netcdf-fortran 4.6.2 | `/save/$USER/schism` |
+| ucla-roms | GitHub `CESR-lab/ucla-roms`, default branch | Spack modules loaded in the scripts: oneAPI 2023.1, Intel MPI 2021.9.0, compression libraries, NetCDF | `/save/$USER/ucla-roms` |
+| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack 2.0 in `/save/environments/spack-stack.v2.0`; `gcc-toolset-13` | `/save/$USER/ufs-weather-model` |
+
+Three recipes follow a branch head (`ucla-roms`, `ufscoastal`,
+`liveocean`'s five repositories), so two builds a month apart need not
+be the same model.
+
+### The install contract
+
+What cloudflow's launchers, in `cloudflow/workflows/`, expect to find
+where a model was installed. The job's configuration names the
+install (`SAVEDIR`, `EXEC`, `MODEL_DIR`, `ProjectHome`); the launcher
+then looks inside it. Each row is one path a launcher uses, as the
+launcher writes it. A check in
+[tools/tests/test_model_units.py](tools/tests/test_model_units.py)
+reads the launchers and fails if one uses a path that has no row here,
+or if a row names a path no launcher uses any more.
+
+| Launcher | Path | What must be there | Put there by |
+| --- | --- | --- | --- |
+| `fcst_launcher.sh` | `$SAVEDIR` | NOS ROMS and FVCOM models: the code package install; `secofs`: the directory holding the module file `intel_x86_64` (`module use -a $SAVEDIR`) | `model-nosofs`, `model-eccofs` (`nosofs.v3.6.6`); `model-secofs` (`/save/$USER/schism`) |
+| `fcst_launcher.sh` | `$HOMEnos/jobs` | The code package's job scripts. `HOMEnos` is `$SAVEDIR`, `$SAVEDIR/LiveOcean` or `$SAVEDIR/WRF-ROMS-Coupled` | the code package, through `model-nosofs` and `model-eccofs`; `LiveOcean` through `model-liveocean` |
+| `fcst_launcher.sh` | `$JOBDIR/fcstrun.sh` | The forecast script, `JOBDIR` being `$HOMEnos/jobs` | as the row above |
+| `fcst_launcher.sh` | `$SAVEDIR/LiveOcean` | The clone of `asascience/LiveOcean`; `SAVEDIR` is the directory above it | `model-liveocean` |
+| `fcst_launcher.sh` | `$SAVEDIR/WRF-ROMS-Coupled` | A coupled WRF-ROMS install for `wrfroms` | **nobody**: there is no recipe in the repository |
+| `fcst_launcher.sh` | `$SAVEDIR/modulefiles` | `intel_x86_64.impi_2021.12.1`, for `necofs` | `model-necofs`: its own `modulefiles/`, in a checkout or a copy |
+| `fcst_launcher.sh` | `$EXEC` | The model executable, by absolute path: `secofs` `$SAVEDIR/bin/pschism_...`, `necofs` `necofs_fvcom`; `adnoc` and `nyh-hindcast` default to a `roms` on `PATH` | `model-secofs`, `model-necofs`; the `TT` models by hand |
+| `fcst_launcher.sh` | `$JOBDIR/fcstrun_adcirc_cluster.sh` | For `adcircofs`, with `JOBDIR` set to one person's home directory, `/home/mmonim/Cloud-Sandbox/cloudflow/workflows` | **nobody**: the script is not in the repository |
+| `simple_launcher.sh` | `$SAVEDIR/modulefiles` | `intel_x86_64.impi_2021.12.1`, for `necofs_hot` and `necofs_cold` | `model-necofs` |
+| `simple_launcher.sh` | `$EXEC` | `necofs_fvcom` or the tidal build's executable | `model-necofs` |
+| `cora_launcher.sh` | `$PROJHOME` | The job's `ProjectHome`: the run tree, laid out like `model-adcirc-cora` | `model-adcirc-cora` (`cora-runs.tgz` from S3) |
+| `cora_launcher.sh` | `$PROJHOME/TracksToRun` | The directory of `<year>.trk` files; the launcher touches one | `model-adcirc-cora` |
+| `cora_launcher.sh` | `$PROJHOME/ERA5` | The run directories, `ERA5/<grid>/<year>` | `model-adcirc-cora` (`cora-runs.tgz`) |
+| `cora_launcher.sh` | `$JOBDIR/common/submit.cloudflow.template` | `JOBDIR` is `$PROJHOME`; the launcher writes cloudflow's template here | `model-adcirc-cora` (`common/`) |
+| `ufs_launcher.sh` | `$SAVEDIR/ufs-weather-model/tests` | The UFS regression tests, with `rt.sh` | `model-ufscoastal` |
+| `ufs_launcher.sh` | `/save/$USER` | The default `SAVEDIR` | `model-ufscoastal`'s default too |
+| `experiment_launcher.sh` | `$MODEL_DIR` | The experiment's run directory, passed on to a `*_run.sh` script | by hand: the job configuration |
+| `experiment_launcher.sh` | `$EXEC` | The executable, passed on | by hand: the job configuration |
+| `adcirc_basic_run.sh` | `$MODEL_DIR` | An ADCIRC run directory | by hand |
+| `adcirc_basic_run.sh` | `$EXEC/adcprep` | `EXEC` here is a *directory* holding `adcprep` | an ADCIRC build: by hand, or `model-adcirc-cora`'s `buildadcirc.sh` |
+| `adcirc_basic_run.sh` | `$EXEC/padcirc` | `padcirc`, in the same directory | as the row above |
+| `fcstrun_adcirc_florence.sh` | `$PHOME/adcprep` | `PHOME` is `/save/adcirc-cg/work` | **nobody**: an old install |
+| `fcstrun_adcirc_florence.sh` | `$PHOME/padcirc` | as the row above | **nobody** |
+| `fcstrun_adcirc_florence.sh` | `/save/adcirc-cg/work` | An ADCIRC build | **nobody** |
+| `fcstrun_adcirc_florence.sh` | `/save/adcirc-florence-input` | The Florence inputs | **nobody** |
+| `fcstrun_adcirc_florence.sh` | `/save/adcirc-florence/tidalSpinup/fort.68.nc` | A tidal spin-up | **nobody** |
+| `fcstrun_adcirc_florence.sh` | `/save/adcirc-ClusterRPS/fcst_adcirc_log.txt` | Where its log goes | **nobody** |
+| `roms_basic_run.sh` | `$MODEL_DIR` | A ROMS run directory | by hand |
+| `roms_basic_run.sh` | `$EXEC` | A ROMS executable | by hand |
+| `ucla-roms_run.sh` | `$MODEL_DIR` | `/save/$USER/ucla-roms/Examples/Rivers_real` in the job configuration | `model-ucla-roms` |
+| `ucla-roms_run.sh` | `$EXEC` | Its `roms` executable | `model-ucla-roms` (`testcase.sh`) |
+| `schism_basic_run.sh` | `$MODEL_DIR` | A SCHISM run directory | by hand |
+| `schism_basic_run.sh` | `$EXEC` | A SCHISM executable | by hand, or `model-secofs` |
+| `fvcom_basic_run.sh` | `$MODEL_DIR` | An FVCOM run directory | by hand |
+| `fvcom_basic_run.sh` | `$EXEC` | An FVCOM executable | by hand, or `model-necofs` |
+| `dflowfm_basic_run.sh` | `$MODEL_DIR` | A D-Flow FM run directory | by hand |
+| `dflowfm_basic_run.sh` | `$EXEC` | `dflowfm` | by hand: no recipe |
+| `wrf_hydro_basic_run.sh` | `$MODEL_DIR` | A WRF-Hydro run directory | by hand |
+| `wrf_hydro_basic_run.sh` | `$EXEC` | `wrf_hydro_NoahMP.exe` | by hand: no recipe |
+| `model_basic_run.sh` | `$MODEL_DIR` | A run directory (the template for new models) | by hand |
+| `python_basic_run.sh` | `$EXEC` | A Python interpreter, not a model | provisioning, or by hand |
+| `python_mpi_basic_run.sh` | `$EXEC` | A Python interpreter with `mpi4py` | provisioning, or by hand |
+
+Not in the table, because they belong to provisioning and not to a
+model: seven `*_basic_run.sh` scripts and `ucla-roms_run.sh` load
+Spack modules by hashed name from
+`/mnt/efs/fs1/save/environments/spack.v0.22.5/share/spack/modules/linux-rhel8-x86_64`,
+and `python_mpi_basic_run.sh` loads two more.
+
+### Found
+
+- **Module names carry Spack's build hashes** (`-3rbcwfi`,
+  `-6nra3z4`, `-aimw7vu`, ...), in every model module file, in
+  `model-common`, and in nine of cloudflow's run scripts. Three different hashes of
+  the same oneAPI 2023.1 compiler are in use. `sandbox-provisioning`
+  builds with Spack 1.2 on RHEL 10 and enables Tcl modules with
+  Spack's default naming, so its hashes and its `linux-rhel10-...`
+  paths will match none of them. A rebuilt sandbox needs either
+  module names without hashes (a Spack modules projection), or every
+  module file rewritten. This is the main thing that ties the model
+  units to one particular sandbox.
+- **Five setup scripts cannot create the directory they install into.**
+  `mkdir -p $SAVEDIR | echo "Can not create $SAVEDIR"; exit 1` (in
+  `eccofs/setup_eccofs.sh`, `liveocean/setup_LiveOcean.sh`,
+  `nosofs/setup_nosofs.sh`, `nosofs/build_nosofs.sh`,
+  `ufscoastal/setup.sh`) pipes instead of `||`, so when `SAVEDIR` is
+  missing the script creates it, prints the error and exits 1 anyway.
+  A second run works.
+- **Recipes that assume their place in a Cloud-Sandbox checkout:**
+  `adcirc-cora/buildadcirc.sh` (`../modulefiles`, now
+  `model-common`), `adcirc-cora/install-adcirc-cora.sh` (installs three
+  levels up), `eccofs/restart_date.sh` (`cd ../../cloudflow/utils`),
+  `patches/adcirc-cora/reinstall-esmf-netcdf.sh` (sources
+  `../../scripts/funcs-setup-instance.sh`, which provisioning
+  replaces), and cloudflow's `job.configs/OFS/necofs.hindcast`, whose
+  `SAVEDIR` is `.../Cloud-Sandbox/models/necofs`. After a split each
+  needs a path given to it instead.
+- **Installs with no recipe:** `WRF-ROMS-Coupled`, D-Flow FM,
+  WRF-Hydro, the `TT` models, and the Florence ADCIRC run, and the
+  `adcircofs` script in one person's home directory.
+- **Paths fixed to one person:** `necofs/tidal_barotropic/build.sh`
+  builds in `/save/patrick/...`; many job configurations name
+  `/save/patrick` ([stage 6](../INPROGRESS/STAGE-6.md)).
+- `liveocean/get_LO_ROMS.sh` defaults to `/save/$USER/liveocean`, and
+  the rest of the recipe to `/save/$USER/LiveOcean`; it works only when
+  `setup_LiveOcean.sh` exports `MODEL_DIR` first.
+- `necofs/bin/makedepf90` is a built executable, tracked in git;
+  `utils/readme.makedepf90` says where its source is.
+- Four job templates in `adcirc-cora/common/` hold placeholders and do
+  not parse as bash; they are recorded as templates.
+
+### How they are checked
+
+Every model unit runs the same harness,
+`tests/check-scripts.sh`, and a check in the `tools` unit holds the
+nine copies identical. Nothing is fetched, built or run.
+
+| Check | Where | Result on 2026-11-12 |
+| --- | --- | --- |
+| The harness has no shellcheck findings | each unit's `just test` | pass, 9 units |
+| Every script passes `bash -n`, and the 4 templates still fail it | each unit's `just test` | pass: 53 scripts |
+| shellcheck's findings per script are as recorded in `tests/shellcheck.counts` | each unit's `just test` | pass: 943 findings |
+| The harness finds a syntax error, a changed count, an unlisted script and a template that parses | `tools`' `just test` | pass |
+| Every launcher path has a row in the install contract | `tools`' `just test` | pass: 42 rows |
+| Extraction with history | root `just full-test` | the same files in all nine; 2 to 8 commits of history each (`model-secofs` 8, `model-eccofs` 7, `model-nosofs` 6, `model-liveocean` 5, `model-adcirc-cora` and `model-necofs` 4, `model-common` 3, `model-ucla-roms` and `model-ufscoastal` 2) |
+
+The counts depend on shellcheck's version: the file records 0.11.0,
+and another version fails the check with a message to review and
+re-record, rather than with 53 differences.
+
+### What a real relocation would change
+
+- Extract each with `just export-filter model-<name>`; `model-common`
+  first, since `model-adcirc-cora` uses it.
+- Give each recipe its install directory and module path as
+  arguments, in place of its place in a checkout (the list above).
+- Settle module naming with `sandbox-provisioning` (the first finding)
+  before the first build on a rebuilt sandbox.
+- Pin the three recipes that follow a branch head.
+- In Cloud-Sandbox: delete `models/` and `patches/`, and point the job
+  configurations at installs, not at a checkout
+  ([stage 6](../INPROGRESS/STAGE-6.md)).
 
 ## sandbox-configs
 
