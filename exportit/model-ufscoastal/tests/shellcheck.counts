@@ -1,0 +1,6 @@
+# Findings of shellcheck per script, written by tests/check-scripts.sh --record.
+# Recorded with shellcheck version 0.11.0
+0	get_input_data.sh
+0	modulefiles/debug_modules.sh
+7	setup.sh
+6	testing_rt.sh

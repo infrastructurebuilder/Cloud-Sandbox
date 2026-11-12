@@ -1,0 +1,17 @@
+# Findings of shellcheck per script, written by tests/check-scripts.sh --record.
+# Recorded with shellcheck version 0.11.0
+26	bin/OwiTimes.sh
+259	bin/bb.run_storms.sh
+23	bin/functions.sh
+0	bin/mods.sh
+290	bin/run_storms.sh
+16	buildadcirc.sh
+0	cleanme.sh
+3	common/orig/submit.slurm.template
+3	common/saved.submit.cloudflow.template
+3	common/submit.slurm.template
+3	common/use.job.templates_submit.cloudflow.template
+3	getS3packages.sh
+7	install-adcirc-cora.sh
+0	patches/fix4cora.sh
+11	patches/reinstall-esmf-netcdf.sh

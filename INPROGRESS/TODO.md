@@ -34,7 +34,7 @@ any work starts.
 | [2](STAGE-2.md) | `cloudflow` and `cloudflow-plotting` | Executed 2026-11-12; waits for validation |
 | [3](STAGE-3.md) | `sandbox-provisioning` (Ansible) | Executed 2026-11-12; waits for validation; live proof not run |
 | [4](STAGE-4.md) | `sandbox-terraform` | Executed 2026-11-12; waits for validation |
-| [5](STAGE-5.md) | `sandbox-models` | Planned |
+| [5](STAGE-5.md) | `model-*` (eight models) and `model-common` | Executed 2026-11-12; waits for validation |
 | [6](STAGE-6.md) | `sandbox-configs` | Planned; better after stage 2 |
 | [7](STAGE-7.md) | `sandbox-ops` | Planned; after stage 3 |
 | [8](STAGE-8.md) | Documentation and the umbrella | Planned; last |

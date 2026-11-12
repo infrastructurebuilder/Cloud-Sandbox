@@ -149,7 +149,8 @@ how the real relocation would be done.
 - **sandbox-terraform** ([stage 4](STAGE-4.md)). Expects: an AWS
   account. Provides: the host and the EFS volume, and the identifiers
   of C7.
-- **sandbox-models** ([stage 5](STAGE-5.md)). Expects: the compilers
+- **sandbox-models** ([stage 5](STAGE-5.md); became one unit per
+  model, `model-<name>`, and `model-common`). Expects: the compilers
   and modules that provisioning installs. Provides: model executables
   at the paths of C3.
 - **sandbox-configs** ([stage 6](STAGE-6.md)). Data only. Expects: the

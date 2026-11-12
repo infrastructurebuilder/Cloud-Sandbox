@@ -1,0 +1,6 @@
+# Templates, not scripts: they hold <placeholders> that cloudflow or
+# run_storms.sh fills in, so bash -n fails on them until then.
+common/orig/submit.slurm.template
+common/saved.submit.cloudflow.template
+common/submit.slurm.template
+common/use.job.templates_submit.cloudflow.template

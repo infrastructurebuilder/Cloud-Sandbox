@@ -1,0 +1,8 @@
+# Findings of shellcheck per script, written by tests/check-scripts.sh --record.
+# Recorded with shellcheck version 0.11.0
+5	LO_COMPILE.sh
+15	get_LO_ROMS.sh
+9	get_LiveOcean_data.sh
+11	get_LiveOcean_grid.sh
+0	modulefiles/load_modules.sh
+12	setup_LiveOcean.sh
