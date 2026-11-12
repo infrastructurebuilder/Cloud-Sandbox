@@ -231,7 +231,8 @@ counts every such place per file, and a test fails if one is added.
 - **AWS:** credentials, and a DynamoDB table named in the cluster
   description. `AWSCluster` refuses to start without it; the two
   Lambda functions and `scripts/weekly_summary.nu` read the same
-  table.
+  table. The table is made by hand and its name is configuration
+  (operator, 2026-11-12).
 
 ### Extraction
 
@@ -527,7 +528,7 @@ comes from:
 | `subnet_id` | the head node's subnet; output `aws_subnet` |
 | `placement_group` | output `aws_placement_group` |
 | `image_id` | not Terraform: `node-image.yml` in `sandbox-provisioning`, on the head node |
-| `table_name` | **nobody** (see below) |
+| `table_name` | configuration: an existing table, made by hand, named by the operator (see below) |
 | `nodeType`, `nodeCount`, `tags`, `vm_retry_delay`, `vm_max_retries`, `platform` | the person who writes the description |
 
 Today the first four reach a cluster description by hand: Terraform
@@ -538,8 +539,16 @@ writes them as a JSON fragment into `deployment_info.txt`, and
 `AWSCluster` refuses to start without, or deploys the two Lambda
 functions that terminate nodes left running. The role is given
 `AmazonDynamoDBFullAccess_v2`; the table and the functions are made by
-hand. A real split has to give them an owner, most naturally this
-unit.
+hand.
+
+**Decided (operator, 2026-11-12):** the table stays made by hand and
+is *supplied as configuration*. This unit does not create it; a split
+passes its name in, the same way as `key_name`. What a real split
+should add is a variable for the table name, so that the IAM policy
+can be narrowed from `AmazonDynamoDBFullAccess_v2` to that one table,
+and an output that carries the name into the cluster description
+beside the other four values. The Lambda functions still have no
+owner.
 
 It expects nothing from the other units. `sandbox-provisioning` runs on
 the node it creates.

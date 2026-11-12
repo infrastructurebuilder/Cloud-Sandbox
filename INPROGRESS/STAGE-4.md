@@ -95,6 +95,8 @@ section is complete.
 - Found: nothing creates the DynamoDB table cloudflow needs or deploys
   the Lambda functions; the interface table is in
   [MAP.md](../exportit/MAP.md#what-it-provides-the-interface).
+  Afterwards the operator decided the table stays made by hand and is
+  supplied as configuration; MAP.md records it.
 - Netrc workaround removed from the provisioning `Justfile` first, at
   the operator's request (separate commit on stage 3's branch).
 
