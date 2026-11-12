@@ -7,11 +7,9 @@ default:
     @just --justfile {{ justfile() }} --list
 
 # Create the tool environment and fetch the collection that node-image.yml needs.
-# Galaxy is public; NETRC points away from the user's file because a netrc that
-# Python cannot parse stops ansible-galaxy before it sends anything.
 init:
     uv sync
-    NETRC=/dev/null uv run ansible-galaxy collection install -r requirements.yml -p .collections
+    uv run ansible-galaxy collection install -r requirements.yml -p .collections
 
 # Nothing to compile: playbooks are applied as they are.
 build:
