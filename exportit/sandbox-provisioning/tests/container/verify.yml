@@ -1,0 +1,183 @@
+---
+# What the roles applied in the container should have left behind. Run by
+# converge.sh inside the container, after the second apply.
+
+- name: Check the result of the roles the container can run
+  hosts: sandbox_head
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../../group_vars/all.yml
+    - ../../roles/base_system/defaults/main.yml
+
+  tasks:
+    - name: Look at the directories and links
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: [/ptmp, /com, /mnt/efs/fs1/ptmp, /mnt/efs/fs1/com, "/com/{{ sandbox_user }}", "/ptmp/{{ sandbox_user }}"]
+      register: paths
+
+    - name: Check the directories and links
+      ansible.builtin.assert:
+        that:
+          - paths.results[0].stat.islnk and paths.results[0].stat.lnk_target == '/mnt/efs/fs1/ptmp'
+          - paths.results[1].stat.islnk and paths.results[1].stat.lnk_target == '/mnt/efs/fs1/com'
+          - paths.results[2].stat.mode == '0777' and paths.results[2].stat.gr_name == 'wheel'
+          - paths.results[3].stat.mode == '0777' and paths.results[3].stat.gr_name == 'wheel'
+          - paths.results[4].stat.pw_name == sandbox_user
+          - paths.results[5].stat.pw_name == sandbox_user
+        quiet: true
+
+    - name: Read the login user's shell files
+      ansible.builtin.slurp:
+        src: "{{ sandbox_user_home }}/{{ item }}"
+      loop: [.bashrc, .tcshrc]
+      register: rc
+
+    - name: Check that each line the roles write is there exactly once
+      ansible.builtin.assert:
+        that:
+          - (rc.results[0].content | b64decode).count(item.bash) == 1
+          - (rc.results[1].content | b64decode).count(item.tcsh) == 1
+        quiet: true
+      loop:
+        - {bash: 'alias lsl="ls -al"', tcsh: 'alias lsl "ls -al"'}
+        - {bash: 'alias cds="cd /save/$USER"', tcsh: 'alias cdpt "cd /ptmp/$USER"'}
+        - {bash: 'PS1="[IOOS-Sandbox:\w] \u> "', tcsh: 'set prompt="[IOOS-Sandbox:%~] %n $0> "'}
+        - {bash: ". /usr/share/Modules/init/bash", tcsh: "source /usr/share/Modules/init/tcsh"}
+        - {bash: ". {{ spack_dir }}/share/spack/setup-env.sh", tcsh: "source {{ spack_dir }}/share/spack/setup-env.csh"}
+      loop_control:
+        label: "{{ item.bash }}"
+      when: (item.bash is not search('spack')) or (spack_dir is directory)
+
+    - name: Check the packages, tools and settings from base_system
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          rpm -q tcsh ksh Lmod tmux jq environment-modules epel-release amazon-ssm-agent >/dev/null
+          aws=$(/usr/local/bin/aws --version)
+          grep -q 'aws-cli/{{ base_system_awscli_version }}' <<<"$aws"
+          [ "$(grep -c '^ulimit -s unlimited$' /etc/profile.d/custom.sh)" = 1 ]
+          modules=$(alternatives --display modules.sh)
+          grep -q 'link currently points to /usr/share/Modules/init/profile.sh' <<<"$modules"
+          cmp /opt/sandbox-provisioning/roles/base_system/files/tmux.conf {{ sandbox_user_home }}/.tmux.conf
+          cmp /opt/sandbox-provisioning/roles/user_shell/files/vimrc {{ sandbox_user_home }}/.vimrc
+          [ "$(stat -c %U {{ sandbox_environments_dir }})" = {{ sandbox_user }} ]
+        executable: /bin/bash
+      changed_when: false
+
+    - name: See whether the module search path got its line
+      ansible.builtin.command:
+        cmd: "grep -c '^{{ sandbox_modulefiles_dir }}$' /etc/environment-modules/modulespath"
+      register: modulespath
+      changed_when: false
+      failed_when: false
+
+    - name: Report it
+      ansible.builtin.debug:
+        msg: >-
+          OBSERVED the modulefiles directory is
+          {{ 'in' if modulespath.stdout == '1' else 'NOT in' }}
+          /etc/environment-modules/modulespath
+
+    - name: Check the Prefect account, its environment and its service
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          [ "$(getent passwd prefect | cut -d: -f7)" = /sbin/nologin ]
+          [ "$(id -gn prefect)" = prefect ]
+          [ "$(stat -c %U:%G /save/environments/prefect/.prefect)" = prefect:prefect ]
+          installed=$(/opt/prefect/venv/bin/pip show prefect)
+          grep -q '^Version: {{ prefect_version }}$' <<<"$installed"
+          cmp /opt/sandbox-provisioning/roles/prefect_server/files/prefect-server.service \
+            /etc/systemd/system/prefect-server.service
+          systemctl is-enabled --quiet prefect-server
+          systemctl is-active --quiet prefect-server
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Wait for the Prefect server to answer
+      ansible.builtin.uri:
+        url: http://127.0.0.1:4200/api/health
+      register: health
+      until: health.status == 200
+      retries: 30
+      delay: 2
+
+    - name: Check the MPI key and the host rules
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          ssh=/home/{{ sandbox_user }}/.ssh
+          [ "$(stat -c %U:%a $ssh/id_rsa)" = {{ sandbox_user }}:600 ]
+          [ "$(grep -c -F "$(cat $ssh/id_rsa.pub)" $ssh/authorized_keys)" = 1 ]
+          grep -q ' mpi-ssh-key$' $ssh/id_rsa.pub
+          # ssh -G prints the effective settings; it spells "no" as "false".
+          private=$(ssh -G 10.1.2.3 </dev/null 2>/dev/null)
+          grep -qx 'stricthostkeychecking false' <<<"$private"
+          node=$(ssh -G ip-10-0-0-5.compute.internal </dev/null 2>/dev/null)
+          grep -qx 'stricthostkeychecking false' <<<"$node"
+          grep -qx 'checkhostip no' <<<"$node"
+          public=$(ssh -G example.org </dev/null 2>/dev/null)
+          grep -qx 'stricthostkeychecking ask' <<<"$public"
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check that the login user can import what the workflows need
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - |
+            import boto3, dask, distributed, matplotlib, netCDF4, numpy, paramiko, PIL, prefect, pyproj
+            assert prefect.__version__ == "{{ prefect_version }}", prefect.__version__
+      become: true
+      become_user: "{{ sandbox_user }}"
+      changed_when: false
+
+    - name: Check what the spack role leaves, when it was applied
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          spack={{ spack_exe }}
+          [ "$(git -C {{ spack_dir }} describe --tags)" = {{ spack_version }} ]
+          config=$($spack config get config)
+          grep -q 'padded_length: 73' <<<"$config"
+          mirrors=$($spack mirror list)
+          grep -q '^spack-public .*https://cache.spack.io' <<<"$mirrors"
+          compilers=$($spack compiler list)
+          grep -q gcc <<<"$compilers"
+          config=$({{ spack_config_json }})
+          grep -q '"padded_length": 73' <<<"$config"
+          grep -q 'cache.spack.io' <<<"$config"
+          [ -n "$({{ spack_fingerprint }})" ]
+        executable: /bin/bash
+      become: true
+      become_user: "{{ sandbox_user }}"
+      changed_when: false
+      when: spack_dir is directory
+
+    - name: Check what the intel_oneapi role leaves, when it was applied
+      ansible.builtin.shell:
+        cmd: |
+          {{ sandbox_modules_init }}
+          set -eo pipefail
+          cmp /opt/sandbox-provisioning/roles/intel_oneapi/files/oneAPI.repo /etc/yum.repos.d/oneAPI.repo
+          rpm -q intel-oneapi-compiler-fortran-{{ oneapi_major_minor }} intel-oneapi-mpi-devel-{{ intel_mpi_version }} >/dev/null
+          [ -d {{ sandbox_modulefiles_dir }}/intel/compiler/{{ oneapi_version }} ] || [ -f {{ sandbox_modulefiles_dir }}/intel/compiler/{{ oneapi_version }} ]
+          {{ sandbox_load_intel_modules }}
+          ifx --version >/dev/null
+          mpiifx -v >/dev/null 2>&1 || mpiifort -v >/dev/null 2>&1
+          config=$({{ spack_config_json }})
+          # Spack puts the site's providers in front of its own defaults, so
+          # the Intel libraries must come first in each list.
+          for want in '"intel-oneapi-mkl@{{ oneapi_major_minor }}"' '"intel-oneapi-mpi@{{ intel_mpi_version }}"' \
+                      '"mpi": \["intel-oneapi-mpi"' '"blas": \["intel-oneapi-mkl"' '"lapack": \["intel-oneapi-mkl"' \
+                      'intel-oneapi-compilers'; do
+            grep -q "$want" <<<"$config" || { echo "missing from Spack's configuration: $want"; exit 1; }
+          done
+        executable: /bin/bash
+      become: true
+      become_user: "{{ sandbox_user }}"
+      changed_when: false
+      when: (sandbox_modulefiles_dir ~ '/intel') is directory

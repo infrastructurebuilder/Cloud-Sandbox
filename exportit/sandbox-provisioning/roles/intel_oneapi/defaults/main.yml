@@ -1,0 +1,31 @@
+---
+# "Below might be needed", says the script, and installs them.
+intel_oneapi_llvm_packages:
+  - clang19
+  - llvm19-toolset
+
+# In the order the script installs them.
+intel_oneapi_packages:
+  - "intel-oneapi-compiler-fortran-{{ oneapi_major_minor }}"
+  - "intel-oneapi-compiler-dpcpp-cpp-{{ oneapi_major_minor }}"
+  - "intel-oneapi-mkl-devel-{{ oneapi_major_minor }}"
+  - "intel-oneapi-mkl-classic-devel-{{ oneapi_major_minor }}"
+  - "intel-oneapi-openmp-{{ oneapi_major_minor }}"
+  - "intel-oneapi-mpi-devel-{{ intel_mpi_version }}"
+
+intel_oneapi_root: /opt/intel/oneapi
+intel_oneapi_modulefiles_dir: "{{ sandbox_modulefiles_dir }}/intel"
+
+# Spack is told to use these instead of building its own.
+intel_oneapi_spack_externals:
+  - {package: intel-oneapi-mkl, spec: "intel-oneapi-mkl@{{ oneapi_major_minor }}", prefix: "{{ intel_oneapi_root }}"}
+  - {package: intel-oneapi-mpi, spec: "intel-oneapi-mpi@{{ intel_mpi_version }}", prefix: "{{ intel_oneapi_root }}"}
+
+intel_oneapi_spack_providers:
+  - "packages:all:providers:mkl:[intel-oneapi-mkl]"
+  - "packages:all:providers:blas:[intel-oneapi-mkl]"
+  - "packages:all:providers:lapack:[intel-oneapi-mkl]"
+  - "packages:all:providers:scalapack:[intel-oneapi-mkl]"
+  - "packages:all:providers:mpi:[intel-oneapi-mpi]"
+
+intel_oneapi_spack_packages_file: "{{ spack_dir }}/etc/spack/site/packages.yaml"

@@ -1,0 +1,119 @@
+---
+# install_spack: Spack itself, on the EFS volume, owned by the login user.
+#
+# The script does nothing at all when /save is missing, and says so. The same
+# condition is on every task here.
+
+# Replaces funcs-setup-instance.sh L637
+- name: Look for the save directory
+  ansible.builtin.stat:
+    path: "{{ sandbox_save_dir }}"
+  register: spack_save
+
+# Replaces funcs-setup-instance.sh L637-L640
+- name: Say so when there is nowhere to install Spack
+  ansible.builtin.debug:
+    msg: "{{ sandbox_save_dir }} does not exist. Setup the paths first."
+  when: not spack_save.stat.exists
+
+# Replaces funcs-setup-instance.sh L642
+- name: Look for an existing Spack
+  ansible.builtin.stat:
+    path: "{{ spack_dir }}"
+  register: spack_existing
+  when: spack_save.stat.exists
+
+# Replaces funcs-setup-instance.sh L642-L648
+# As in the script, a directory that is already there is left exactly as it
+# is: it is not updated and its version is not checked.
+- name: Fetch Spack, when it is not there yet
+  when:
+    - spack_save.stat.exists
+    - not spack_existing.stat.exists
+  block:
+    # Replaces funcs-setup-instance.sh L643-L644
+    - name: Create the Spack directory for the login user
+      ansible.builtin.file:
+        path: "{{ spack_dir }}"
+        state: directory
+        owner: "{{ sandbox_user }}"
+        group: "{{ sandbox_user }}"
+        mode: "0755"
+
+    # Replaces funcs-setup-instance.sh L645-L647
+    - name: Clone Spack at the chosen version
+      ansible.builtin.git:
+        repo: https://github.com/spack/spack.git
+        dest: "{{ spack_dir }}"
+        version: "{{ spack_version }}"
+      become: true
+      become_user: "{{ sandbox_user }}"
+
+# Replaces funcs-setup-instance.sh L651-L653
+- name: Load Spack in the login user's bash
+  ansible.builtin.lineinfile:
+    path: "{{ sandbox_user_home }}/.bashrc"
+    line: ". {{ spack_dir }}/share/spack/setup-env.sh"
+    create: true
+    owner: "{{ sandbox_user }}"
+    group: "{{ sandbox_user }}"
+    mode: "0644"
+  register: spack_bashrc
+  when: spack_save.stat.exists
+
+# Replaces funcs-setup-instance.sh L654
+# The script writes this line only when it has just written the bash one.
+- name: Load Spack in the login user's tcsh
+  ansible.builtin.lineinfile:
+    path: "{{ sandbox_user_home }}/.tcshrc"
+    line: "source {{ spack_dir }}/share/spack/setup-env.csh"
+    create: true
+    owner: "{{ sandbox_user }}"
+    group: "{{ sandbox_user }}"
+    mode: "0644"
+  when:
+    - spack_save.stat.exists
+    - spack_bashrc is changed
+
+# Replaces funcs-setup-instance.sh L661-L700
+# The script's Spack commands, in its order. Spack v1.2.0 already has a
+# source-only mirror called spack-public in its defaults; the script's add
+# puts a binary one of the same name in the site scope, which takes
+# precedence. Adding it a second time is an error, which the script runs into
+# and ignores on a repeated run; here it is added when the site scope does not
+# have it yet.
+#
+# Once the intel_oneapi role has run, its modules are loaded here first. On the
+# first run they do not exist yet, which is the script's situation. On a later
+# run, "compiler find" without them would remove the Intel compilers that the
+# intel_oneapi role registered, and that role would add them back: the end
+# state is the same, as it is when the script runs twice, but both steps would
+# report a change every time.
+- name: Configure Spack, find the compilers and externals, add the public mirror
+  ansible.builtin.shell:
+    cmd: |
+      {{ sandbox_modules_init }}
+      set -eo pipefail
+      if [ -d {{ sandbox_modulefiles_dir }}/intel ]; then
+        {{ sandbox_load_intel_modules | indent(2) }}
+      fi
+      spack={{ spack_exe }}
+      before=$({{ spack_fingerprint }})
+      $spack config add "config:install_tree:padded_length:73"
+      $spack config add "modules:default:enable:[tcl]"
+      $spack compiler find --scope site
+      $spack external find --scope site
+      $spack external find --not-buildable --scope site cmake
+      mirrors=$($spack mirror list --scope site)
+      if ! grep -q '^spack-public ' <<<"$mirrors"; then
+        $spack mirror add --scope site spack-public https://cache.spack.io
+      fi
+      $spack buildcache keys --install --trust
+      after=$({{ spack_fingerprint }})
+      [ "$before" = "$after" ] || echo SPACK-CHANGED
+    executable: /bin/bash
+  become: true
+  become_user: "{{ sandbox_user }}"
+  register: spack_configure
+  changed_when: "'SPACK-CHANGED' in spack_configure.stdout"
+  when: spack_save.stat.exists

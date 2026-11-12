@@ -1,6 +1,9 @@
 # Stage 3: head-node provisioning as Ansible playbooks
 
-*Status:* planned 2026-11-12. Waits for validation and "do 3".
+*Status:* executed 2026-11-12 on `feature/stage-3-ansible`; committed
+locally, not pushed, not merged. Waits for the operator's validation.
+The decisions are under [Decisions taken](#decisions-taken); the
+result is under [Outcome](#outcome).
 
 ## Why
 
@@ -112,6 +115,30 @@ the node by its project tag; that is the route for later changes.
    to role, variable to variable, file to file, and the new first-boot
    template.
 
+## Decisions taken
+
+Asked one at a time on 2026-11-12, before execution.
+
+1. **How it is applied:** `ansible-pull` at first boot; the same
+   playbook pushed from an operator's machine for later changes.
+2. **Fidelity:** faithful. Same packages, versions and order; only
+   what a safe second run needs is changed; every accident of the
+   script is kept and written down.
+3. **Kernel updates:** today's behaviour. No reboot; the play says so
+   when the running kernel is not the newest installed.
+4. **User Python packages:** the same pip list as the script.
+5. **Image creation:** rewritten with the `amazon.aws` modules. This
+   is the one place where the mechanism is new and not a translation.
+6. **Proof:** static checks in `just test`; a container apply, twice,
+   in `just full-test`; a written procedure for the live run, which
+   the operator runs when they choose.
+
+Asked when it surfaced, during execution:
+
+7. **The Prefect server:** the script's install no longer gives a
+   working server (FastAPI too new). Pin `fastapi<0.155` by default;
+   the one deliberate departure from the script.
+
 ## Out of scope
 
 - The other stacks (`ufs-setup-instance.sh`, spack-stack, `ncdis`).
@@ -129,6 +156,35 @@ the node by its project tag; that is the route for later changes.
   task that replaces a shell line names the line it replaces.
 - The map's provisioning section is complete.
 
+## Outcome
+
+- [exportit/sandbox-provisioning/](../exportit/sandbox-provisioning/):
+  `site.yml` with twelve roles, `node-image.yml`, two inventories, the
+  first-boot script, 9 source files carried under `legacy/` and as
+  role files, and [docs/LIVE-PROOF.md](../exportit/sandbox-provisioning/docs/LIVE-PROOF.md).
+- `just test` and `just full-test` pass at the repository root
+  (full-test 19 minutes on 2026-11-12).
+- 310 tests compare the playbooks with the scripts: every task names
+  its lines or says why it is new; every acting line of the scripts is
+  replaced or listed in `not_carried.yml` (ten entries); every value,
+  package list and copied text equals what the script computes.
+- The container test applied eight roles with `ansible-pull` to
+  AlmaLinux 10: first run 49 changes, second run 0, result checked.
+  `intel_oneapi` turned out to work in a container and was added; the
+  plan had expected seven.
+- Not proved: `efa_driver`, `fsx_lustre_client`, `spack_environment`,
+  `hpc_tuning`, `node-image.yml`, the first-boot script, and anything
+  on RHEL or AWS. The live-proof page is written, not run.
+- Extraction rehearsal: the same 9 files with 15 commits of history.
+- Found: the script's Prefect server does not start today (corrected,
+  decision 7); Spack v1.2.0 ships its own `spack-public` mirror, which
+  makes the script's second `mirror add` a no-op; the two
+  `compiler find` steps undo each other on a repeated run; the module
+  search path line never arrives on AlmaLinux 10. Details in
+  [MAP.md](../exportit/MAP.md#found-while-testing).
+
 ## Sizing and branch
 
-About 12 roles and 60 to 80 tasks. Branch `feature/stage-3-ansible`.
+12 roles, 98 named tasks and blocks, 14 in `node-image.yml`. Branch
+`feature/stage-3-ansible`, cut from `feature/stage-2-cloudflow`;
+commits local.
