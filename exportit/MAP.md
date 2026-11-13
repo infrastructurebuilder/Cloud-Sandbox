@@ -1040,7 +1040,7 @@ above its task:
 | Every task of the two roles names its lines; every line is replaced or explained | `sandbox-provisioning`'s `just test` | pass |
 | The templates write the original files | `sandbox-provisioning`'s `just test` | pass |
 | `users.yml` and `jupyterhub.yml` applied twice in the container, the second run changing nothing; the user removed again | `sandbox-provisioning`'s `just full-test` | pass; the hub answers on port 8000 |
-| Extraction with history | root `just full-test` | `sandbox-ops`: the same 92 files, with 22 commits; `sandbox-provisioning`: 25 files, 19 commits |
+| Extraction with history | root `just full-test` | `sandbox-ops`: the same 16 files, with 14 commits (2026-11-13; 92 files and 22 commits with the attic); `cloud-sandbox`, attic included: 84 files, 62 commits; `sandbox-provisioning`: 25 files, 19 commits |
 
 ### What a real relocation would change
 
