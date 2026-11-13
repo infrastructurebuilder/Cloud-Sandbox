@@ -1,7 +1,8 @@
 # Stage 7: operator utilities as an independent unit
 
-*Status:* planned 2026-11-12. Waits for validation and "do 7".
-After [stage 3](STAGE-3.md), which decides what provisioning takes.
+*Status:* executed 2026-11-12; waits for validation. The decisions are
+under [Decisions taken](#decisions-taken); the result under
+[Outcome](#outcome).
 
 ## Why
 
@@ -49,6 +50,16 @@ The part of the 93 files under `scripts/` that
    [stage 5](STAGE-5.md)).
 5. The ops section of [MAP.md](../exportit/MAP.md).
 
+## Decisions taken
+
+1. **Users and JupyterHub:** Ansible roles in `sandbox-provisioning`,
+   `sandbox_users` and `jupyterhub`, each with its own playbook.
+2. **Dead files:** copied into `attic/` of the export, under their
+   status and original path.
+3. **Conda for JupyterHub** (surfaced by the container test, where the
+   script's Miniconda 23.1 had not solved the conda-forge install after
+   25 minutes): Miniforge, conda-forge only.
+
 ## Out of scope
 
 Rewriting any tool. The other stacks stay scripts.
@@ -62,3 +73,30 @@ mapping, the copy check covers every tracked file under `scripts/`,
 ## Sizing and branch
 
 About 100 files read and sorted. Branch `feature/stage-7-ops`.
+
+## Outcome
+
+- Item 1: all 108 files read and marked with evidence: 21 in use, 28
+  superseded, 59 dead (the reading was delegated to a subagent and
+  spot-checked). The catalogue in
+  [exportit/sandbox-ops/CATALOGUE.tsv](../exportit/sandbox-ops/CATALOGUE.tsv)
+  keeps it for the 92 files copied there.
+- Item 2: `users.yml` with role `sandbox_users`, and `jupyterhub.yml`
+  with role `jupyterhub`, in
+  [sandbox-provisioning](../exportit/sandbox-provisioning/README.md):
+  16 files moved there (the originals into `legacy/`, two as role
+  files). Traceability and parity tests cover them; the container test
+  applies both twice and removes its test user.
+- Items 3 and 4: [exportit/sandbox-ops/](../exportit/sandbox-ops/README.md),
+  92 files byte-identical: 16 tools in `bin/` and `keys/`, 26
+  superseded and 50 dead in `attic/`. Tests: the catalogue matches the
+  files; 50 scripts parse except one recorded; 559 shellcheck findings
+  recorded.
+- Item 5: [MAP.md](../exportit/MAP.md#sandbox-ops).
+- Root `just full-test` passed: the container applies all of `site.yml`'s
+  testable roles, `users.yml` and `jupyterhub.yml` twice with nothing
+  changed the second time, the hub answers, the test user is removed;
+  every unit's extraction gives its files.
+- Found: nothing installed JupyterHub before (both scripts were broken);
+  `scrub_liveocean.sh` does not parse; `add-ufs-setup.sh` calls a
+  function that no longer exists; personal data in a few files.

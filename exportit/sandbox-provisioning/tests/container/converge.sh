@@ -5,6 +5,11 @@
 #
 #   tests/container/converge.sh            run, and remove the container
 #   KEEP=1 tests/container/converge.sh     leave the container for a look
+#   PLAYS="site users" ROLES=sandbox_paths tests/container/converge.sh
+#                                          a part: some plays, some roles of site.yml
+#
+# The plays are site.yml (with the roles below), users.yml (with the users of
+# tests/container/users.yml) and jupyterhub.yml, in that order.
 #
 # Not exercised here: efa_driver, fsx_lustre_client, spack_environment,
 # hpc_tuning and node-image.yml. See docs/LIVE-PROOF.md.
@@ -16,6 +21,7 @@ image=sandbox-provisioning-test:alma10
 container=sandbox-provisioning-test-$$
 logs=$(mktemp -d)
 roles=${ROLES:-sandbox_paths,user_shell,base_system,prefect_server,mpi_ssh,python_user_env,spack,intel_oneapi}
+plays=${PLAYS:-site users jupyterhub}
 
 cleanup() {
     if [ "${KEEP:-0}" = 1 ]; then
@@ -70,49 +76,73 @@ in_container bash -c '
     git -c user.name=test -c user.email=test@example.invalid commit --quiet --message "under test"
 '
 
-# ansible-pull hands the extra variables to its checkout step too, so the file
-# has to exist before the checkout does: it is read from the source repository.
-apply() {
+# ansible-pull hands the extra variables to its checkout step too, so the files
+# have to exist before the checkout does: they are read from the source repository.
+apply_play() {
+    local play=$1
+    local -a extra=(--extra-vars @/srv/provisioning/tests/container/vars.yml)
+    case "$play" in
+        site) extra+=(--tags "$roles") ;;
+        users) extra+=(--extra-vars @/srv/provisioning/tests/container/users.yml) ;;
+    esac
     in_container env ANSIBLE_CONFIG=/opt/sandbox-provisioning/ansible.cfg ansible-pull \
         --url /srv/provisioning --checkout main --directory /opt/sandbox-provisioning \
-        --inventory inventories/local/hosts.yml \
-        --tags "$roles" \
-        --extra-vars @/srv/provisioning/tests/container/vars.yml \
-        site.yml
+        --inventory inventories/local/hosts.yml "${extra[@]}" "$play.yml"
 }
 
 recap() { grep -E '^localhost +: ok=' "$1" | tail -1; }
 count() { recap "$1" | sed -E "s/.* $2=([0-9]+).*/\1/"; }
 
-echo "== first apply (roles: $roles)"
-if ! apply >"$logs/first.log" 2>&1; then
-    tail -60 "$logs/first.log"
-    echo "FAILED: the first apply did not finish; full log in $logs/first.log"
-    KEEP=${KEEP:-0}
-    exit 1
-fi
-echo "   $(recap "$logs/first.log")"
+# Apply every play once; the run is named by $1 (first, second).
+apply() {
+    local run=$1 play
+    for play in $plays; do
+        if ! apply_play "$play" >"$logs/$run.$play.log" 2>&1; then
+            tail -60 "$logs/$run.$play.log"
+            echo "FAILED: the $run apply of $play.yml did not finish; full log in $logs/$run.$play.log"
+            return 1
+        fi
+        echo "   $play.yml: $(recap "$logs/$run.$play.log")"
+    done
+}
+
+echo "== first apply (plays: $plays; roles of site.yml: $roles)"
+apply first || exit 1
 
 echo "== second apply"
-if ! apply >"$logs/second.log" 2>&1; then
-    tail -60 "$logs/second.log"
-    echo "FAILED: the second apply did not finish; full log in $logs/second.log"
-    exit 1
-fi
-echo "   $(recap "$logs/second.log")"
-if [ "$(count "$logs/second.log" changed)" != 0 ]; then
-    grep -B1 -A6 '^changed:' "$logs/second.log" | head -80
-    echo "FAILED: the second apply changed something"
-    exit 1
-fi
+apply second || exit 1
+for play in $plays; do
+    if [ "$(count "$logs/second.$play.log" changed)" != 0 ]; then
+        grep -B1 -A6 '^changed:' "$logs/second.$play.log" | head -80
+        echo "FAILED: the second apply of $play.yml changed something"
+        exit 1
+    fi
+done
 
 echo "== checking what the roles left behind"
-if ! in_container bash -c 'cd /opt/sandbox-provisioning && ansible-playbook tests/container/verify.yml' \
+# shellcheck disable=SC2016 # $1 is expanded by the shell in the container
+if ! in_container bash -c 'cd /opt/sandbox-provisioning && exec ansible-playbook tests/container/verify.yml --extra-vars "verify_plays=$1"' _ "$plays" \
     >"$logs/verify.log" 2>&1; then
     tail -60 "$logs/verify.log"
     echo "FAILED: the result is not what the roles should leave"
     exit 1
 fi
 grep -E 'OBSERVED|^localhost +: ok=' "$logs/verify.log" | sed -E 's/^ *(msg: )?/   /'
+
+case " $plays " in
+    *" users "*)
+        echo "== removing the test user"
+        if ! in_container env ANSIBLE_CONFIG=/opt/sandbox-provisioning/ansible.cfg bash -c '
+            cd /opt/sandbox-provisioning &&
+            ansible-playbook -i inventories/local/hosts.yml users.yml \
+                -e "{\"sandbox_users_present\": [], \"sandbox_users_absent\": [\"jdoe\"]}" &&
+            ! id jdoe 2>/dev/null && ! getent group jdoe && [ ! -e /home/jdoe ]' >"$logs/remove.log" 2>&1; then
+            tail -40 "$logs/remove.log"
+            echo "FAILED: the test user was not removed"
+            exit 1
+        fi
+        echo "   jdoe, the group and the home directory are gone"
+        ;;
+esac
 
 echo "PASSED: applied twice, second run changed nothing, result verified"

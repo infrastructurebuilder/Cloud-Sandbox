@@ -1,0 +1,3 @@
+# Scripts that do not parse as bash, and must go on failing until fixed at
+# the source. Not templates: real tools with a syntax error.
+bin/scrub_liveocean.sh   # the `if` opened at L88 is never closed

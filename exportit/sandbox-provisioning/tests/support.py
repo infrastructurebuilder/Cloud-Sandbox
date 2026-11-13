@@ -30,6 +30,27 @@ ROLE_FUNCTIONS = {
     "hpc_tuning": ["configure_optimizations"],
 }
 
+# Stage 7: roles that replace operator scripts run by hand, not steps of
+# setup-instance.sh. Each is applied by a playbook of its own.
+OPS_ROLES = {
+    "sandbox_users": ["add-users.py", "remove-user.sh", "system/sudoers.d.sandbox-modelers"],
+    "jupyterhub": ["install_conda_jupyterhub.sh"],
+}
+
+# Every script and file of legacy/ that a stage 7 role accounts for, line by
+# line: replaced by a task, or listed in tests/not_carried.yml.
+OPS_SCRIPTS = [
+    "add-users.py",
+    "remove-user.sh",
+    "add_group.sh",
+    "test_user.sh",
+    "system/sudoers.d.sandbox-modelers",
+    "system/sudoers.d_sandbox_modelers",
+    "system/sudoers.s_ioos-sb-admins",
+    "install_conda_jupyterhub.sh",
+    "install_jupyterhub.sh",
+]
+
 # The name each exported variable of environment-vars.sh has in group_vars/all.yml.
 VARIABLES = {
     "PREFECT_VER": "prefect_version",

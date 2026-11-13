@@ -94,6 +94,32 @@ those differences are not carried.
 | 11 | `spack_environment` | `create_spack-environment`, `build_spack-environment` | no: hours of compiling |
 | 12 | `hpc_tuning` | `configure_optimizations` | no: changes kernel settings |
 
+Two more roles, added in [stage 7](../../INPROGRESS/STAGE-7.md), replace
+operator scripts that are run by hand rather than steps of
+`setup-instance.sh`. Each has a playbook of its own:
+
+| Playbook | Role | Replaces | In the container test |
+| --- | --- | --- | --- |
+| [users.yml](users.yml) | `sandbox_users` | `add-users.py`, `remove-user.sh`, the Lustre `sudoers` rules | yes, except opening SSH in the security group (AWS) |
+| [jupyterhub.yml](jupyterhub.yml) | `jupyterhub` | `install_conda_jupyterhub.sh`, with the service, run script, nginx and `sudoers` files | yes, except nginx's TLS (no certificate) |
+
+The user list holds people's names, addresses and keys, so it is a
+variable the site keeps with its own settings
+([roles/sandbox_users/defaults/main.yml](roles/sandbox_users/defaults/main.yml)
+shows its shape); add-users.py read it from a file that was never in the
+repository. The hub's Google OAuth client id and secret are variables too,
+empty by default, as they are in the original configuration.
+[docs/JUPYTERHUB.md](docs/JUPYTERHUB.md) is the original `jupyterhub/README.md`.
+
+What the two roles correct, on purpose, is in the comments above each
+task: among them, the hub's configuration and run script now go where the
+service reads them, conda is given to its owner (the script's
+`chown ec2-user/ec2-user` changes nothing), conda comes from Miniforge rather than the
+script's Miniconda 23.1, whose solver did not finish the install in 25
+minutes (the operator's choice), nginx is started only when the
+certificates are there, and the Spack configuration each user gets is
+theirs, not root's.
+
 The versions are in [group_vars/all.yml](group_vars/all.yml), which is
 `environment-vars.sh` as data. Settings that belong to one role are in
 that role's `defaults/main.yml`.
@@ -105,7 +131,7 @@ You need `just`, `uv` and `shellcheck`; `full-test` also needs Docker.
 ```sh
 just init        # tool environment, and the amazon.aws collection
 just test        # syntax, ansible-lint, shellcheck, and the comparisons with the scripts
-just full-test   # also applies eight roles to an AlmaLinux 10 container, twice
+just full-test   # also applies eight roles, users.yml and jupyterhub.yml to an AlmaLinux 10 container, twice
 ```
 
 `full-test` builds a container that stands in for a freshly booted

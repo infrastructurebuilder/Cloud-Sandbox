@@ -22,6 +22,26 @@ copy scripts/system/.vimrc                    roles/user_shell/files/vimrc
 copy scripts/system/prefect-server.service    roles/prefect_server/files/prefect-server.service
 copy scripts/system/profile.d.zippy_efa.sh    roles/efa_driver/files/zippy_efa.sh
 
+# Stage 7: the users and JupyterHub, as two more roles (decision 1 of stage 7).
+# The scripts and files they replace are carried in legacy/; the two files
+# the jupyterhub role installs unchanged are its files/.
+copy scripts/add-users.py                     legacy/add-users.py
+copy scripts/remove-user.sh                   legacy/remove-user.sh
+copy scripts/add_group.sh                     legacy/add_group.sh
+copy scripts/test_user.sh                     legacy/test_user.sh
+copy scripts/system/sample.users.csv          legacy/system/sample.users.csv
+copy scripts/system/sudoers.d.sandbox-modelers  legacy/system/sudoers.d.sandbox-modelers
+copy scripts/system/sudoers.d_sandbox_modelers  legacy/system/sudoers.d_sandbox_modelers
+copy scripts/system/sudoers.s_ioos-sb-admins  legacy/system/sudoers.s_ioos-sb-admins
+copy scripts/install_conda_jupyterhub.sh      legacy/install_conda_jupyterhub.sh
+copy scripts/install_jupyterhub.sh            legacy/install_jupyterhub.sh
+copy scripts/system/jupyterhub_config.py      legacy/system/jupyterhub_config.py
+copy scripts/system/jupyterhub.conf           legacy/system/jupyterhub.conf
+copy scripts/system/jupytersudoers            legacy/system/jupytersudoers
+copy scripts/system/jupyterhub.service        roles/jupyterhub/files/jupyterhub.service
+copy scripts/system/runJupyterhub.sh          roles/jupyterhub/files/runJupyterhub.sh
+copy jupyterhub/README.md                     docs/JUPYTERHUB.md
+
 # Files that exist only in the unit.
 new README.md
 new LICENSE                 # a copy of the repository's LICENSE
@@ -53,3 +73,10 @@ new roles/spack/
 new roles/intel_oneapi/
 new roles/spack_environment/
 new roles/hpc_tuning/
+new users.yml
+new jupyterhub.yml
+new roles/sandbox_users/
+new roles/jupyterhub/defaults/
+new roles/jupyterhub/tasks/
+new roles/jupyterhub/templates/
+new roles/jupyterhub/handlers/
