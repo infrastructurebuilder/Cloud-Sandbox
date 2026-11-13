@@ -1,7 +1,8 @@
 # Stage 8: documentation and the umbrella
 
-*Status:* planned 2026-11-12. Waits for validation and "do 8". Last,
-because it describes what the other stages made.
+*Status:* executed 2026-11-12; waits for validation. The decisions are
+under [Decisions taken](#decisions-taken); the result under
+[Outcome](#outcome).
 
 ## Why
 
@@ -49,6 +50,15 @@ Cloud-Sandbox itself is afterwards.
    relocations would be done, and what the original repository looks
    like after each.
 
+## Decisions taken
+
+1. **Built HTML:** not copied; the sources are, and the HTML and
+   `docs/save/` are dropped as rebuilt.
+2. **Splitting DEPLOYMENT.md:** written, as a `DEPLOYMENT.md` in
+   `sandbox-terraform` and one in `sandbox-provisioning`.
+3. **What remains:** an umbrella repository that pins the units'
+   versions.
+
 ## Out of scope
 
 Publishing documentation. Changing the original documents.
@@ -63,3 +73,26 @@ the cloudflow documentation builds from the export.
 
 About 45 files copied, about 8 written. Branch
 `feature/stage-8-docs-umbrella`.
+
+## Outcome
+
+- Item 1: `docs/source/` and its build files in
+  [exportit/cloudflow/docs/sphinx/](../exportit/cloudflow/docs/sphinx/);
+  one patch makes `conf.py` document the installed packages; `just docs`
+  builds, and a slow test holds the build to the three pages whose
+  modules are gone. 129 built files and `docs/save/` dropped.
+- Item 2: [sandbox-terraform/DEPLOYMENT.md](../exportit/sandbox-terraform/DEPLOYMENT.md)
+  and [sandbox-provisioning/DEPLOYMENT.md](../exportit/sandbox-provisioning/DEPLOYMENT.md),
+  each naming the original's lines and its departures.
+- Item 3: [exportit/cloud-sandbox/](../exportit/cloud-sandbox/README.md),
+  with `units.toml` (15 units, versions, apply steps, relocation order),
+  its own check, and a tools test that holds it to the repository.
+- Item 4: the umbrella's map says `covers ./`, a form the export tool
+  learned for it; every one of the 814 tracked files outside `exportit/`
+  is now taken or dropped with a reason.
+- Item 5: [MAP.md](../exportit/MAP.md#the-order-of-the-real-relocations)
+  closes with the nine relocation steps and what the original holds
+  after each.
+- Found: six broken links in the root README; DEPLOYMENT.md stale
+  against the Terraform module; the Terraform version (1.5.7 in the
+  documents, 1.9.8 in the tests) left as a choice to make.

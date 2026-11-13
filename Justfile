@@ -7,7 +7,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Projects under exportit/, in dependency order.
-units := "tools cloudflow-plotting cloudflow sandbox-provisioning sandbox-terraform sandbox-configs sandbox-ops " + model_units
+units := "tools cloudflow-plotting cloudflow sandbox-provisioning sandbox-terraform sandbox-configs sandbox-ops " + model_units + " cloud-sandbox"
 
 # The model recipes: one unit per model, and what they share (stage 5).
 model_units := "model-common model-adcirc-cora model-eccofs model-liveocean model-necofs model-nosofs model-secofs model-ucla-roms model-ufscoastal"
@@ -33,7 +33,7 @@ build: (each "build")
 test: export-check (each "test")
 
 # Everything in test, plus the slow tests and the extraction proof for each copied unit.
-full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs") (export-prove "sandbox-ops")
+full-test: export-check (each "full-test") (export-prove "cloudflow-plotting") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs") (export-prove "sandbox-ops") (export-prove "cloud-sandbox")
     for unit in {{ model_units }}; do just export-prove "$unit"; done
 
 # Nothing is published from this repository.

@@ -44,6 +44,7 @@ copy jupyterhub/README.md                     docs/JUPYTERHUB.md
 
 # Files that exist only in the unit.
 new README.md
+new DEPLOYMENT.md            # DEPLOYMENT.md's provisioning part, written for this unit (stage 8)
 new LICENSE                 # a copy of the repository's LICENSE
 new Justfile
 new pyproject.toml

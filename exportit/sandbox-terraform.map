@@ -9,7 +9,12 @@ covers terraform/
 copy terraform/    ./
 
 # Files that exist only in the unit.
+# Stage 8: DEPLOYMENT.md's Terraform part, written for this unit, and the
+# screenshot it shows.
+copy images/AWS-Key-pairs-screen.png    docs/images/AWS-Key-pairs-screen.png
+
 new README.md
+new DEPLOYMENT.md
 new LICENSE                    # a copy of the repository's LICENSE
 new Justfile
 new pyproject.toml

@@ -1,0 +1,36 @@
+# cloud-sandbox: what Cloud-Sandbox itself becomes once the units have left,
+# a small repository that names the units and the versions that make a
+# sandbox (stage 8, decision 3). Read by exportit/tools/export.py; described
+# in exportit/MAP.md.
+#
+# It covers the whole repository, so a tracked file that no unit takes and no
+# unit drops is a problem for `just test`.
+
+covers ./
+
+# The project's own files. The root README and DEPLOYMENT.md describe the
+# monorepo; the umbrella has a README of its own, so they are kept, whole,
+# under history/. DEPLOYMENT.md is also split into the two units it describes
+# (stage 8, decision 2), as new documents there.
+copy LICENSE                                        LICENSE
+copy CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md    CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md
+copy .github/ISSUE_TEMPLATE.md                      .github/ISSUE_TEMPLATE.md
+copy images/sandbox-stack.png                       images/sandbox-stack.png
+copy README.md                                      history/README.md
+copy DEPLOYMENT.md                                  history/DEPLOYMENT.md
+copy TODO                                           history/TODO
+# Kept under a name git does not read: as .gitignore here it would hide files
+# of the umbrella (its patterns are the monorepo's).
+copy .gitignore                                     history/gitignore
+
+# Not relocated: the records and the entry point of this reconstruction,
+# which go when the work is done.
+drop INPROGRESS/
+drop PLAN.md
+drop Justfile
+
+# Files that exist only in the unit.
+new README.md
+new units.toml
+new Justfile
+new tests/

@@ -3,7 +3,8 @@
 Terraform that creates a Cloud Sandbox in an AWS account: a network (or
 the use of an existing one), an EFS volume, an IAM role, a placement
 group, and the head node. On its first boot the head node mounts the
-EFS volume and installs the software stack.
+EFS volume and installs the software stack. [DEPLOYMENT.md](DEPLOYMENT.md)
+walks through a deployment.
 
 ```sh
 terraform init -backend-config=config.s3.tfbackend
@@ -13,8 +14,7 @@ terraform apply my.plan
 ```
 
 `remote-state/` is a second, separate module that creates the S3 bucket
-the main module keeps its state in. It is applied once, first. The full
-deployment walk is `DEPLOYMENT.md` in the Cloud-Sandbox repository.
+the main module keeps its state in. It is applied once, first.
 
 ## This is a copy
 
@@ -27,8 +27,10 @@ change the original and run `just export sandbox-terraform` at the
 repository root.
 
 What is new: this README, `LICENSE`, `Justfile`, `tests/`, the Python
-files that run the tests, and
-[init_template.ansible.tpl](init_template.ansible.tpl).
+files that run the tests,
+[init_template.ansible.tpl](init_template.ansible.tpl), and
+[DEPLOYMENT.md](DEPLOYMENT.md), the walk-through for deploying a sandbox
+(with its screenshot in `docs/images/`, a copy of the original's).
 
 ## Two first-boot scripts
 

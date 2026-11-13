@@ -221,3 +221,13 @@ def test_a_file_cannot_be_copied_to_the_root_itself(repo: Path, capsys: pytest.C
     (repo / "exportit/plot.map").write_text(PLOT_MAP + "copy top.txt ./\n")
     assert run(repo, "check") == 1
     assert "a directory must be copied to a directory" in capsys.readouterr().err
+
+
+def test_covering_the_root_makes_every_file_count(repo: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    run(repo, "copy")
+    assert run(repo, "check") == 0
+    (repo / "exportit/plot.map").write_text(PLOT_MAP + "covers ./\n")
+    assert run(repo, "check") == 1
+    assert "not assigned to any unit: other/left.txt" in capsys.readouterr().err
+    (repo / "exportit/plot.map").write_text(PLOT_MAP + "covers ./\ndrop other/left.txt\n")
+    assert run(repo, "check") == 0

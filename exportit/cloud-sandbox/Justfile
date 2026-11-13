@@ -1,0 +1,33 @@
+# cloud-sandbox: the units a Cloud Sandbox is made of, their versions, and the order to apply them.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+python := "uv run --no-project --python 3.12"
+
+# List the targets.
+default:
+    @just --justfile {{ justfile() }} --list
+
+# Nothing to install: the check needs only Python's standard library (uv fetches Python 3.12 if needed).
+init:
+    {{ python }} python --version
+
+# Nothing to build: the umbrella is a manifest and documents.
+build:
+    @echo "cloud-sandbox: nothing to build"
+
+# Lint the check.
+lint:
+    {{ python }} --with ruff ruff check --isolated --line-length 110 --select E,F,W,I,UP,B tests
+    {{ python }} --with ruff ruff format --isolated --line-length 110 --check tests
+
+# units.toml is consistent: names, versions, kinds, and the two orders.
+test: lint
+    {{ python }} python tests/check_units.py
+
+# There is nothing slower to check.
+full-test: test
+
+# Nothing is published from a copy inside Cloud-Sandbox.
+release: full-test
+    @echo "cloud-sandbox: nothing to release from exportit/; see exportit/MAP.md"

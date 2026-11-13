@@ -30,6 +30,8 @@ cloudflow = "cloudflow.workflows.workflow_main:main"
 
 [dependency-groups]
 dev = ["pyright>=1.1.400", "pytest>=8", "ruff>=0.12"]
+# docs/sphinx/: the API documentation, built by `just docs` (stage 8).
+docs = ["recommonmark", "sphinx", "sphinx-rtd-theme"]
 
 [build-system]
 requires = ["hatchling>=1.27"]
@@ -39,6 +41,9 @@ build-backend = "hatchling.build"
 # that this distribution shares with cloudflow-plotting.
 [tool.hatch.build.targets.wheel]
 packages = ["src/cloudflow"]
+
+[tool.uv]
+default-groups = ["dev", "docs"]
 
 [tool.uv.sources]
 cloudflow-plotting = { path = "../cloudflow-plotting" }
@@ -63,4 +68,4 @@ pythonVersion = "3.12"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["tests"]
-markers = ["slow: builds and installs the wheels; run by full-test only"]
+markers = ["slow: builds and installs the wheels, or builds the documentation; run by full-test only"]
