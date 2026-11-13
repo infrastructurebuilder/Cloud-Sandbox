@@ -1,4 +1,4 @@
-"""What the tests share: where the module is, and how Terraform is run."""
+"""What the tests share: where the module is, and how OpenTofu is run."""
 
 from __future__ import annotations
 
@@ -9,8 +9,9 @@ from pathlib import Path
 
 UNIT = Path(__file__).resolve().parents[1]
 
-# The version the Justfile pins through tfenv.
-TERRAFORM_VERSION = "1.9.8"
+# The version the Justfile pins and `just init` puts in .tofu/.
+TOFU_VERSION = "1.13.9"
+TOFU = Path(os.environ.get("TOFU_BIN", str(UNIT / ".tofu" / TOFU_VERSION / "tofu")))
 
 # Directories that hold .tf files and are expected to validate.
 MODULES = [".", "remote-state"]
@@ -23,9 +24,10 @@ FRAGMENTS = {
     "modules": "an older copy of main.tf: it refers to variables that it does not declare",
 }
 
-# Files that `terraform fmt -check` (1.9.8) would rewrite. They are
-# byte-identical copies of the originals, so they keep the originals'
-# formatting. OpenTofu 1.12 accepts variables.tf; Terraform does not.
+# Files that `tofu fmt -check` (1.13.9) would rewrite. They are byte-identical
+# copies of the originals, so they keep the originals' formatting. Terraform
+# 1.9.8, which the tests used before, gives the same nine; OpenTofu 1.12 left
+# out variables.tf.
 UNFORMATTED = {
     "main.tf",
     "modules/orig.main.tf",
@@ -40,20 +42,19 @@ UNFORMATTED = {
 
 
 def environment() -> dict[str, str]:
-    """Give the environment Terraform runs in, the same as the Justfile's."""
+    """Give the environment OpenTofu runs in, the same as the Justfile's."""
     env = dict(os.environ)
-    env.setdefault("TFENV_TERRAFORM_VERSION", TERRAFORM_VERSION)
-    env.setdefault("CHECKPOINT_DISABLE", "1")
     env.setdefault("TF_IN_AUTOMATION", "1")
     env.setdefault("TF_PLUGIN_CACHE_DIR", str(UNIT / ".terraform-plugins"))
     Path(env["TF_PLUGIN_CACHE_DIR"]).mkdir(exist_ok=True)
     return env
 
 
-def terraform(*args: str, cwd: Path = UNIT, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
-    """Run terraform and return what happened, without raising."""
+def tofu(*args: str, cwd: Path = UNIT, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
+    """Run the pinned OpenTofu and return what happened, without raising."""
+    assert TOFU.is_file(), f"no OpenTofu at {TOFU}; run `just init` first"
     return subprocess.run(
-        ["terraform", *args],
+        [str(TOFU), *args],
         cwd=cwd,
         env=environment(),
         input=stdin,

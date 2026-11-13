@@ -2,7 +2,7 @@
 
 Terraform renders the template when it plans, so a placeholder that main.tf
 does not supply is only found then. These tests render each template with
-templatefile(), the function main.tf calls, through `terraform console`.
+templatefile(), the function main.tf calls, through `tofu console`.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from support import UNIT, template_variables, terraform
+from support import UNIT, template_variables, tofu
 
 NEW_TEMPLATE = "init_template.ansible.tpl"
 
@@ -27,7 +27,7 @@ def sample(names: list[str]) -> dict[str, str]:
 
 def render(template: str, values: dict[str, str], cwd: Path) -> tuple[int, str]:
     expression = f"templatefile({json.dumps(str(UNIT / template))}, {json.dumps(values)})"
-    done = terraform("console", "-no-color", cwd=cwd, stdin=expression + "\n")
+    done = tofu("console", "-no-color", cwd=cwd, stdin=expression + "\n")
     return done.returncode, done.stdout + done.stderr
 
 

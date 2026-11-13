@@ -2,11 +2,11 @@
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
-# The Terraform that checks the module (stage 4, decision 3). tfenv reads this;
-# a terraform installed without tfenv ignores it, and the tests then say which
-# version ran.
-export TFENV_TERRAFORM_VERSION := "1.9.8"
-export CHECKPOINT_DISABLE := "1"
+# The tool that checks the module: OpenTofu, at the version the operator chose
+# (the latest release on 2026-11-13). `just init` puts it in .tofu/, for this
+# project only, and every target uses that copy.
+export TOFU_VERSION := "1.13.9"
+export TOFU_BIN := justfile_directory() / ".tofu" / TOFU_VERSION / "tofu"
 export TF_IN_AUTOMATION := "1"
 # Providers are downloaded once and kept here.
 export TF_PLUGIN_CACHE_DIR := justfile_directory() / ".terraform-plugins"
@@ -15,19 +15,21 @@ export TF_PLUGIN_CACHE_DIR := justfile_directory() / ".terraform-plugins"
 default:
     @just --justfile {{ justfile() }} --list
 
-# Create the test environment and initialise both modules without a backend (downloads providers; no AWS).
+# Fetch OpenTofu, create the test environment, and initialise both modules without a backend (no AWS).
 init:
+    tools/install-tofu.sh "$TOFU_VERSION"
     uv sync
     mkdir -p "$TF_PLUGIN_CACHE_DIR"
-    terraform init -backend=false -input=false -no-color
-    terraform -chdir=remote-state init -backend=false -input=false -no-color
+    "$TOFU_BIN" init -backend=false -input=false -no-color
+    "$TOFU_BIN" -chdir=remote-state init -backend=false -input=false -no-color
 
-# Nothing to compile: Terraform is applied as it is.
+# Nothing to compile: the module is applied as it is.
 build:
     @echo "sandbox-terraform: nothing to build"
 
-# Lint and format-check the tests.
+# Lint and format-check the tests and the installer.
 lint:
+    shellcheck tools/install-tofu.sh
     uv run ruff check tests
     uv run ruff format --check tests
 
