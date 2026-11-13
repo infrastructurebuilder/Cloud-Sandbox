@@ -1188,8 +1188,7 @@ anything in Cloud-Sandbox, so by the operator's decision it is not under
 `exportit/`: it lives in its own repository from the start,
 `git@github.com:infrastructurebuilder/ansible-collection-csis-spack.git`,
 worked on in a clone beside this one
-(`../ansible-collection-spack`; the directory keeps the repository's
-first name). The operator renamed the repository and the collection
+(`../ansible-collection-csis-spack`). The operator renamed the repository and the collection
 from `ansible-collection-spack` and `spack` the same day; a collection
 name cannot hold a hyphen, hence `csis_spack`. It needs no relocation, and nothing in
 this file's copy check covers it.
@@ -1200,8 +1199,9 @@ this file's copy check covers it.
   in place of shell tasks that hash files before and after.
 - **State:** metadata (`galaxy.yml`: 0.1.0, GPL-3.0-or-later,
   ansible-core 2.16 on Python 3.12), tests, a build that installs, and
-  `ansible-test sanity` in `full-test`. No module yet. Committed locally
-  on its own `feature/skeleton`; nothing pushed.
+  `ansible-test sanity` in `full-test`. No module yet; the plan for the
+  first two, `spack_env` and `spack_buildcache_push`, is the
+  collection's `PLAN.md`. Committed locally there; nothing pushed.
 - **How `sandbox-provisioning` will use it:** once there is a module, as
   a line in `requirements.yml` pinned to a tag, installed into
   `.collections/` by `just init` like `amazon.aws`, and a line in

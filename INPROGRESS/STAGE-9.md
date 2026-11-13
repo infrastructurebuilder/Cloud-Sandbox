@@ -101,7 +101,8 @@ Asked one at a time on 2026-11-13, before execution.
 1. **Licence:** GPL-3.0-or-later.
 2. **Where the collection is worked on** (raised by the operator during
    the questions): not under `exportit/`, but in its own clone,
-   `/Volumes/MiniSSD/git/Work/Phase3/ansible-collection-spack`. Item 1
+   `/Volumes/MiniSSD/git/Work/Phase3/ansible-collection-csis-spack`
+   (first cloned as `ansible-collection-spack`). Item 1
    is done there instead: no map, no line in the root `Justfile`, and no
    line in `units.toml` until `sandbox-provisioning` uses it.
 3. **Variables:** one mapping, `spack_environment_config`, in the shape
@@ -124,7 +125,7 @@ Asked one at a time on 2026-11-13, before execution.
 
 ## Outcome
 
-- The collection: [its own clone](../../ansible-collection-spack/README.md),
+- The collection: [its own clone](../../ansible-collection-csis-spack/README.md),
   `infrastructurebuilder.csis_spack` 0.1.0, two local commits on its
   `feature/skeleton`. `just test` (lint, type-check, six metadata tests,
   a build that installs) and `just full-test` (adding `ansible-test
