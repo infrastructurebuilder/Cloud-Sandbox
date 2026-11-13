@@ -22,3 +22,6 @@ new uv.lock
 new .python-version
 new init_template.ansible.tpl  # the first-boot script that runs the Ansible playbooks
 new tests/
+new tools/                     # fetches the pinned OpenTofu into .tofu/
+new versions.tofu              # the OpenTofu version both modules require (read by OpenTofu only)
+new remote-state/versions.tofu

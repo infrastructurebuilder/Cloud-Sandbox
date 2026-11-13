@@ -517,7 +517,7 @@ gives the change that would switch over: two variables,
 `provisioning_repo` and `provisioning_version`, and the new file name
 in the head node's `user_data`.
 [tests/test_template.py](sandbox-terraform/tests/test_template.py)
-renders both templates through `terraform console`: the old one with
+renders both templates through `tofu console` (`terraform console` until 2026-11-13): the old one with
 the five values `main.tf` passes, the new one with those five plus the
 two new ones, and it fails if either new value is left out. So the
 change in the README is complete, as far as the template goes.
@@ -562,13 +562,17 @@ the node it creates.
 
 ### How it is checked
 
-The operator chose `terraform`, at 1.9.8 through tfenv, and to
-validate what can be validated and count the rest. No test plans,
-applies or calls AWS.
+The operator chose, in stage 4, `terraform` at 1.9.8 through tfenv, and
+to validate what can be validated and count the rest. On 2026-11-13 the
+operator switched the unit to OpenTofu at its latest release, 1.13.9:
+the licence question in `DEPLOYMENT.md` (Terraform after 1.5.7 is not
+open source) decided it. `just init` fetches that version into the
+unit's `.tofu/`, checked against the release's checksums, and the tests
+run only that copy. No test plans, applies or calls AWS.
 
 | Check | Where | Result on 2026-11-12 |
 | --- | --- | --- |
-| Terraform 1.9.8 is what runs | `just test` | pass |
+| OpenTofu 1.13.9 is what runs | `just test` | pass (2026-11-13) |
 | The root module and `remote-state/` validate | `just test` | pass |
 | `fmt -check` would rewrite exactly the nine recorded files | `just test` | pass |
 | Both templates render with what `main.tf` passes, the new one with two more values | `just test` | pass |
@@ -581,8 +585,16 @@ Things noticed and left as they are:
   3.76.1, the last 3.x). `remote-state/` pins nothing and gets 6.x.
 - `random` and `local` are used but not declared in
   `required_providers`.
-- OpenTofu 1.12 accepts `variables.tf` as formatted; Terraform 1.9.8
-  does not. Both validate both modules.
+- OpenTofu 1.13.9 and Terraform 1.9.8 both validate both modules and
+  name the same nine unformatted files; OpenTofu 1.12 accepted
+  `variables.tf`.
+- Both modules now require OpenTofu 1.13.9, in a new `versions.tofu`
+  each (2026-11-13, the operator's request). Not in `main.tf`:
+  OpenTofu ignores `required_version` in `.tf` files and enforces it
+  only in `.tofu` files, which a test proves by changing the version in
+  a copy and watching `tofu init` refuse it. Terraform does not read
+  `.tofu` files, so this guards against the wrong OpenTofu, not against
+  Terraform.
 - The policy files are not used by the module, which attaches six AWS
   managed policies, `AmazonEC2FullAccess` among them.
 
@@ -1085,7 +1097,8 @@ and `just full-test` there checks the build.
   `allowed_ssh_cidr_list`; its login example uses `centos`, the module
   says `ec2-user`. It asks for Terraform 1.5.7, the last open-source
   version, while stage 4 tests with 1.9.8. The split documents correct
-  the first two and set out the third as a choice to make.
+  the first two. The third the operator settled on 2026-11-13:
+  OpenTofu 1.13.9.
 
 ## The order of the real relocations
 

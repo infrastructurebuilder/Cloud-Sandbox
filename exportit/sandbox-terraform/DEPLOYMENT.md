@@ -6,7 +6,7 @@ written for this project. Installing the software on the head node is the
 other part; it is in `sandbox-provisioning`'s `DEPLOYMENT.md`. Where this
 text differs from the original, the difference is noted.
 
-Terraform creates everything a sandbox needs in an AWS account: the
+OpenTofu, from these Terraform-language modules, creates everything a sandbox needs in an AWS account: the
 network (or uses an existing one), the security groups, an EFS volume, an
 IAM role, a placement group and the head node. When the head node first
 boots it mounts the EFS volume and installs the software.
@@ -21,33 +21,42 @@ On your local machine:
 - AWS credentials with the permissions to create the resources above.
   The owner of the account, or anyone with full administrative rights,
   has them; otherwise ask the account's administrator.
-- Terraform.
+- OpenTofu 1.13.9, the operator's choice (2026-11-13), from
+  <https://opentofu.org/docs/intro/install/>. This project's `just init`
+  also puts that version in `.tofu/` for its own tests.
 
-  **Which version.** The original says to use Terraform 1.5.7, the last
-  version under an open-source licence (later ones are under the
-  Business Source Licence). This project's tests run Terraform 1.9.8,
-  and its `Justfile` asks `tfenv` for that version. OpenTofu, the
-  open-source fork, validates the same files. Pick one deliberately; the
-  modules do not need anything newer than 1.5.
+  **Differs from the original:** the original asks for Terraform 1.5.7,
+  the last Terraform under an open-source licence (later ones are under
+  the Business Source Licence). OpenTofu is the open-source fork, under
+  MPL 2.0, and reads the same files. A sandbox deployed with Terraform
+  1.5.7 can be taken over: OpenTofu reads its state. Once OpenTofu has
+  written the state, keep using OpenTofu, and nothing older than the
+  version that last wrote it. A `.terraform.lock.hcl` written by Terraform
+  records HashiCorp's builds of the providers, which are not byte for
+  byte OpenTofu's; run `tofu init -upgrade` once to record OpenTofu's.
+
+  Each module's `versions.tofu` requires exactly 1.13.9, so another
+  OpenTofu version stops at `tofu init`. Terraform does not read `.tofu`
+  files and is not stopped: use OpenTofu.
 
 - This project: clone its repository (in Cloud-Sandbox it is the
   `terraform/` directory).
 
 AWS allows five VPCs per region by default. If the account has reached
-that, either ask AWS for a higher quota or give Terraform an existing VPC,
+that, either ask AWS for a higher quota or give OpenTofu an existing VPC,
 subnet and security groups in the settings file.
 
 ## 1. Create the state bucket (once per AWS account)
 
-Terraform keeps the state of what it has created in an S3 bucket. The
+OpenTofu keeps the state of what it has created in an S3 bucket. The
 `remote-state/` module creates that bucket. **Do this only once per AWS
 account.**
 
 ```sh
 cd remote-state
 # Edit s3.defaults.tfvars and give the bucket a name no one else uses.
-terraform init
-terraform apply -var-file=s3.defaults.tfvars
+tofu init
+tofu apply -var-file=s3.defaults.tfvars
 ```
 
 A different `.tfvars` file overrides the defaults. If your local files are
@@ -59,14 +68,14 @@ Make sure the bucket name in `config.s3.tfbackend` is the one from step 1,
 then, at the top of the project:
 
 ```sh
-terraform init -backend-config=config.s3.tfbackend
+tofu init -backend-config=config.s3.tfbackend
 ```
 
 The backend file gives the region and the bucket. To move to another
 backend later:
 
 ```sh
-terraform init -reconfigure -backend-config=alternate.s3.tfbackend
+tofu init -reconfigure -backend-config=alternate.s3.tfbackend
 ```
 
 ### Workspaces
@@ -75,16 +84,16 @@ When several people deploy sandboxes in one AWS account, each should work
 in a workspace of their own:
 
 ```sh
-terraform workspace new my_workspace
-terraform workspace list
-terraform workspace select existing_workspace
+tofu workspace new my_workspace
+tofu workspace list
+tofu workspace select existing_workspace
 ```
 
 An overview of workspaces: <https://spacelift.io/blog/terraform-workspaces>.
 
 ## 3. Make a key pair
 
-The head node is reached with SSH, so Terraform needs a key pair that
+The head node is reached with SSH, so the module needs a key pair that
 exists already: an existing one, or one made now.
 
 In the AWS EC2 console: "Key Pairs" under "Network & Security", then
@@ -137,11 +146,11 @@ Optional settings, with their defaults:
 ## 5. Create the resources
 
 ```sh
-terraform plan -var-file=mysettings.tfvars -out=my.plan
-terraform apply my.plan
+tofu plan -var-file=mysettings.tfvars -out=my.plan
+tofu apply my.plan
 ```
 
-(or `terraform apply -var-file=mysettings.tfvars` and answer `yes`).
+(or `tofu apply -var-file=mysettings.tfvars` and answer `yes`).
 
 If more than one sandbox has been deployed in the account, the apply can
 fail with:
@@ -152,8 +161,8 @@ Error: error creating IAM Role (ioos_cloud_sandbox_terraform_role): EntityAlread
 
 Give `nameprefix` a value of its own and apply again.
 
-When the apply finishes, Terraform prints how to reach the head node, and
-`terraform output` prints it again at any time:
+When the apply finishes, OpenTofu prints how to reach the head node, and
+`tofu output` prints it again at any time:
 
 ```text
 instance_id = "i-01346de00e778f"
@@ -167,12 +176,12 @@ login_command = "ssh -i ~/.ssh/my-sandbox-key.pem ec2-user@3.219.217.151"
 
 `./login` runs that login command. Wait a minute or two after the apply:
 the instance has to boot. The software installation starts on the head
-node at its first boot and goes on after Terraform has finished; see
+node at its first boot and goes on after OpenTofu has finished; see
 `sandbox-provisioning`'s `DEPLOYMENT.md` for following it.
 
 ### What a cluster description needs from here
 
-Terraform writes `deployment_info.txt` and copies it to the head node, with
+The module writes `deployment_info.txt` and copies it to the head node, with
 the values a cluster description for cloudflow needs:
 
 ```text
@@ -183,7 +192,7 @@ the values a cluster description for cloudflow needs:
 "placement_group" : "<nameprefix>-..._Terraform_Placement_Group"
 ```
 
-`image_id` is not Terraform's: it is the compute-node image made on the
+`image_id` is not the module's: it is the compute-node image made on the
 head node after the installation. The DynamoDB table that a cluster
 description also names is made by hand and is part of the site's
 configuration.
@@ -195,26 +204,26 @@ on a smaller instance type. Change `instance_type` in
 `mysettings.tfvars` (for example `"t3.micro"`) and apply:
 
 ```sh
-terraform apply -refresh-only -var-file=mysettings.tfvars
+tofu apply -refresh-only -var-file=mysettings.tfvars
 ```
 
-If Terraform says the instance must be destroyed first, answer `no` to
+If OpenTofu says the instance must be destroyed first, answer `no` to
 keep it; `sandbox-ops`' `change-instance-type.sh` is another way.
 
 **Removing the sandbox.** Every resource, the disks included, goes with:
 
 ```sh
-terraform destroy -var-file=mysettings.tfvars
+tofu destroy -var-file=mysettings.tfvars
 ```
 
 **Save any data you need to S3 or another backup first.**
 
 ## 7. Recovering the state
 
-If the local Terraform files are lost, or you work from more than one
-copy, run `terraform init -backend-config=config.s3.tfbackend` again,
-select your workspace with `terraform workspace select`, and run
-`terraform plan`: it should find nothing to create.
+If the local files are lost, or you work from more than one
+copy, run `tofu init -backend-config=config.s3.tfbackend` again,
+select your workspace with `tofu workspace select`, and run
+`tofu plan`: it should find nothing to create.
 
 ---
 

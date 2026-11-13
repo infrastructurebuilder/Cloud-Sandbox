@@ -7,10 +7,10 @@ EFS volume and installs the software stack. [DEPLOYMENT.md](DEPLOYMENT.md)
 walks through a deployment.
 
 ```sh
-terraform init -backend-config=config.s3.tfbackend
-terraform workspace new my_workspace
-terraform plan -var-file=mysettings.tfvars -out=my.plan
-terraform apply my.plan
+tofu init -backend-config=config.s3.tfbackend
+tofu workspace new my_workspace
+tofu plan -var-file=mysettings.tfvars -out=my.plan
+tofu apply my.plan
 ```
 
 `remote-state/` is a second, separate module that creates the S3 bucket
@@ -30,7 +30,10 @@ What is new: this README, `LICENSE`, `Justfile`, `tests/`, the Python
 files that run the tests,
 [init_template.ansible.tpl](init_template.ansible.tpl), and
 [DEPLOYMENT.md](DEPLOYMENT.md), the walk-through for deploying a sandbox
-(with its screenshot in `docs/images/`, a copy of the original's).
+(with its screenshot in `docs/images/`, a copy of the original's). Also new: `tools/install-tofu.sh`, and a `versions.tofu`
+in each module that requires OpenTofu 1.13.9. OpenTofu reads
+`required_version` only from `.tofu` files, so the constraint is there
+rather than in `main.tf`, which stays the same as the original.
 
 ## Two first-boot scripts
 
@@ -84,17 +87,19 @@ made later, on the head node, by `sandbox-provisioning`'s
 
 ## Working on it
 
-You need `just`, `uv` and Terraform 1.9.8; the `Justfile` asks `tfenv`
-for that version. No AWS account or credentials are needed: nothing
-here plans or applies.
+You need `just`, `uv`, `curl`, `unzip` and `shellcheck`. `just init`
+fetches OpenTofu 1.13.9 into `.tofu/` (checking it against the release's
+checksums) and every target uses that copy, so whatever `tofu` or
+`terraform` is on your PATH does not matter. No AWS account or
+credentials are needed: nothing here plans or applies.
 
 ```sh
-just init        # test environment; both modules initialised without a backend
+just init        # OpenTofu into .tofu/, test environment, both modules initialised without a backend
 just test        # both modules validate; formatting and templates as recorded
 just full-test   # also: the two fragments still fail to validate
 ```
 
-The copies keep the originals' formatting: `terraform fmt -check`
+The copies keep the originals' formatting: `tofu fmt -check`
 would rewrite nine of them, and the tests hold that list fixed.
 
 ## Licence

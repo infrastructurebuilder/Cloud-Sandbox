@@ -25,7 +25,7 @@ This repository says which units, which versions, and in which order.
 
 ## Building a sandbox, in order
 
-1. **`sandbox-terraform`.** Once per AWS account, create the state bucket
+1. **`sandbox-terraform`**, with OpenTofu. Once per AWS account, create the state bucket
    with its `remote-state/` module. Then write the site's settings and
    apply the main module. Its `DEPLOYMENT.md` is the walk-through. It
    names the version of `sandbox-provisioning` the head node applies.
