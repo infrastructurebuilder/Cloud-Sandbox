@@ -48,6 +48,12 @@ This repository says which units, which versions, and in which order.
 
 `sandbox-ops` is used along the way, as needed.
 
+## The attic
+
+[attic/](attic/README.md) keeps the old scripts and notes that were read
+and found superseded or dead when the tools were sorted. It stays here,
+with the original repository, and does not travel with any unit.
+
 ## Integrating a new model
 
 [CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md](CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md)
@@ -63,7 +69,7 @@ Until the split, all of this was one repository. Its README,
 ## Working on it
 
 ```sh
-just test        # units.toml is consistent: names, versions, and the order of the relocations
+just test        # units.toml is consistent (names, versions, the order of the relocations); the attic matches its catalogue
 ```
 
 ## Licence

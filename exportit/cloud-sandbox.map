@@ -23,6 +23,91 @@ copy TODO                                           history/TODO
 # of the umbrella (its patterns are the monorepo's).
 copy .gitignore                                     history/gitignore
 
+# The attic: the files from scripts/ and misc/ that were read and found
+# superseded or dead (stage 7, item 1). They do not travel with sandbox-ops: by
+# the operator's decision of 2026-11-13 they stay with the original repository,
+# which is what this umbrella is, under their status and their original path.
+# attic/CATALOGUE.tsv gives the evidence for each.
+# superseded
+copy misc/install_intel.sh                                       attic/superseded/misc/install_intel.sh
+copy misc/intel-oneapi-install                                   attic/superseded/misc/intel-oneapi-install
+copy misc/spack/creating-buildcache.txt                          attic/superseded/misc/spack/creating-buildcache.txt
+copy scripts/archived/old.funcs-setup-instance.sh                attic/superseded/scripts/archived/old.funcs-setup-instance.sh
+copy scripts/getaws.sh                                           attic/superseded/scripts/getaws.sh
+copy scripts/install_fsxdriver.sh                                attic/superseded/scripts/install_fsxdriver.sh
+copy scripts/install_prefect.sh                                  attic/superseded/scripts/install_prefect.sh
+copy scripts/install_pythonmods.sh                               attic/superseded/scripts/install_pythonmods.sh
+copy scripts/mountEFS.sh                                         attic/superseded/scripts/mountEFS.sh
+copy scripts/partial-setup.sh                                    attic/superseded/scripts/partial-setup.sh
+copy scripts/rhel10-setup.sh                                     attic/superseded/scripts/rhel10-setup.sh
+copy scripts/run_create_image.sh                                 attic/superseded/scripts/run_create_image.sh
+copy scripts/setup-python-deps.sh                                attic/superseded/scripts/setup-python-deps.sh
+copy scripts/setup_git-lfs-rpm.sh                                attic/superseded/scripts/setup_git-lfs-rpm.sh
+copy scripts/spack-stack-setup.sh                                attic/superseded/scripts/spack-stack-setup.sh
+copy scripts/system/.bashrc                                      attic/superseded/scripts/system/.bashrc
+copy scripts/system/.tcshrc                                      attic/superseded/scripts/system/.tcshrc
+copy scripts/system/etc.profile.d.prefect.sh                     attic/superseded/scripts/system/etc.profile.d.prefect.sh
+copy scripts/system/etc.profile.d/custom.csh                     attic/superseded/scripts/system/etc.profile.d/custom.csh
+copy scripts/system/etc.profile.d/custom.sh                      attic/superseded/scripts/system/etc.profile.d/custom.sh
+copy scripts/system/etc.profile.d/zippy_efa.sh                   attic/superseded/scripts/system/etc.profile.d/zippy_efa.sh
+copy scripts/system/etc.ssh.ssh_config.d/sandbox-local-net.conf  attic/superseded/scripts/system/etc.ssh.ssh_config.d/sandbox-local-net.conf
+copy scripts/system/spack.etc.spack/packages.yaml                attic/superseded/scripts/system/spack.etc.spack/packages.yaml
+copy scripts/ufs-setup-instance.sh                               attic/superseded/scripts/ufs-setup-instance.sh
+copy scripts/update-efa.sh                                       attic/superseded/scripts/update-efa.sh
+copy scripts/update_efs_driver.sh                                attic/superseded/scripts/update_efs_driver.sh
+
+# dead
+copy misc/README_redhat_gnu.txt                                  attic/dead/misc/README_redhat_gnu.txt
+copy misc/build_netcdf.sh                                        attic/dead/misc/build_netcdf.sh
+copy misc/gcc-8.3.1                                              attic/dead/misc/gcc-8.3.1
+copy misc/libhdf5.settings                                       attic/dead/misc/libhdf5.settings
+copy misc/libnetcdf.settings                                     attic/dead/misc/libnetcdf.settings
+copy misc/man.slurm.conf                                         attic/dead/misc/man.slurm.conf
+copy misc/notes.slurm.conf                                       attic/dead/misc/notes.slurm.conf
+copy misc/notes.txt                                              attic/dead/misc/notes.txt
+copy misc/savediff.sh                                            attic/dead/misc/savediff.sh
+copy misc/setup-mrw.sh                                           attic/dead/misc/setup-mrw.sh
+copy misc/slurm-notes.txt                                        attic/dead/misc/slurm-notes.txt
+copy misc/slurm.NOTES                                            attic/dead/misc/slurm.NOTES
+copy misc/slurm.TODO.notes                                       attic/dead/misc/slurm.TODO.notes
+copy misc/spack/compilers.yaml                                   attic/dead/misc/spack/compilers.yaml
+copy misc/spack/create-buildcache.sh                             attic/dead/misc/spack/create-buildcache.sh
+copy misc/spack/mirrors.yaml                                     attic/dead/misc/spack/mirrors.yaml
+copy misc/spack/packages.yml                                     attic/dead/misc/spack/packages.yml
+copy misc/spack/spack-spec-expressions.txt                       attic/dead/misc/spack/spack-spec-expressions.txt
+copy misc/srweather-setup-notes.txt                              attic/dead/misc/srweather-setup-notes.txt
+copy scripts/archived/build_gcc.sh                               attic/dead/scripts/archived/build_gcc.sh
+copy scripts/archived/buildit.sh                                 attic/dead/scripts/archived/buildit.sh
+copy scripts/archived/install_mpi.sh                             attic/dead/scripts/archived/install_mpi.sh
+copy scripts/archived/install_slurm.sh                           attic/dead/scripts/archived/install_slurm.sh
+copy scripts/archived/old-setup-jupyterhub.sh                    attic/dead/scripts/archived/old-setup-jupyterhub.sh
+copy scripts/esmf.spack.deps                                     attic/dead/scripts/esmf.spack.deps
+copy scripts/log.concretize                                      attic/dead/scripts/log.concretize
+copy scripts/mpi.spack.deps                                      attic/dead/scripts/mpi.spack.deps
+copy scripts/ncdis-setup.sh                                      attic/dead/scripts/ncdis-setup.sh
+copy scripts/osx-setup-local.sh                                  attic/dead/scripts/osx-setup-local.sh
+copy scripts/reinstall-clean-spack-env.sh                        attic/dead/scripts/reinstall-clean-spack-env.sh
+copy scripts/resume-setup.sh                                     attic/dead/scripts/resume-setup.sh
+copy scripts/spack-mirror-create.sh                              attic/dead/scripts/spack-mirror-create.sh
+copy scripts/system/default.conf                                 attic/dead/scripts/system/default.conf
+copy scripts/system/etc.profile.d.sandbox_env.sh                 attic/dead/scripts/system/etc.profile.d.sandbox_env.sh
+copy scripts/system/etc.profile.d/sandbox_env.sh                 attic/dead/scripts/system/etc.profile.d/sandbox_env.sh
+copy scripts/system/git.munge.systemd.service.in                 attic/dead/scripts/system/git.munge.systemd.service.in
+copy scripts/system/github.slurmctld.service.in                  attic/dead/scripts/system/github.slurmctld.service.in
+copy scripts/system/github.slurmd.service.in                     attic/dead/scripts/system/github.slurmd.service.in
+copy scripts/system/munge.service                                attic/dead/scripts/system/munge.service
+copy scripts/system/munge.service.in                             attic/dead/scripts/system/munge.service.in
+copy scripts/system/nginx.conf                                   attic/dead/scripts/system/nginx.conf
+copy scripts/system/patrick.gitconfig                            attic/dead/scripts/system/patrick.gitconfig
+copy scripts/system/slurm.conf                                   attic/dead/scripts/system/slurm.conf
+copy scripts/system/slurmctld.service                            attic/dead/scripts/system/slurmctld.service
+copy scripts/system/slurmctld.service.in                         attic/dead/scripts/system/slurmctld.service.in
+copy scripts/system/slurmd.service                               attic/dead/scripts/system/slurmd.service
+copy scripts/system/slurmd.service.in                            attic/dead/scripts/system/slurmd.service.in
+copy scripts/system/slurmdbd.service                             attic/dead/scripts/system/slurmdbd.service
+copy scripts/system/spack.etc.spack/compilers.yaml               attic/dead/scripts/system/spack.etc.spack/compilers.yaml
+copy scripts/upgrade-mpi.sh                                      attic/dead/scripts/upgrade-mpi.sh
+
 # Not relocated: the records and the entry point of this reconstruction,
 # which go when the work is done.
 drop INPROGRESS/
@@ -34,3 +119,5 @@ new README.md
 new units.toml
 new Justfile
 new tests/
+new attic/CATALOGUE.tsv
+new attic/README.md

@@ -1,4 +1,4 @@
-# sandbox-ops: the operator tools of a Cloud Sandbox, and the attic of what is retired.
+# sandbox-ops: the operator tools of a Cloud Sandbox.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
