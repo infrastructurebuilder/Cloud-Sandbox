@@ -346,7 +346,7 @@ the functions; a test checks the order.
 | `python_user_env` | `install_python_modules_user`, 1210-1249 | 1 |
 | `spack` | `install_spack`, 630-704 | 9 |
 | `intel_oneapi` | `install_intel_oneapi_dnf` and `add_spack_site_external`, 884-963 and 708-733 | 7 |
-| `spack_environment` | `create_spack-environment` and `build_spack-environment`, 737-766 and 770-826 | 8 |
+| `spack_environment` | `create_spack-environment` and `build_spack-environment`, 737-766 and 770-826 | 7 (8 before stage 9) |
 | `hpc_tuning` | `configure_optimizations`, 169-214 | 4 |
 | `node-image.yml` | `setup-instance.sh` 52-75, `create_image.sh`, `create_image.py` | 14 |
 
@@ -451,7 +451,8 @@ Cloud-Sandbox, because cloudflow runs from that checkout.
 | Syntax, `ansible-lint` production profile, `shellcheck`, `ruff`, `pyright` | `just test` | pass |
 | Traceability and parity with the scripts (310 tests) | `just test` | pass |
 | Eight roles (all but the four below) applied with `ansible-pull` to an AlmaLinux 10 container, twice; the second run must change nothing; the result is checked | `just full-test` | pass: 49 changes, then 0 |
-| `efa_driver`, `fsx_lustre_client`, `spack_environment`, `hpc_tuning`, `node-image.yml` | nowhere | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
+| `spack_environment`'s `spack.yaml` (stage 9): an environment made with the script's commands and one written by the role's template, side by side with the real Spack v1.2.0, give the same manifest and the same merged `concretizer`, `modules` and `packages` | `just full-test` | pass (2026-11-13) |
+| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and the rest of `spack_environment` (concretize, build, module files) | nowhere | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
 | Anything on RHEL, or on AWS | nowhere | **not proved** |
 | The first-boot script | nowhere | **not proved**: it needs a real EFS volume |
 | Whether the playbook leaves the same node the script does | nowhere | **not proved** |
@@ -467,6 +468,53 @@ record's form differs, the installer simply runs every time, as in the
 script. The `spack_environment` role reports a change in module files
 by hashing Spack's default module directory; if the files are
 elsewhere, it reports no change but still regenerates them.
+
+### The environment's spack.yaml, written whole (stage 9)
+
+Until stage 9 the `spack_environment` role made the environment's
+`spack.yaml` as the script does: `spack env create`, then one
+`spack config add` per setting and one `spack add` per spec, each step
+hashing the file before and after to say whether it changed. Now, by
+the operator's decisions of 2026-11-13:
+
+- **The file is a template.** `spack env create` still makes the
+  environment when it is missing; then one `template` task writes
+  `spack.yaml` whole, from two variables, and keeps the previous file
+  beside it. Ansible reports the change itself, and `--check` and
+  `--diff` work on it. The task replaces the script's L754-L762 and
+  L775-L806, as the two shell tasks did.
+- **`spack_environment_config`** replaces `spack_environment_settings`:
+  a mapping in the shape of `spack.yaml` instead of three
+  `config add` paths. It also holds `view: true` and
+  `concretizer: unify: true`, which `spack env create` writes into a new
+  file and the script keeps; without them the template's file would
+  not be the script's.
+- **Ansible owns the file.** An edit made by hand on the head node is
+  overwritten; the backup is the only trace of it.
+
+What is proved: `tests/test_parity.py` reads the script's three
+`config add` lines as Spack does and holds the mapping to them;
+`tests/test_spack_yaml.py` renders the template and holds it to the two
+variables; and the container test makes both environments with the real
+Spack and compares them (table above). Concretizing, building and the
+module files are unchanged and run as before.
+
+Found by that comparison: `spack add` does not store a spec as it is
+typed but as Spack prints it. The script's
+`esmf@8.9.1+pnetcdf+mpi ... %intel-oneapi-compilers@2024.2.1` lands in
+its `spack.yaml` as `esmf@8.9.1+mpi+pnetcdf ... %oneapi@2024.2.1`:
+variants sorted, and the compiler under its short name. The template
+writes the specs as the role states them, so the two files differ in
+text; the test compares the specs as Spack parses them, where they are
+the same. The configuration sections hold the same data, but not the
+same text: `spack config add` writes a list in flow style
+(`[target=x86_64_v3]`) and the template in block style, so
+`spack config get` prints them differently. The test compares what
+Spack reads as data, not as text.
+
+What is left for a module is what has to call Spack: concretize,
+install, regenerate module files, push to a build cache. That is
+[the collection](#ansible-collection-csis-spack-outside-this-repository)'s.
 
 ### What a real relocation would change
 
@@ -1131,6 +1179,33 @@ and `just full-test` there checks the build.
   version, while stage 4 tests with 1.9.8. The split documents correct
   the first two. The third the operator settled on 2026-11-13:
   OpenTofu 1.13.9.
+
+## ansible-collection-csis-spack (outside this repository)
+
+Begun on 2026-11-13 by [stage 9](../INPROGRESS/STAGE-9.md). The Ansible
+collection `infrastructurebuilder.csis_spack` is new code, not a copy of
+anything in Cloud-Sandbox, so by the operator's decision it is not under
+`exportit/`: it lives in its own repository from the start,
+`git@github.com:infrastructurebuilder/ansible-collection-csis-spack.git`,
+worked on in a clone beside this one
+(`../ansible-collection-spack`; the directory keeps the repository's
+first name). The operator renamed the repository and the collection
+from `ansible-collection-spack` and `spack` the same day; a collection
+name cannot hold a hyphen, hence `csis_spack`. It needs no relocation, and nothing in
+this file's copy check covers it.
+
+- **What it is for:** the steps of `spack_environment` that have to call
+  Spack (concretize, install, regenerate module files, push to the build
+  cache), as a module with Ansible's change reporting and check mode,
+  in place of shell tasks that hash files before and after.
+- **State:** metadata (`galaxy.yml`: 0.1.0, GPL-3.0-or-later,
+  ansible-core 2.16 on Python 3.12), tests, a build that installs, and
+  `ansible-test sanity` in `full-test`. No module yet. Committed locally
+  on its own `feature/skeleton`; nothing pushed.
+- **How `sandbox-provisioning` will use it:** once there is a module, as
+  a line in `requirements.yml` pinned to a tag, installed into
+  `.collections/` by `just init` like `amazon.aws`, and a line in
+  `units.toml` with `sandbox-provisioning` needing it.
 
 ## The order of the real relocations
 

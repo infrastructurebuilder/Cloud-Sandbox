@@ -53,7 +53,7 @@
               'dnf_base': base_system_packages + base_system_python_packages,
               'dnf_intel': intel_oneapi_llvm_packages + intel_oneapi_packages,
               'spack_specs': spack_environment_specs,
-              'spack_settings': spack_environment_settings,
+              'spack_config': spack_environment_config,
               'intel_modules': sandbox_intel_modules,
               'spack_providers': intel_oneapi_spack_providers,
               'spack_externals': intel_oneapi_spack_externals,
