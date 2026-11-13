@@ -4,6 +4,7 @@ A unit is described by ``exportit/<unit>.map``. Each line of that file is one
 directive::
 
     covers <path>             every tracked file under <path> must belong to a unit
+                              ("covers ./": every tracked file of the repository)
     copy   <source> <dest>    copy <source> to <dest> inside the unit
     drop   <source>           the file is deliberately not carried over
     new    <path>             a file that exists only in the unit
@@ -113,7 +114,8 @@ def parse_map(path: Path) -> Unit:
         verb, args = words[0], words[1:]
         where = f"{path.name}:{number}"
         if verb == "covers" and len(args) == 1:
-            unit.covers.append(args[0])
+            # "covers ./" is the whole repository (outside exportit/).
+            unit.covers.append("" if args[0] == "./" else args[0])
         elif verb == "copy" and len(args) == 2:  # noqa: PLR2004
             source, dest = args
             if source.endswith("/") != dest.endswith("/"):

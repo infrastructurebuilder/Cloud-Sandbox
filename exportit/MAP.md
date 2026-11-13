@@ -22,14 +22,14 @@ nothing leaves this repository).
 | --- | --- | --- | ---: | --- |
 | `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` without `plotting/`; root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
 | `cloudflow-plotting` | [cloudflow-plotting/](cloudflow-plotting/) | `cloudflow/plotting/`, `cloudflow/setup.py`, `cloudflow/plotting_reqs.reference`, `cloudflow/tests/test.plotting.py` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
-| cloudflow's documentation | `exportit/cloudflow/docs/` | `docs/source/` | [8](../INPROGRESS/STAGE-8.md) | planned |
+| cloudflow's documentation | [cloudflow/docs/sphinx/](cloudflow/docs/sphinx/) | `docs/source/` and the files that built it | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12 |
 | `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
 | `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
 | `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the rest of `scripts/`, all of `misc/` | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
-| `cloud-sandbox` (umbrella) | `exportit/cloud-sandbox/` | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/`, `TODO`, `.github/`, `LICENSE`, `.gitignore` | [8](../INPROGRESS/STAGE-8.md) | planned |
-| not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/` | [8](../INPROGRESS/STAGE-8.md) | planned |
+| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore` | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12 |
+| not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `INPROGRESS/`, `PLAN.md`, `Justfile` | [8](../INPROGRESS/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
 
 Every tracked top-level path of the repository appears in one row.
 `scripts/` is divided file by file between two units; stages 3 and 7
@@ -503,7 +503,10 @@ key). `config.s3.tfbackend` names one site's state bucket,
 
 New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
 `.python-version`, `tests/`, and
-[init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl).
+[init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl). Stage 8 added
+[DEPLOYMENT.md](sandbox-terraform/DEPLOYMENT.md), the Terraform part of
+the root `DEPLOYMENT.md`, and the screenshot it shows, copied from
+`images/` to `docs/images/`.
 
 ### The first-boot template
 
@@ -590,8 +593,8 @@ Things noticed and left as they are:
   `provisioning_repo` at the relocated `sandbox-provisioning`.
 - Decide where the site's settings and backend file live: they would
   no longer sit in a shared repository.
-- In Cloud-Sandbox: delete `terraform/` and update `DEPLOYMENT.md`
-  ([stage 8](../INPROGRESS/STAGE-8.md)).
+- In Cloud-Sandbox: delete `terraform/`; the root `DEPLOYMENT.md` goes
+  to the umbrella's `history/` ([stage 8](../INPROGRESS/STAGE-8.md)).
 
 ## The model units
 
@@ -1011,5 +1014,105 @@ above its task:
 
 ## cloud-sandbox (the umbrella)
 
-Planned. [Stage 8](../INPROGRESS/STAGE-8.md) fills this section and
-closes the map with the order of the relocations.
+Made on 2026-11-12 by [stage 8](../INPROGRESS/STAGE-8.md). By the
+operator's decision, Cloud-Sandbox does not disappear: it becomes a
+small repository that says what a sandbox is made of, at which versions,
+and in which order. Its own description is
+[cloud-sandbox/README.md](cloud-sandbox/README.md).
+
+### Where its files go
+
+From [cloud-sandbox.map](cloud-sandbox.map):
+
+| Source | In the umbrella |
+| --- | --- |
+| `LICENSE`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `.github/ISSUE_TEMPLATE.md` | the same paths |
+| `images/sandbox-stack.png` | `images/` |
+| `README.md`, `DEPLOYMENT.md`, `TODO`, `.gitignore` | `history/` (`.gitignore` as `history/gitignore`, so that its monorepo patterns do not hide the umbrella's files) |
+| `images/AWS-Key-pairs-screen.png` | not here: `sandbox-terraform/docs/images/`, beside the text that shows it |
+
+New: `README.md`, `units.toml`, `Justfile`, `tests/`.
+
+[units.toml](cloud-sandbox/units.toml) is the umbrella's substance: each
+unit's name, the version that goes into a sandbox, its kind, the step at
+which it is applied, its place in the order of relocation, and the units
+it needs. The umbrella's own test holds it consistent (each unit is
+relocated after what it needs); a test in `tools` holds it to the
+repository (every mapped unit is listed, and a unit with a
+`pyproject.toml` has that version).
+
+The map also says `covers ./`: every tracked file of the repository must
+now be taken or dropped by some unit, and `just test` fails on one that
+is not. On 2026-11-12 all 814 tracked files outside `exportit/` are
+accounted for.
+
+### DEPLOYMENT.md, split
+
+By the operator's decision the split is written, as two new documents:
+[sandbox-terraform/DEPLOYMENT.md](sandbox-terraform/DEPLOYMENT.md) (the
+original's lines 1–183, 209–221, 239–261, 272–274 and 281–304) and
+[sandbox-provisioning/DEPLOYMENT.md](sandbox-provisioning/DEPLOYMENT.md)
+(lines 184–238 and 262–279), each saying where it comes from and where
+it departs from the original. The original stays whole in the umbrella's
+`history/`.
+
+### The documentation
+
+By the operator's decision only the Sphinx sources travel:
+`docs/source/` and the files that built it go to
+`cloudflow/docs/sphinx/`; the 129 files of committed HTML and build output and the older
+copy in `docs/save/` are dropped as rebuilt. One patch,
+`cloudflow.patches/08-sphinx-conf-installed-packages.patch`, makes
+`conf.py` document the installed packages instead of reaching into the
+repository's directories. `just docs` in the cloudflow export builds it,
+and `just full-test` there checks the build.
+
+### Found
+
+- **Three documentation pages are for modules that no longer exist**
+  (`nodeInfo`, `nosofs_qops`, `run_adnoc`). The build is held to exactly
+  those three.
+- **The `@task` work-around is no longer needed.** `sedtasks.sh` comments
+  out every `@task` in the source tree before a build, because autodoc
+  could not document decorated tasks then. With today's Prefect the
+  tasks are documented as they are (`workflows/tasks.html` lists them).
+- **The root README has six broken links:** `PREFECTV3.md` (the file is
+  `PREFECTv3.md`, so the link only works on a case-insensitive disk),
+  `ZOMBIE_JOB_CHECKLIST.md` (it is under `cloudflow/`), and the READMEs
+  of four models, which are named `README`, without `.md`.
+- **DEPLOYMENT.md has gone stale against Terraform:** it names
+  `allowed_ssh_cidr`, which the module replaced with
+  `allowed_ssh_cidr_list`; its login example uses `centos`, the module
+  says `ec2-user`. It asks for Terraform 1.5.7, the last open-source
+  version, while stage 4 tests with 1.9.8. The split documents correct
+  the first two and set out the third as a choice to make.
+
+## The order of the real relocations
+
+A unit moves after every unit it names by version, so that it can name a
+version that exists. `units.toml` holds this order; the steps below
+follow it. Each is the method under
+[How a unit would really be relocated](#how-a-unit-would-really-be-relocated);
+"Cloud-Sandbox after" says what the original repository holds once the
+step is done.
+
+| Step | Unit | What it needs first | Cloud-Sandbox after |
+| ---: | --- | --- | --- |
+| 1 | `cloudflow-plotting` | nothing | `cloudflow/plotting/` and `cloudflow/setup.py` gone; cloudflow there still imports plotting through the namespace, so the new package is installed beside it |
+| 2 | `cloudflow` | `cloudflow-plotting` | `cloudflow/`, the root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, the Miniforge guide and `docs/` gone. The launchers no longer sit next to `models/`; the job descriptions that name `/save/<user>/Cloud-Sandbox/...` paths have to change (step 5) |
+| 3 | `model-common` | nothing | `models/modulefiles/`, `models/utils/` and the three notes gone; `adcirc-cora`'s `../modulefiles` no longer resolves in the original |
+| 4 | the eight `model-<name>` units | `model-common` (ADCIRC only) | `models/` and `patches/` gone |
+| 5 | `sandbox-configs` | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
+| 6 | `sandbox-provisioning` | nothing | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
+| 7 | `sandbox-terraform` | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 6's repository |
+| 8 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | `scripts/` and `misc/` gone |
+| 9 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–8 |
+
+The machinery of this work does not move: `exportit/`, `INPROGRESS/`,
+`PLAN.md` and the root `Justfile` are deleted in step 9, and the
+umbrella gets its own `Justfile`.
+
+Not one of these steps has been carried out. `just full-test` rehearses
+the extraction of every unit (steps 1–8 and the umbrella's files) on
+throw-away clones; nothing has been pushed anywhere for a relocation,
+and no repository has been created.

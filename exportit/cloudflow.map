@@ -7,6 +7,7 @@ covers setup-plotting.sh
 covers CLOUDFLOW.md
 covers PREFECTv3.md
 covers LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md
+covers docs/
 
 # The package. cloudflow/plotting/ belongs to the cloudflow-plotting unit.
 copy cloudflow/cluster/      src/cloudflow/cluster/
@@ -50,6 +51,19 @@ copy cloudflow/cloudflow_miniforge3_installation.yml    requirements/cloudflow_m
 # Superseded by pyproject.toml and the Justfile; kept for the record.
 copy setup.py             legacy/setup.py
 copy setup-plotting.sh    legacy/setup-plotting.sh
+
+# Stage 8: the Sphinx sources of cloudflow's API documentation and the files
+# that built it. The built HTML beside them in docs/, and an older copy of
+# the sources in docs/save/, are rebuilt rather than relocated (stage 8,
+# decision 1): `just docs` makes the HTML from the sources.
+copy docs/source/       docs/sphinx/source/
+copy docs/Makefile      docs/sphinx/Makefile
+copy docs/make.bat      docs/sphinx/make.bat
+copy docs/mkhtml.sh     docs/sphinx/mkhtml.sh
+copy docs/sedtasks.sh   docs/sphinx/sedtasks.sh
+copy docs/unsedtasks.sh docs/sphinx/unsedtasks.sh
+copy docs/notes         docs/sphinx/notes
+drop docs/
 
 # Files that exist only in the unit.
 new README.md

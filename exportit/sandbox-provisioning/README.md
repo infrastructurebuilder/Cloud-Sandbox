@@ -9,6 +9,9 @@ repository, step for step. The difference is in how: the playbooks can
 be applied again to a node that is already built, one step can be
 applied on its own, and the first step that fails stops the run.
 
+[DEPLOYMENT.md](DEPLOYMENT.md) says what happens on a new head node and
+how to follow it.
+
 | Playbook | What it does |
 | --- | --- |
 | [site.yml](site.yml) | Builds the software stack: twelve roles, one per function of the script, in the script's order |

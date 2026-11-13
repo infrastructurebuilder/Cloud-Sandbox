@@ -31,9 +31,13 @@ typecheck:
 test: lint typecheck
     {{ run }} pytest -q -m "not slow"
 
-# Everything in test, then build the wheels and try them in an empty environment.
+# Everything in test, then build the wheels and try them in an empty environment, and build the documentation.
 full-test: test
     {{ run }} pytest -q -m slow
+
+# Build the API documentation into docs/sphinx/build/html (stage 8).
+docs:
+    {{ run }} sphinx-build -b html docs/sphinx/source docs/sphinx/build/html
 
 # Nothing is published from a copy inside Cloud-Sandbox.
 release: full-test

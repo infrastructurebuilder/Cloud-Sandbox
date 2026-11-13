@@ -1,0 +1,151 @@
+# The units a Cloud Sandbox is made of, and the version of each that goes
+# into one. This file is the umbrella's reason to exist (stage 8, decision 3):
+# a sandbox is these versions, applied in this order.
+#
+#   name      the unit, and the name of its repository
+#   version   the version that goes into a sandbox. Where the unit has a
+#             pyproject.toml it is that file's version; for the others it is
+#             the first tag to cut when the unit is relocated.
+#   kind      what it is: python, ansible, terraform, scripts, data
+#   step      when it is applied while building a sandbox (README.md)
+#   relocate  the order of the real relocations: a unit goes after every unit
+#             it needs
+#   needs     units it refers to by version, which must exist first
+#
+# No repository exists yet for any unit: nothing has left Cloud-Sandbox.
+# tests/check_units.py holds this file consistent.
+
+[[unit]]
+name = "sandbox-terraform"
+version = "0.1.0"
+kind = "terraform"
+step = 1
+relocate = 7
+needs = ["sandbox-provisioning"]
+what = "the network, EFS volume, IAM role, placement group and head node"
+
+[[unit]]
+name = "sandbox-provisioning"
+version = "0.1.0"
+kind = "ansible"
+step = 2
+relocate = 6
+needs = []
+what = "the head node's software (site.yml), the compute-node image, users, JupyterHub"
+
+[[unit]]
+name = "cloudflow-plotting"
+version = "0.3.1"
+kind = "python"
+step = 3
+relocate = 1
+needs = []
+what = "the plots of model output"
+
+[[unit]]
+name = "cloudflow"
+version = "1.6.0b0"
+kind = "python"
+step = 3
+relocate = 2
+needs = ["cloudflow-plotting"]
+what = "the workflow engine that starts compute nodes and runs the models"
+
+[[unit]]
+name = "model-common"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 3
+needs = []
+what = "the module files and notes the model recipes share"
+
+[[unit]]
+name = "model-adcirc-cora"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = ["model-common"]
+what = "ADCIRC for the CORA reanalysis"
+
+[[unit]]
+name = "model-eccofs"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "ECCOFS (ROMS), from the NOSOFS code package"
+
+[[unit]]
+name = "model-liveocean"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "LiveOcean (ROMS)"
+
+[[unit]]
+name = "model-necofs"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "NECOFS (FVCOM)"
+
+[[unit]]
+name = "model-nosofs"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "the NOS operational forecast systems (ROMS and FVCOM)"
+
+[[unit]]
+name = "model-secofs"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "SECOFS (SCHISM)"
+
+[[unit]]
+name = "model-ucla-roms"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "UCLA ROMS"
+
+[[unit]]
+name = "model-ufscoastal"
+version = "0.1.0"
+kind = "scripts"
+step = 4
+relocate = 4
+needs = []
+what = "UFS Coastal"
+
+[[unit]]
+name = "sandbox-configs"
+version = "0.1.0"
+kind = "data"
+step = 5
+relocate = 5
+needs = ["cloudflow"]
+what = "the job and cluster descriptions cloudflow runs with, and their schema"
+
+[[unit]]
+name = "sandbox-ops"
+version = "0.1.0"
+kind = "scripts"
+step = 6
+relocate = 8
+needs = ["sandbox-provisioning"]
+what = "the operator's tools, and the attic of what is retired"

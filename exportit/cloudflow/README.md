@@ -41,7 +41,7 @@ Do not edit the copied files here. Change the original and run
 | `src/cloudflow/workflows/` | The flows and tasks, the `cloudflow` command (`workflow_main.py`), and the launcher scripts the tasks run |
 | `tests/` | Tests that need no sandbox |
 | `legacy-tests/` | The original test scripts; they drive a live sandbox |
-| `docs/` | The original instructions and notes |
+| `docs/` | The original instructions and notes; `docs/sphinx/`, the API documentation's sources (stage 8) |
 | `notebooks/`, `notes/`, `examples/` | Material that travels with the code and is not installed |
 | `requirements/` | The original requirement lists, for reference |
 | `legacy/` | The two files that `pyproject.toml` replaces |
@@ -58,8 +58,17 @@ has none.
 ```sh
 just init        # create the environment, with every extra
 just test        # lint, type-check, fast tests
-just full-test   # also build both wheels and try them in an empty environment
+just full-test   # also build both wheels and try them in an empty environment, and build the docs
+just docs        # the API documentation, into docs/sphinx/build/html
 ```
+
+The API documentation is built from the installed `cloudflow` and
+`cloudflow-plotting`. Its sources are copies; only `conf.py` is patched,
+to find the modules there instead of through paths into the old
+repository. Three of its pages name modules that no longer exist
+(`nodeInfo`, `nosofs_qops`, `run_adnoc`); `tests/test_docs.py` holds the
+build to exactly those three failures. The built HTML that Cloud-Sandbox
+commits beside the sources is not copied: `just docs` makes it.
 
 `just test` holds new files to the full lint and type-check rules. The
 copied code is held to less: every file compiles, every module imports
