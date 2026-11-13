@@ -31,42 +31,20 @@
   become_user: "{{ sandbox_user }}"
   when: spack_environment_save.stat.exists
 
-# Replaces funcs-setup-instance.sh L754-L762
-- name: Configure the environment
-  ansible.builtin.shell:
-    cmd: |
-      set -euo pipefail
-      before=$(sha256sum {{ spack_environment_dir }}/spack.yaml)
-      {% for setting in spack_environment_settings %}
-      {{ spack_exe }} -e {{ spack_environment_dir }} config add '{{ setting }}'
-      {% endfor %}
-      after=$(sha256sum {{ spack_environment_dir }}/spack.yaml)
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
+# Replaces funcs-setup-instance.sh L754-L762 L775-L806
+# The script configures the environment and adds its specs with one Spack
+# command each. Here spack.yaml is written whole from a template (stage 9),
+# so Ansible reports the change itself and --check and --diff work. The Intel
+# modules the script has loaded at that point play no part in writing a file.
+- name: Write the environment's spack.yaml
+  ansible.builtin.template:
+    src: spack.yaml.j2
+    dest: "{{ spack_environment_dir }}/spack.yaml"
+    mode: "0644"
+    backup: true
   become: true
   become_user: "{{ sandbox_user }}"
-  register: spack_environment_configure
-  changed_when: "'SPACK-CHANGED' in spack_environment_configure.stdout"
   when: spack_environment_save.stat.exists
-
-# Replaces funcs-setup-instance.sh L775-L806
-- name: Add ESMF and PETSc to the environment
-  ansible.builtin.shell:
-    cmd: |
-      {{ sandbox_modules_init }}
-      set -eo pipefail
-      {{ sandbox_load_intel_modules }}
-      before=$(sha256sum {{ spack_environment_dir }}/spack.yaml)
-      {% for spec in spack_environment_specs %}
-      {{ spack_exe }} -e {{ spack_environment_dir }} add '{{ spec }}'
-      {% endfor %}
-      after=$(sha256sum {{ spack_environment_dir }}/spack.yaml)
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
-  become: true
-  become_user: "{{ sandbox_user }}"
-  register: spack_environment_add
-  changed_when: "'SPACK-CHANGED' in spack_environment_add.stdout"
 
 # Replaces funcs-setup-instance.sh L812
 # The script keeps the output in log.concretize in whatever directory it was

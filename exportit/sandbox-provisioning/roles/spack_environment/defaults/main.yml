@@ -3,10 +3,25 @@
 # taken from the target variable in environment-vars.sh.
 spack_environment_dir: "{{ sandbox_environments_dir }}/rhel10-x86_64_v3"
 
-spack_environment_settings:
-  - "modules:default:enable:[tcl]"
-  - "concretizer:targets:granularity:generic"
-  - "packages:all:require:[target=x86_64_v3]"
+# Everything in the environment's spack.yaml except its specs, in the shape of
+# that file (stage 9, decision 2). The template writes the whole file
+# (decision 3), so this mapping is the environment's configuration.
+#
+# view and concretizer:unify are what "spack env create" writes into a new
+# spack.yaml; the script keeps them. The other three are the script's
+# "spack config add" lines (funcs-setup-instance.sh L756, L761 and L762).
+spack_environment_config:
+  view: true
+  concretizer:
+    unify: true
+    targets:
+      granularity: generic
+  modules:
+    default:
+      enable: [tcl]
+  packages:
+    all:
+      require: [target=x86_64_v3]
 
 spack_environment_compiler: "intel-oneapi-compilers@{{ oneapi_version }}"
 

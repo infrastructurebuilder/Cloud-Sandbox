@@ -121,9 +121,44 @@ def test_spack_is_told_about_the_same_externals_and_providers(values: dict, scri
     assert values["spack_providers"] == providers
 
 
+# What "spack env create" writes into a new spack.yaml besides an empty list of
+# specs (Spack v1.2.0); the script keeps it, and so does the role.
+SPACK_ENV_CREATE_DEFAULTS = {"view": True, "concretizer": {"unify": True}}
+
+
+def config_add(path: str) -> dict:
+    """Give the mapping that ``spack config add '<path>'`` adds, as Spack reads the path."""
+    *keys, value = path.split(":")
+    result: dict = {keys[-1]: yaml.safe_load(value)}
+    for key in reversed(keys[:-1]):
+        result = {key: result}
+    return result
+
+
+def merged(into: dict, extra: dict) -> dict:
+    out = dict(into)
+    for key, value in extra.items():
+        out[key] = merged(out[key], value) if isinstance(value, dict) and key in out else value
+    return out
+
+
+def test_config_add_reads_a_path_as_spack_does() -> None:
+    assert config_add("packages:all:require:[target=x86_64_v3]") == {
+        "packages": {"all": {"require": ["target=x86_64_v3"]}}
+    }
+    assert config_add("concretizer:targets:granularity:generic") == {
+        "concretizer": {"targets": {"granularity": "generic"}}
+    }
+
+
 def test_the_spack_environment_gets_the_same_settings_and_specs(values: dict, script: dict[str, str]) -> None:
-    settings = re.findall(r"spack config add '([^']+)'", "\n".join(body("create_spack-environment")))
-    assert values["spack_settings"] == settings
+    lines = "\n".join(body("create_spack-environment"))
+    settings = re.findall(r"^\s*spack config add '([^']+)'", lines, re.MULTILINE)
+    assert len(settings) == 3
+    expected = SPACK_ENV_CREATE_DEFAULTS
+    for setting in settings:
+        expected = merged(expected, config_add(setting))
+    assert values["spack_config"] == expected
     known = {**script, "COMPILER": f"intel-oneapi-compilers@{script['ONEAPI_VER']}"}
     specs = re.findall(r'^spack add "([^"]+)"', "\n".join(body("build_spack-environment")), re.MULTILINE)
     assert values["spack_specs"] == [substitute(spec, known) for spec in specs]

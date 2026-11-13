@@ -9,6 +9,7 @@
   vars_files:
     - ../../group_vars/all.yml
     - ../../roles/base_system/defaults/main.yml
+    - ../../roles/spack_environment/defaults/main.yml
 
   tasks:
     - name: Look at the directories and links
@@ -156,6 +157,98 @@
       become_user: "{{ sandbox_user }}"
       changed_when: false
       when: spack_dir is directory
+
+    # Stage 9: the role writes spack.yaml from a template instead of running the
+    # script's commands. Here both are done with the real Spack, side by side,
+    # and what Spack reads from each is compared. Nothing is concretized.
+    - name: Compare the role's spack.yaml with what the script's commands make
+      when: spack_dir is directory
+      become: true
+      become_user: "{{ sandbox_user }}"
+      vars:
+        parity_dir: /tmp/spack-environment-parity
+        # The script's "spack config add" lines (funcs-setup-instance.sh L756,
+        # L761, L762), as it writes them; tests/test_parity.py holds the role's
+        # spack_environment_config to the same lines.
+        parity_script_settings:
+          - "modules:default:enable:[tcl]"
+          - "concretizer:targets:granularity:generic"
+          - "packages:all:require:[target=x86_64_v3]"
+      block:
+        - name: Make one environment with the script's commands and an empty one for the template
+          ansible.builtin.shell:
+            cmd: |
+              set -euo pipefail
+              spack={{ spack_exe }}
+              rm -rf {{ parity_dir }}
+              mkdir -p {{ parity_dir }}
+              $spack env create {{ parity_dir }}/script >/dev/null
+              {% for setting in parity_script_settings %}
+              $spack -e {{ parity_dir }}/script config add '{{ setting }}'
+              {% endfor %}
+              {% for spec in spack_environment_specs %}
+              $spack -e {{ parity_dir }}/script add '{{ spec }}' >/dev/null
+              {% endfor %}
+              $spack env create {{ parity_dir }}/template >/dev/null
+            executable: /bin/bash
+          changed_when: false
+
+        - name: Write the other environment's spack.yaml with the role's template
+          ansible.builtin.template:
+            src: ../../roles/spack_environment/templates/spack.yaml.j2
+            dest: "{{ parity_dir }}/template/spack.yaml"
+            mode: "0644"
+
+        - name: Compare the two manifests, and what Spack reads from each
+          ansible.builtin.shell:
+            cmd: |
+              set -euo pipefail
+              spack={{ spack_exe }}
+              # "spack python -c" compiles a single statement; a file takes a program.
+              cat >{{ parity_dir }}/compare.py <<'EOF'
+              import json
+              import os
+              import sys
+              import spack.spec
+              import spack.util.spack_yaml as syaml
+              # Through JSON, so that the order of the keys does not count.
+              script, template = (
+                  json.loads(json.dumps(syaml.load(open(os.environ[name])))) for name in ("SCRIPT", "TEMPLATE")
+              )
+              # "spack add" stores each spec as Spack prints it, not as it was
+              # typed: variants sorted, intel-oneapi-compilers as oneapi. The
+              # specs are compared as Spack reads them.
+              for manifest in (script, template):
+                  manifest["spack"]["specs"] = [str(spack.spec.Spec(spec)) for spec in manifest["spack"]["specs"]]
+              if script != template:
+                  sys.exit(f"the manifests differ:\n{script}\n{template}")
+              # What Spack reads for each section once every scope is merged,
+              # compared as data: the two files write a list in different styles.
+              for section in os.environ["SECTIONS"].split():
+                  read = [
+                      json.loads(json.dumps(syaml.load(open(f"{os.environ['PARITY']}/{env}.{section}.yaml"))))
+                      for env in ("script", "template")
+                  ]
+                  if read[0] != read[1]:
+                      sys.exit(f"Spack reads {section} differently:\n{read[0]}\n{read[1]}")
+              EOF
+              sections="concretizer modules packages"
+              for section in $sections; do
+                for env in script template; do
+                  $spack -e {{ parity_dir }}/$env config get "$section" >{{ parity_dir }}/$env.$section.yaml
+                done
+              done
+              SCRIPT={{ parity_dir }}/script/spack.yaml TEMPLATE={{ parity_dir }}/template/spack.yaml \
+                PARITY={{ parity_dir }} SECTIONS="$sections" $spack python {{ parity_dir }}/compare.py
+              echo "the manifest ({{ spack_environment_specs | length }} specs as Spack reads them, view, configuration)" \
+                "and the merged concretizer, modules and packages sections"
+            executable: /bin/bash
+          register: parity_compare
+          changed_when: false
+
+        - name: Report it
+          ansible.builtin.debug:
+            msg: "OBSERVED spack.yaml: the template and the script's commands agree on {{ parity_compare.stdout_lines[-1] }}"
 
     - name: Check what the intel_oneapi role leaves, when it was applied
       ansible.builtin.shell:
