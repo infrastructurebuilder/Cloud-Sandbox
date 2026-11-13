@@ -469,6 +469,17 @@ script. The `spack_environment` role reports a change in module files
 by hashing Spack's default module directory; if the files are
 elsewhere, it reports no change but still regenerates them.
 
+**That second guess is wrong the other way too** (found 2026-11-13 while
+testing the `infrastructurebuilder.csis_spack` collection against the
+real Spack v1.2.0): Spack writes into every module file the time it
+wrote it (`## Module file created by spack (...) on 2026-11-13
+11:00:30.218360`). Every refresh therefore changes every file, and the
+role's "Regenerate the environment's module files" task reports a
+change on every run, so a second run of `site.yml` is never "nothing
+changed" once the environment is built. The collection's `spack_env`
+module leaves that line out when it compares module trees; the task
+here is left as it is until the role uses the module.
+
 ### The environment's spack.yaml, written whole (stage 9)
 
 Until stage 9 the `spack_environment` role made the environment's
