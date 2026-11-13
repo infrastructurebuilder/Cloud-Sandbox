@@ -9,22 +9,26 @@ covers PREFECTv3.md
 covers LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md
 covers docs/
 
-# The package. cloudflow/plotting/ belongs to the cloudflow-plotting unit.
+# The package, plotting included. Until 2026-11-13 cloudflow/plotting/ was a
+# second unit, cloudflow-plotting (stage 2, decision 4); the operator folded it
+# back, so cloudflow is one distribution again, as in the root setup.py.
+copy cloudflow/__init__.py   src/cloudflow/__init__.py
 copy cloudflow/cluster/      src/cloudflow/cluster/
 copy cloudflow/job/          src/cloudflow/job/
+copy cloudflow/plotting/     src/cloudflow/plotting/
 copy cloudflow/services/     src/cloudflow/services/
 copy cloudflow/utils/        src/cloudflow/utils/
 copy cloudflow/workflows/    src/cloudflow/workflows/
 
-# Empty today. Left out so that cloudflow is a namespace that the
-# cloudflow-plotting distribution can add cloudflow.plotting to.
-drop cloudflow/__init__.py
+# The plotting requirements, beside the package's own.
+copy cloudflow/plotting_reqs.reference   requirements/plotting_reqs.reference
 
 # Empty today. The project has a new README.
 drop cloudflow/README.md
 
 # Scripts that drive a live sandbox. They are not tests that pytest can run.
 copy cloudflow/tests/forecast.workflow.cbofs.py        legacy-tests/forecast.workflow.cbofs.py
+copy cloudflow/tests/test.plotting.py                  legacy-tests/test.plotting.py
 copy cloudflow/tests/hindcast.worflow.seccofs.py       legacy-tests/hindcast.worflow.seccofs.py
 copy cloudflow/tests/hindcast.workflow.cbofs.py        legacy-tests/hindcast.workflow.cbofs.py
 copy cloudflow/tests/hindcast.workflow.eccofs.py       legacy-tests/hindcast.workflow.eccofs.py
@@ -51,6 +55,10 @@ copy cloudflow/cloudflow_miniforge3_installation.yml    requirements/cloudflow_m
 # Superseded by pyproject.toml and the Justfile; kept for the record.
 copy setup.py             legacy/setup.py
 copy setup-plotting.sh    legacy/setup-plotting.sh
+# The setup.py that built a second, top-level "plotting" distribution, which
+# the root setup.py requires but no code imports. Renamed, because legacy/
+# already holds the root setup.py.
+copy cloudflow/setup.py   legacy/plotting-setup.py
 
 # Stage 8: the Sphinx sources of cloudflow's API documentation and the files
 # that built it. The built HTML beside them in docs/, and an older copy of

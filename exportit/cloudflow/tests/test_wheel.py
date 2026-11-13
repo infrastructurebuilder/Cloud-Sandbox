@@ -8,8 +8,6 @@ from pathlib import Path
 import pytest
 from support import PROJECT
 
-PLOTTING = PROJECT.parent / "cloudflow-plotting"
-
 pytestmark = pytest.mark.slow
 
 PROBE = """
@@ -30,27 +28,25 @@ def run(*command: str, cwd: Path, expect: int = 0) -> str:
 
 
 @pytest.fixture(scope="module")
-def wheels(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path]:
+def wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
     out = tmp_path_factory.mktemp("dist")
     run("uv", "build", "--wheel", "--out-dir", str(out), cwd=PROJECT)
-    run("uv", "build", "--wheel", "--out-dir", str(out), cwd=PLOTTING)
-    (own,) = out.glob("cloudflow-*.whl")
-    (plotting,) = out.glob("cloudflow_plotting-*.whl")
-    return own, plotting
+    (built,) = out.glob("cloudflow-*.whl")
+    return built
 
 
 @pytest.fixture(scope="module")
-def installed(wheels: tuple[Path, Path], tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """Install both wheels into an empty environment; return its bin directory."""
+def installed(wheel: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Install the wheel into an empty environment; return its bin directory."""
     venv = tmp_path_factory.mktemp("install") / "venv"
     run("uv", "venv", "--quiet", "--python", "3.12", str(venv), cwd=venv.parent)
     python = venv / "bin" / "python"
-    run("uv", "pip", "install", "--quiet", "--python", str(python), *map(str, wheels), cwd=venv.parent)
+    run("uv", "pip", "install", "--quiet", "--python", str(python), str(wheel), cwd=venv.parent)
     return venv / "bin"
 
 
-def test_the_wheel_carries_what_the_code_looks_up(wheels: tuple[Path, Path]) -> None:
-    archive = zipfile.ZipFile(wheels[0])
+def test_the_wheel_carries_what_the_code_looks_up(wheel: Path) -> None:
+    archive = zipfile.ZipFile(wheel)
     members = {info.filename: info for info in archive.infolist()}
     templates = [name for name in members if name.startswith("cloudflow/job/templates/")]
     assert len(templates) == 44
@@ -59,12 +55,11 @@ def test_the_wheel_carries_what_the_code_looks_up(wheels: tuple[Path, Path]) -> 
         assert mode & 0o111, f"{launcher} lost its executable bit"
 
 
-def test_the_two_wheels_share_the_namespace_without_overlap(wheels: tuple[Path, Path]) -> None:
-    own, plotting = (set(zipfile.ZipFile(wheel).namelist()) for wheel in wheels)
-    code = {name for name in own & plotting if name.startswith("cloudflow/")}
-    assert code == set()
-    assert "cloudflow/__init__.py" not in own | plotting
-    assert not any(name.startswith("cloudflow/plotting/") for name in own)
+def test_the_one_wheel_holds_the_whole_package_plotting_included(wheel: Path) -> None:
+    names = set(zipfile.ZipFile(wheel).namelist())
+    assert "cloudflow/__init__.py" in names
+    for module in ["plot_roms", "plot_fvcom", "shared", "tile", "hlfs"]:
+        assert f"cloudflow/plotting/{module}.py" in names
 
 
 def test_the_installed_package_finds_its_own_files(installed: Path, tmp_path: Path) -> None:

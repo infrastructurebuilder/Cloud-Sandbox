@@ -44,26 +44,23 @@ Do not edit the copied files here. Change the original and run
 | `docs/` | The original instructions and notes; `docs/sphinx/`, the API documentation's sources (stage 8) |
 | `notebooks/`, `notes/`, `examples/` | Material that travels with the code and is not installed |
 | `requirements/` | The original requirement lists, for reference |
-| `legacy/` | The two files that `pyproject.toml` replaces |
+| `legacy/` | The files that `pyproject.toml` replaces: the root `setup.py`, `setup-plotting.sh`, and `plotting-setup.py` (the original's `cloudflow/setup.py`) |
 
-Plotting lives in a second project,
-[cloudflow-plotting](../cloudflow-plotting/), which this one depends
-on. It installs into the same `cloudflow` namespace, so the code
-imports it as `cloudflow.plotting`. That is why there is no
-`src/cloudflow/__init__.py`: a namespace shared by two distributions
-has none.
+Plotting is part of the package, `src/cloudflow/plotting/`, imported as
+`cloudflow.plotting`. From stage 2 until 2026-11-13 it was a second
+project, `cloudflow-plotting`; it was folded back because the workflows
+import it whenever they load and nothing else ever used it on its own.
 
 ## Working on it
 
 ```sh
 just init        # create the environment, with every extra
 just test        # lint, type-check, fast tests
-just full-test   # also build both wheels and try them in an empty environment, and build the docs
+just full-test   # also build the wheel and try it in an empty environment, and build the docs
 just docs        # the API documentation, into docs/sphinx/build/html
 ```
 
-The API documentation is built from the installed `cloudflow` and
-`cloudflow-plotting`. Its sources are copies; only `conf.py` is patched,
+The API documentation is built from the installed `cloudflow`. Its sources are copies; only `conf.py` is patched,
 to find the modules there instead of through paths into the old
 repository. Three of its pages name modules that no longer exist
 (`nodeInfo`, `nosofs_qops`, `run_adnoc`); `tests/test_docs.py` holds the

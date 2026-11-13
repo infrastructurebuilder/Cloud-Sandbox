@@ -85,13 +85,14 @@ About 45 files copied, about 8 written. Branch
   and [sandbox-provisioning/DEPLOYMENT.md](../exportit/sandbox-provisioning/DEPLOYMENT.md),
   each naming the original's lines and its departures.
 - Item 3: [exportit/cloud-sandbox/](../exportit/cloud-sandbox/README.md),
-  with `units.toml` (15 units, versions, apply steps, relocation order),
+  with `units.toml` (15 units, versions, apply steps, relocation order;
+  14 since plotting was folded back into cloudflow on 2026-11-13),
   its own check, and a tools test that holds it to the repository.
 - Item 4: the umbrella's map says `covers ./`, a form the export tool
   learned for it; every one of the 814 tracked files outside `exportit/`
   is now taken or dropped with a reason.
 - Item 5: [MAP.md](../exportit/MAP.md#the-order-of-the-real-relocations)
-  closes with the nine relocation steps and what the original holds
+  closes with the relocation steps (nine, eight since 2026-11-13) and what the original holds
   after each.
 - Found: six broken links in the root README; DEPLOYMENT.md stale
   against the Terraform module; the Terraform version (1.5.7 in the
