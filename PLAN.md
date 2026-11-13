@@ -2,11 +2,9 @@
 
 ## Reconstruction into independent units (2026-11-12)
 
-*Status:* stages 1 (analysis and plan), 2 (cloudflow), 3
-(provisioning as Ansible), 4 (Terraform), 5 (model recipes),
-6 (job and cluster descriptions) and 7 (operator tools, users and
-JupyterHub) merged into `develop` 2026-11-12; 8 (documentation and the
-umbrella) executed, waiting for validation. All stages are done.
+*Status:* all eight stages merged into `develop` 2026-11-12, one
+squash commit each, feature branches kept. Nothing has been relocated;
+the real relocations wait for the operator.
 
 Cloud-Sandbox is being taken apart into units that could each live in
 their own repository: the cloudflow workflow engine, head-node

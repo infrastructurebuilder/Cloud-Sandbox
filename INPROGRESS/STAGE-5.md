@@ -1,6 +1,6 @@
 # Stage 5: model recipes as an independent unit
 
-*Status:* executed 2026-11-12; waits for validation. The decisions are
+*Status:* executed and merged into `develop` 2026-11-12. The decisions are
 under [Decisions taken](#decisions-taken); the result under
 [Outcome](#outcome).
 
