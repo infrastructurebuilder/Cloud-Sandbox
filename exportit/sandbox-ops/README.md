@@ -2,10 +2,11 @@
 
 The tools an operator of a Cloud Sandbox runs by hand: keeping the Spack
 binary mirror, clearing old model output, changing the head node's
-instance, the weekly job report. Beside them, in `attic/`, is everything
-else that was left in `scripts/`, `misc/` and `jupyterhub/` once
-provisioning had taken its part: files that something newer has replaced,
-and files that no longer apply.
+instance, the weekly job report. They are what was still in use of
+everything left in `scripts/`, `misc/` and `jupyterhub/` once
+provisioning had taken its part. The rest, files that something newer
+has replaced and files that no longer apply, does not travel: it stays
+with the original repository, in the umbrella's `attic/`.
 
 ## This is a copy
 
@@ -22,20 +23,25 @@ What is new: this README, `LICENSE`, `Justfile`, `CATALOGUE.tsv` and
 
 ## The catalogue
 
-Each of the 92 files was read and marked, with the evidence, in
-[CATALOGUE.tsv](CATALOGUE.tsv): its original path, where it is here, its
-status, its group, what superseded it, one sentence of evidence citing
-the lines it rests on, and a note when it holds personal data.
+Each of the 92 files left over was read and marked, with the evidence:
+its original path, where it went, its status, its group, what superseded
+it, one sentence of evidence citing the lines it rests on, and a note
+when it holds personal data.
 
 | Status | Means | Where | Files |
 | --- | --- | --- | ---: |
-| in use | still makes sense on today's sandbox (RHEL 10, Spack, oneAPI, EFS, Prefect), even if nothing calls it | `bin/`, `keys/` | 16 |
-| superseded | what it did is done by something else, named in the catalogue: mostly a role of `sandbox-provisioning` | `attic/superseded/<original path>` | 26 |
-| dead | refers to what no longer exists (Slurm and munge, RHEL 7 and 8, old Spack trees), or is a one-off note | `attic/dead/<original path>` | 50 |
+| in use | still makes sense on today's sandbox (RHEL 10, Spack, oneAPI, EFS, Prefect), even if nothing calls it | here, in `bin/` and `keys/` | 16 |
+| superseded | what it did is done by something else, named in the catalogue: mostly a role of `sandbox-provisioning` | the umbrella's `attic/superseded/<original path>` | 26 |
+| dead | refers to what no longer exists (Slurm and munge, RHEL 7 and 8, old Spack trees), or is a one-off note | the umbrella's `attic/dead/<original path>` | 50 |
 
-By the operator's decision the attic is copied rather than left behind,
-so that every file is accounted for and nothing is lost if a judgement is
-wrong. Its files keep their original paths under the status directory.
+[CATALOGUE.tsv](CATALOGUE.tsv) here holds the 16 rows of the tools in
+use; `cloud-sandbox/attic/CATALOGUE.tsv` holds the other 76.
+
+At first the attic was copied here, so that every file was accounted
+for. On 2026-11-13 the operator decided that the attic does not travel
+with the code: it stays with the original repository, which the
+umbrella `cloud-sandbox` is. The files are still accounted for, by that
+unit's map.
 
 ## The tools in use
 
@@ -61,8 +67,6 @@ The tools came from one directory and some still expect its neighbours:
   `funcs-setup-instance.sh` and runs `./create_image.sh`. Those are now
   `sandbox-provisioning`'s, in its `legacy/`; its `group_vars/all.yml`
   holds the same values.
-- `attic/dead/scripts/ncdis-setup.sh` runs `install_jupyterhub.sh`,
-  which is now in `sandbox-provisioning/legacy/` too.
 
 ## Working on it
 

@@ -3,7 +3,10 @@
 This directory holds copies of the parts of Cloud-Sandbox that could
 live in repositories of their own. Nothing here has been moved: the
 original paths are untouched, and no other repository has been
-created. This page says, for each unit, where its files come from,
+created. Whether anything is relocated at all is not decided: the
+operator will decide once the commit tree is in good order
+(2026-11-13). What follows says how it would be done, not that it
+will be. This page says, for each unit, where its files come from,
 where the copy is, and how the real relocation would be done.
 
 The reasons behind the split are in
@@ -26,13 +29,14 @@ nothing leaves this repository).
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
 | `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
-| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the rest of `scripts/`, all of `misc/` | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
-| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore` | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12 |
+| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 16 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 15 operator tools and the Spack mirror's public key | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
+| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13 |
 | not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `INPROGRESS/`, `PLAN.md`, `Justfile` | [8](../INPROGRESS/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
 
 Every tracked top-level path of the repository appears in one row.
-`scripts/` is divided file by file between two units; stages 3 and 7
-record that division here.
+`scripts/` is divided file by file between three units
+(`sandbox-provisioning`, `sandbox-ops`, and the umbrella's attic);
+stages 3 and 7 record that division here.
 
 ## How a copy is made and checked
 
@@ -910,20 +914,47 @@ project's own description is
 
 After stage 3, 108 files of `scripts/`, `misc/` and `jupyterhub/` had no
 unit. Each was read and marked in use, superseded or dead, with the
-evidence (`sandbox-ops/CATALOGUE.tsv`, which keeps the reading for the
-92 that are copied). Then:
+evidence (`sandbox-ops/CATALOGUE.tsv` and
+`cloud-sandbox/attic/CATALOGUE.tsv` keep the reading for the 92 that are
+not provisioning's). Then:
 
 | Files | Went to | Why |
 | ---: | --- | --- |
 | 8 | `sandbox-provisioning`, role `sandbox_users`, playbook `users.yml` | the user tools and their `sudoers` files: operator's decision 1 |
 | 8 | `sandbox-provisioning`, role `jupyterhub`, playbook `jupyterhub.yml` | the JupyterHub install, its files, and its README: decision 1 |
 | 16 | `sandbox-ops/bin/`, `keys/` | tools still in use |
-| 26 | `sandbox-ops/attic/superseded/` | replaced by something named in the catalogue |
-| 50 | `sandbox-ops/attic/dead/` | no longer apply: operator's decision 2 copies them rather than leaving them behind |
+| 26 | `cloud-sandbox/attic/superseded/` | replaced by something named in the catalogue |
+| 50 | `cloud-sandbox/attic/dead/` | no longer apply |
 
 With this, the copy check covers every tracked file under `scripts/`,
 `misc/` and `jupyterhub/`: the [sandbox-ops.map](sandbox-ops.map) says
-`covers` for all three, and `sandbox-provisioning.map` takes its part.
+`covers` for all three, `sandbox-provisioning.map` takes its part, and
+[cloud-sandbox.map](cloud-sandbox.map) takes the attic.
+
+### The attic stays with the original repository
+
+Stage 7 copied the 76 superseded and dead files into `sandbox-ops/attic/`
+(decision 2). On 2026-11-13 the operator decided that the attic does not
+travel with the code: it stays with the original repository. The
+original repository is what the umbrella `cloud-sandbox` is once the
+units have left, so the attic moved there, whole and unchanged:
+`cloud-sandbox/attic/<status>/<original path>`, with the 76 rows of the
+catalogue in `cloud-sandbox/attic/CATALOGUE.tsv` and a description in
+[cloud-sandbox/attic/README.md](cloud-sandbox/attic/README.md).
+
+- `sandbox-ops` keeps the 16 tools in use and their 16 rows. Its
+  catalogue check now refuses a superseded or dead row: those belong in
+  the attic. Its shellcheck record lost the attic's 36 scripts: 14
+  scripts and 70 findings remain, the one that does not parse
+  (`scrub_liveocean.sh`) among them.
+- The umbrella's `just test` checks the attic with
+  `tests/check_attic.py`: every file has one row, every row a file, and
+  each file sits at `attic/<status>/<original path>`. The attic's
+  scripts are not shellchecked: nothing runs them.
+- `patrick.gitconfig` is in the attic, at
+  `attic/dead/scripts/system/patrick.gitconfig`, as it already was in
+  `sandbox-ops`. It has always been in the original repository; staying
+  there adds nothing to it, and it no longer travels anywhere.
 
 ### The two new roles
 
@@ -993,8 +1024,8 @@ above its task:
 - **Personal data in the tree:** `scripts/system/patrick.gitconfig`
   (a name and an address), the mirror key's user id (a work address),
   and three `sudoers` files that name accounts. They are copied as they
-  are, like everything else; a real relocation should leave
-  `patrick.gitconfig` behind.
+  are, like everything else. `patrick.gitconfig` is in the attic, which
+  stays with the original repository, so it leaves with no unit.
 - 16 of the 50 dead files are Slurm and munge: unit files, a
   configuration and notes from before the sandbox used cloudflow's own
   nodes.
@@ -1003,23 +1034,25 @@ above its task:
 
 | Check | Where | Result on 2026-11-12 |
 | --- | --- | --- |
-| The catalogue and the files agree; each file sits where its status says | `sandbox-ops`' `just test` | pass, 92 files |
-| 50 scripts parse, except the one recorded; 559 shellcheck findings as recorded | `sandbox-ops`' `just test` | pass |
+| The catalogue and the files agree; every file is in use (2026-11-13) | `sandbox-ops`' `just test` | pass, 16 files |
+| 14 scripts parse, except the one recorded; 70 shellcheck findings as recorded (2026-11-13; before the attic moved, 50 scripts and 559 findings) | `sandbox-ops`' `just test` | pass |
+| The attic and its catalogue agree; each file sits where its status says (2026-11-13) | `cloud-sandbox`' `just test` | pass, 76 files: 26 superseded, 50 dead |
 | Every task of the two roles names its lines; every line is replaced or explained | `sandbox-provisioning`'s `just test` | pass |
 | The templates write the original files | `sandbox-provisioning`'s `just test` | pass |
 | `users.yml` and `jupyterhub.yml` applied twice in the container, the second run changing nothing; the user removed again | `sandbox-provisioning`'s `just full-test` | pass; the hub answers on port 8000 |
-| Extraction with history | root `just full-test` | `sandbox-ops`: the same 92 files, with 22 commits; `sandbox-provisioning`: 25 files, 19 commits |
+| Extraction with history | root `just full-test` | `sandbox-ops`: the same 16 files, with 14 commits (2026-11-13; 92 files and 22 commits with the attic); `cloud-sandbox`, attic included: 84 files, 62 commits; `sandbox-provisioning`: 25 files, 19 commits |
 
 ### What a real relocation would change
 
-- Extract with `just export-filter sandbox-ops`, then decide whether
-  the attic travels at all: it is there so that nothing is lost, not
-  because anything needs it. Leave `patrick.gitconfig` out either way.
+- Extract with `just export-filter sandbox-ops`. The attic is not in
+  it: it stays with the original repository (2026-11-13).
 - Point the mirror tools at `sandbox-provisioning`'s `group_vars`
   instead of sourcing `environment-vars.sh`, and update their versions.
 - Fix or retire `scrub_liveocean.sh` and `add-ufs-setup.sh`.
-- In Cloud-Sandbox: delete `scripts/`, `misc/` and `jupyterhub/`
-  ([stage 8](../INPROGRESS/STAGE-8.md)).
+- In Cloud-Sandbox: move the attic's 76 files to
+  `attic/<status>/<original path>` with `git mv`, so that they keep their
+  history there, then delete what is left of `scripts/`, `misc/` and
+  `jupyterhub/` ([stage 8](../INPROGRESS/STAGE-8.md)).
 
 ## cloud-sandbox (the umbrella)
 
@@ -1039,8 +1072,10 @@ From [cloud-sandbox.map](cloud-sandbox.map):
 | `images/sandbox-stack.png` | `images/` |
 | `README.md`, `DEPLOYMENT.md`, `TODO`, `.gitignore` | `history/` (`.gitignore` as `history/gitignore`, so that its monorepo patterns do not hide the umbrella's files) |
 | `images/AWS-Key-pairs-screen.png` | not here: `sandbox-terraform/docs/images/`, beside the text that shows it |
+| the 76 superseded and dead files of `scripts/` and `misc/` | `attic/superseded/` and `attic/dead/`, under their original paths (2026-11-13; see [the sandbox-ops section](#the-attic-stays-with-the-original-repository)) |
 
-New: `README.md`, `units.toml`, `Justfile`, `tests/`.
+New: `README.md`, `units.toml`, `Justfile`, `tests/`, and
+`attic/README.md` and `attic/CATALOGUE.tsv`.
 
 [units.toml](cloud-sandbox/units.toml) is the umbrella's substance: each
 unit's name, the version that goes into a sandbox, its kind, the step at
@@ -1114,7 +1149,7 @@ step is done.
 | 4 | `sandbox-configs` | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
 | 5 | `sandbox-provisioning` | nothing | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
 | 6 | `sandbox-terraform` | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 5's repository |
-| 7 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | `scripts/` and `misc/` gone |
+| 7 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | the attic's 76 files moved to `attic/`, which stays; the rest of `scripts/` and `misc/` gone |
 | 8 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |
 
 The machinery of this work does not move: `exportit/`, `INPROGRESS/`,

@@ -139,4 +139,4 @@ kind = "scripts"
 step = 6
 relocate = 7
 needs = ["sandbox-provisioning"]
-what = "the operator's tools, and the attic of what is retired"
+what = "the operator's tools"

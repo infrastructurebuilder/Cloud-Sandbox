@@ -54,7 +54,11 @@ The part of the 93 files under `scripts/` that
 
 1. **Users and JupyterHub:** Ansible roles in `sandbox-provisioning`,
    `sandbox_users` and `jupyterhub`, each with its own playbook.
-2. **Dead files:** copied into `attic/` of the export, under their
+2. **Dead files:** *(changed by the operator on 2026-11-13: the attic
+   does not travel with the code; it stays with the original
+   repository, as `attic/` of the umbrella `cloud-sandbox`; see
+   [MAP.md](../exportit/MAP.md#the-attic-stays-with-the-original-repository).)*
+   copied into `attic/` of the export, under their
    status and original path.
 3. **Conda for JupyterHub** (surfaced by the container test, where the
    script's Miniconda 23.1 had not solved the conda-forge install after
