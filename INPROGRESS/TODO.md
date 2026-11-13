@@ -31,7 +31,7 @@ any work starts.
 | Stage | Unit | State |
 | ---: | --- | --- |
 | [1](STAGE-1.md) | Analysis and plan | Merged into `develop` 2026-11-12 |
-| [2](STAGE-2.md) | `cloudflow` and `cloudflow-plotting` | Merged into `develop` 2026-11-12 |
+| [2](STAGE-2.md) | `cloudflow` and `cloudflow-plotting` (plotting folded back into cloudflow 2026-11-13) | Merged into `develop` 2026-11-12 |
 | [3](STAGE-3.md) | `sandbox-provisioning` (Ansible) | Merged into `develop` 2026-11-12; live proof not run |
 | [4](STAGE-4.md) | `sandbox-terraform` | Merged into `develop` 2026-11-12 |
 | [5](STAGE-5.md) | `model-*` (eight models) and `model-common` | Merged into `develop` 2026-11-12 |

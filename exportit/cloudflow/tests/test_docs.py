@@ -1,8 +1,8 @@
 """The API documentation builds from the installed packages.
 
 The Sphinx sources under docs/sphinx/source/ are copies; only conf.py is
-patched, to find the modules in the installed cloudflow and cloudflow-plotting
-instead of through paths into the old repository. Three pages document modules
+patched, to find the modules in the installed cloudflow instead of through
+paths into the old repository. Three pages document modules
 that no longer exist. The build is held to exactly those three failures.
 """
 

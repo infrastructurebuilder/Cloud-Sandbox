@@ -28,11 +28,7 @@ OUTWARD = {
 
 
 def package_dir() -> Path:
-    """Find this distribution's part of the cloudflow namespace.
-
-    cloudflow is a namespace shared with cloudflow-plotting, so it has more
-    than one directory; this one holds the workflows.
-    """
+    """Find the cloudflow package's directory: the one that holds the workflows."""
     for entry in cloudflow.__path__:
         if (Path(entry) / "workflows").is_dir():
             return Path(entry)

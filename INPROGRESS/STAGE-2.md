@@ -105,7 +105,9 @@ Asked one at a time on 2026-11-12, before execution.
    That is the one exception to decision 2. It touches eight files,
    each correction is kept as a patch file beside the mapping file,
    and the copy check applies the patches before it compares.
-4. **Plotting:** a second project, `exportit/cloudflow-plotting/`,
+4. **Plotting:** *(reversed by the operator on 2026-11-13: plotting is
+   folded back into cloudflow; see [MAP.md](../exportit/MAP.md#plotting-folded-back).)*
+   a second project, `exportit/cloudflow-plotting/`,
    which cloudflow depends on. The copied code imports it as
    `cloudflow.plotting`, so both projects install into one `cloudflow`
    namespace. A consequence: the empty `cloudflow/__init__.py` is not

@@ -1,3 +1,5 @@
+"""cloudflow.plotting works out file names and map tiles as it did as its own distribution."""
+
 from __future__ import annotations
 
 import pytest

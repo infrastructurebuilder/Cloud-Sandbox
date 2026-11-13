@@ -16,6 +16,7 @@ NOT_IMPORTABLE = {
     "AWS_REGION and ORG_MAX_MINUTES from the environment when it is loaded",
     "cloudflow.cluster.lambda_terminate_zombies": "an AWS Lambda handler: it reads TABLE_NAME, "
     "AWS_REGION and ORG_MAX_MINUTES from the environment when it is loaded",
+    "cloudflow.plotting.hlfs": "an exported notebook: it runs main('hlfs.config') when it is loaded",
     "cloudflow.utils.testutils": "imports modelUtil as a top-level module, which resolves only "
     "when the working directory is utils/",
     "cloudflow.workflows.scripts.random_ofs": "a script: it reads /com/nos/current.fcst when it is loaded",

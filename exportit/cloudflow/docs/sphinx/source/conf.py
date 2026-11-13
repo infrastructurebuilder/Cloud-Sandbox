@@ -12,10 +12,10 @@
 #
 import os
 import sys
-# Exported: the modules are documented from the installed packages, cloudflow
-# and cloudflow-plotting, which share the cloudflow namespace. The pages name
-# each module by its bare name, so each subpackage's directory goes on the
-# path, wherever the package is installed.
+# Exported: the modules are documented from the installed cloudflow package,
+# plotting included. The pages name each module by its bare name, so each
+# subpackage's directory goes on the path, wherever the package is
+# installed.
 import cloudflow
 
 for base in cloudflow.__path__:

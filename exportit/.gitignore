@@ -7,3 +7,4 @@ dist/
 .terraform.lock.hcl
 .terraform-plugins/
 cloudflow/docs/sphinx/build/
+.tofu/

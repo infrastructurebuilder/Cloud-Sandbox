@@ -16,7 +16,7 @@ This repository says which units, which versions, and in which order.
 | --- | --- |
 | `sandbox-terraform` | The AWS resources: network, security groups, EFS volume, IAM role, placement group, head node |
 | `sandbox-provisioning` | Ansible that builds the head node's software (compilers, MPI, Spack, Prefect), the compute-node image, the users, JupyterHub |
-| `cloudflow`, `cloudflow-plotting` | The workflow engine that starts compute nodes and runs the models, and the plots of their output |
+| `cloudflow` | The workflow engine that starts compute nodes and runs the models, and the plots of their output |
 | `model-common` and eight `model-<name>` units | The recipes that fetch, build and feed each model: ADCIRC (CORA), ECCOFS, LiveOcean, NECOFS, NOSOFS, SECOFS, UCLA ROMS, UFS Coastal |
 | `sandbox-configs` | The job and cluster descriptions cloudflow runs with, and their schema |
 | `sandbox-ops` | The operator's tools: the Spack mirror, clearing old output, instance changes, the weekly report |
@@ -35,7 +35,7 @@ This repository says which units, which versions, and in which order.
    several without. Add users with `users.yml`, and JupyterHub with
    `jupyterhub.yml` if the site wants it. Its `DEPLOYMENT.md` says how to
    follow the installation.
-3. **`cloudflow`** (with `cloudflow-plotting`), installed on the head node
+3. **`cloudflow`**, installed on the head node
    in the login user's Python environment.
 4. **The models** a site runs: `model-common`, then each `model-<name>`,
    built on the EFS volume under `/save`.

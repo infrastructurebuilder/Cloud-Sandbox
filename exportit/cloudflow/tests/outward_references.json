@@ -50,6 +50,12 @@
   "job/WRF_Hydro_Experiment.py": {
     "sys.path changed at import": 1
   },
+  "plotting/plot_fvcom.py": {
+    "sys.path changed at import": 1
+  },
+  "plotting/plot_roms.py": {
+    "sys.path changed at import": 1
+  },
   "services/testscratch.py": {
     "a home directory": 2,
     "sys.path changed at import": 1,

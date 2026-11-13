@@ -20,7 +20,7 @@ name = "sandbox-terraform"
 version = "0.1.0"
 kind = "terraform"
 step = 1
-relocate = 7
+relocate = 6
 needs = ["sandbox-provisioning"]
 what = "the network, EFS volume, IAM role, placement group and head node"
 
@@ -29,34 +29,25 @@ name = "sandbox-provisioning"
 version = "0.1.0"
 kind = "ansible"
 step = 2
-relocate = 6
+relocate = 5
 needs = []
 what = "the head node's software (site.yml), the compute-node image, users, JupyterHub"
-
-[[unit]]
-name = "cloudflow-plotting"
-version = "0.3.1"
-kind = "python"
-step = 3
-relocate = 1
-needs = []
-what = "the plots of model output"
 
 [[unit]]
 name = "cloudflow"
 version = "1.6.0b0"
 kind = "python"
 step = 3
-relocate = 2
-needs = ["cloudflow-plotting"]
-what = "the workflow engine that starts compute nodes and runs the models"
+relocate = 1
+needs = []
+what = "the workflow engine that starts compute nodes and runs the models, and the plots of their output"
 
 [[unit]]
 name = "model-common"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 3
+relocate = 2
 needs = []
 what = "the module files and notes the model recipes share"
 
@@ -65,7 +56,7 @@ name = "model-adcirc-cora"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = ["model-common"]
 what = "ADCIRC for the CORA reanalysis"
 
@@ -74,7 +65,7 @@ name = "model-eccofs"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "ECCOFS (ROMS), from the NOSOFS code package"
 
@@ -83,7 +74,7 @@ name = "model-liveocean"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "LiveOcean (ROMS)"
 
@@ -92,7 +83,7 @@ name = "model-necofs"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "NECOFS (FVCOM)"
 
@@ -101,7 +92,7 @@ name = "model-nosofs"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "the NOS operational forecast systems (ROMS and FVCOM)"
 
@@ -110,7 +101,7 @@ name = "model-secofs"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "SECOFS (SCHISM)"
 
@@ -119,7 +110,7 @@ name = "model-ucla-roms"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "UCLA ROMS"
 
@@ -128,7 +119,7 @@ name = "model-ufscoastal"
 version = "0.1.0"
 kind = "scripts"
 step = 4
-relocate = 4
+relocate = 3
 needs = []
 what = "UFS Coastal"
 
@@ -137,7 +128,7 @@ name = "sandbox-configs"
 version = "0.1.0"
 kind = "data"
 step = 5
-relocate = 5
+relocate = 4
 needs = ["cloudflow"]
 what = "the job and cluster descriptions cloudflow runs with, and their schema"
 
@@ -146,6 +137,6 @@ name = "sandbox-ops"
 version = "0.1.0"
 kind = "scripts"
 step = 6
-relocate = 8
+relocate = 7
 needs = ["sandbox-provisioning"]
 what = "the operator's tools, and the attic of what is retired"

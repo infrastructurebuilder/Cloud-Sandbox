@@ -20,8 +20,7 @@ nothing leaves this repository).
 
 | Unit | Copy | Source paths | Stage | State |
 | --- | --- | --- | ---: | --- |
-| `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` without `plotting/`; root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
-| `cloudflow-plotting` | [cloudflow-plotting/](cloudflow-plotting/) | `cloudflow/plotting/`, `cloudflow/setup.py`, `cloudflow/plotting_reqs.reference`, `cloudflow/tests/test.plotting.py` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
+| `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` (plotting included since 2026-11-13); root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
 | cloudflow's documentation | [cloudflow/docs/sphinx/](cloudflow/docs/sphinx/) | `docs/source/` and the files that built it | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12 |
 | `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
@@ -43,8 +42,8 @@ for a file that is deliberately left behind, `new <path>` for a file
 that exists only in the unit, and `covers <path>` to say that every
 tracked file under a path must be assigned to some unit. Where two
 directives match a file, the longer source wins; that is how
-`cloudflow/plotting/` goes to one unit and the rest of `cloudflow/`
-to another.
+`cloudflow/README.md` is dropped while the rest of `cloudflow/` is
+copied.
 
 A correction to a copied file is not made by editing the copy. It is a
 patch in `<unit>.patches/`, applied after the copy.
@@ -114,23 +113,28 @@ project's own description is
 
 ### Where each file goes
 
-From [cloudflow.map](cloudflow.map): 188 files copied, 2 left behind.
+From [cloudflow.map](cloudflow.map). Plotting was a unit of its own,
+`cloudflow-plotting`, until 2026-11-13, when the operator folded it
+back (see [Plotting, folded back](#plotting-folded-back)); the table is
+as it is now.
 
 | Source | In the unit | Files |
 | --- | --- | ---: |
 | `cloudflow/cluster/` | `src/cloudflow/cluster/` | 9 |
 | `cloudflow/job/` | `src/cloudflow/job/` | 63 |
+| `cloudflow/plotting/` | `src/cloudflow/plotting/` | 7 |
+| `cloudflow/__init__.py` (empty) | `src/cloudflow/__init__.py` | 1 |
 | `cloudflow/services/` | `src/cloudflow/services/` | 6 |
 | `cloudflow/utils/` | `src/cloudflow/utils/` | 4 |
 | `cloudflow/workflows/` | `src/cloudflow/workflows/` | 59 |
-| `cloudflow/tests/` except `test.plotting.py` | `legacy-tests/` | 6 |
+| `cloudflow/tests/` | `legacy-tests/` | 7 |
 | `cloudflow/notebooks/` | `notebooks/` | 22 |
 | `cloudflow/notes/`, `cloudflow/somenotes/` | `notes/`, `notes/somenotes/` | 5 |
 | `cloudflow/docs/`, the three `.md` files in `cloudflow/`, root `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | `docs/` | 7 |
 | `cloudflow/cron_nosofs.sh`, `cloudflow/cron_rand_nosofs.sh` | `examples/cron/` | 2 |
-| `cloudflow/python_minimal_requirements.txt`, `pip_freeze.reference`, `cloudflow_miniforge3_installation.yml` | `requirements/` | 3 |
+| `cloudflow/python_minimal_requirements.txt`, `pip_freeze.reference`, `cloudflow_miniforge3_installation.yml`, `plotting_reqs.reference` | `requirements/` | 4 |
 | root `setup.py`, `setup-plotting.sh` | `legacy/` | 2 |
-| `cloudflow/__init__.py` | left behind: empty, and `cloudflow` has to be a namespace (see below) | |
+| `cloudflow/setup.py` | `legacy/plotting-setup.py`, renamed because `legacy/setup.py` is the root one | 1 |
 | `cloudflow/README.md` | left behind: empty; the unit has a new README | |
 
 ### What is new
@@ -138,7 +142,10 @@ From [cloudflow.map](cloudflow.map): 188 files copied, 2 left behind.
 `README.md`, `LICENSE` (a copy of the repository's), `pyproject.toml`,
 `uv.lock`, `Justfile`, `.python-version` and `tests/`.
 
-`pyproject.toml` replaces both `setup.py` files. It names the
+`pyproject.toml` replaces both `setup.py` files. Its dependencies
+include plotting's (matplotlib, netCDF4, numpy, Pillow, pyproj), since
+`workflows/job_tasks.py` imports `cloudflow.plotting` when it is
+loaded, and an `hlfs` extra for `plotting/hlfs.py`. It names the
 distribution `cloudflow`, version `1.6.0b0` (the root `setup.py` said
 `1.6.0b`), and registers a `cloudflow` command that runs
 `workflow_main.py`'s `main`. Its dependencies are what the code
@@ -148,11 +155,9 @@ imports; the lower bounds are the versions in
 ### Decisions that shaped it
 
 - **Layout:** the package is under `src/`.
-- **Plotting is a second distribution.** Both install into one
-  `cloudflow` namespace, because the copied code says
-  `from cloudflow.plotting import ...`. A namespace shared by two
-  distributions cannot have an `__init__.py`, which is why the empty
-  one is left behind.
+- **Plotting is part of the package**, as `cloudflow.plotting`, the way
+  the code imports it. Stage 2 made it a second distribution sharing a
+  `cloudflow` namespace; the operator folded it back on 2026-11-13.
 - **The Lambda functions stay in the package**, in
   `src/cloudflow/cluster/`, as today.
 
@@ -238,13 +243,10 @@ counts every such place per file, and a test fails if one is added.
 ### Extraction
 
 `just export-prove cloudflow` passed on 2026-11-12: the rewritten
-clone holds the same 188 files, with 112 commits of history (the
+clone held the same 188 files, with 112 commits of history; with
+plotting and the documentation folded in, on 2026-11-13, 240 files and
+114 commits (the
 repository had 176 before this work). `just export-filter cloudflow` prints the 56 directives.
-
-Order matters once: extract `cloudflow-plotting` first, or at least
-publish it first, because cloudflow depends on it. In
-`pyproject.toml` the dependency is a relative path
-(`../cloudflow-plotting`); at a real relocation it becomes a version.
 
 Afterwards Cloud-Sandbox would delete `cloudflow/` and the five root
 files, `scripts/funcs-setup-instance.sh` would install the
@@ -255,42 +257,37 @@ would document the installed package
 The name `cloudflow` has not been checked against any package index.
 Nothing is published.
 
-## cloudflow-plotting
+### Plotting, folded back
 
-Copied on 2026-11-12 by [stage 2](../INPROGRESS/STAGE-2.md). The
-project's own description is
-[cloudflow-plotting/README.md](cloudflow-plotting/README.md).
+From stage 2 to 2026-11-13 `cloudflow/plotting/` was a unit of its own,
+`cloudflow-plotting`, by the operator's decision then: a second
+distribution, version 0.3.1, that installed `cloudflow.plotting` into a
+`cloudflow` namespace it shared with this one. On 2026-11-13 the
+operator folded it back. The reasons: the code only ever imports it as
+`cloudflow.plotting`; the workflows import it whenever they load, so
+cloudflow could not run without it; and the second distribution's
+model, `cloudflow/setup.py`, is close to an orphan. That file builds a
+distribution called `plotting`, with a top-level `plotting` package that
+no code imports. Only `setup-plotting.sh` installs it, and the root
+`setup.py` lists it as a requirement.
 
-From [cloudflow-plotting.map](cloudflow-plotting.map): 10 files.
+What changed:
 
-| Source | In the unit | Files |
-| --- | --- | ---: |
-| `cloudflow/plotting/` | `src/cloudflow/plotting/` | 7 |
-| `cloudflow/tests/test.plotting.py` | `legacy-tests/test.plotting.py` | 1 |
-| `cloudflow/plotting_reqs.reference` | `requirements/plotting_reqs.reference` | 1 |
-| `cloudflow/setup.py` | `legacy/setup.py` | 1 |
-
-New: `README.md`, `LICENSE`, `pyproject.toml`, `uv.lock`, `Justfile`,
-`.python-version` and `tests/`. `pyproject.toml` replaces
-`cloudflow/setup.py`, which built a distribution called `plotting`,
-version 0.3.1, from a directory that the code never imported under
-that name. The new distribution is `cloudflow-plotting`, the same
-version, and provides `cloudflow.plotting`.
-
-One correction, in
-[cloudflow-plotting.patches/](cloudflow-plotting.patches/):
-`plotting/hlfs.py` catches `ClientError` without importing it; the
-import is added.
-
-Left as it is: `hlfs.py` is an exported notebook that runs
-`main('hlfs.config')` when it is imported, so it is a script and not a
-module. What it imports is the `hlfs` extra. `legacy-tests/test.plotting.py`
-imports `plotting`, the old name, and needs model output under `/com`.
-
-It expects nothing from the other units. `cloudflow` depends on it.
-
-`just export-prove cloudflow-plotting` passed on 2026-11-12: the same
-10 files, with 14 commits.
+- `cloudflow/plotting/`, `cloudflow/plotting_reqs.reference` and
+  `cloudflow/tests/test.plotting.py` are copied into this unit;
+  `cloudflow/setup.py` goes to `legacy/plotting-setup.py`, renamed so
+  that it does not overwrite the root `setup.py` in `legacy/`.
+- `cloudflow/__init__.py`, left out while `cloudflow` was a namespace,
+  is copied again: the package is a regular one, as in the original.
+- The one plotting correction, the missing `ClientError` import in
+  `hlfs.py`, is now `cloudflow.patches/09-hlfs-import-clienterror.patch`.
+- Plotting's dependencies and its `hlfs` extra are cloudflow's; its
+  tests are `tests/test_plotting.py`; the wheel test builds one wheel
+  and checks that plotting is in it. Two more outward references are
+  counted: `plot_roms.py` and `plot_fvcom.py` change `sys.path` when
+  they load.
+- `exportit/cloudflow-plotting/`, its map and its patch directory are
+  gone, and so is its line in the umbrella's `units.toml`.
 
 ## sandbox-provisioning
 
@@ -1098,21 +1095,20 @@ step is done.
 
 | Step | Unit | What it needs first | Cloud-Sandbox after |
 | ---: | --- | --- | --- |
-| 1 | `cloudflow-plotting` | nothing | `cloudflow/plotting/` and `cloudflow/setup.py` gone; cloudflow there still imports plotting through the namespace, so the new package is installed beside it |
-| 2 | `cloudflow` | `cloudflow-plotting` | `cloudflow/`, the root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, the Miniforge guide and `docs/` gone. The launchers no longer sit next to `models/`; the job descriptions that name `/save/<user>/Cloud-Sandbox/...` paths have to change (step 5) |
-| 3 | `model-common` | nothing | `models/modulefiles/`, `models/utils/` and the three notes gone; `adcirc-cora`'s `../modulefiles` no longer resolves in the original |
-| 4 | the eight `model-<name>` units | `model-common` (ADCIRC only) | `models/` and `patches/` gone |
-| 5 | `sandbox-configs` | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
-| 6 | `sandbox-provisioning` | nothing | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
-| 7 | `sandbox-terraform` | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 6's repository |
-| 8 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | `scripts/` and `misc/` gone |
-| 9 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–8 |
+| 1 | `cloudflow` | nothing | `cloudflow/`, the root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, the Miniforge guide and `docs/` gone. The launchers no longer sit next to `models/`; the job descriptions that name `/save/<user>/Cloud-Sandbox/...` paths have to change (step 4) |
+| 2 | `model-common` | nothing | `models/modulefiles/`, `models/utils/` and the three notes gone; `adcirc-cora`'s `../modulefiles` no longer resolves in the original |
+| 3 | the eight `model-<name>` units | `model-common` (ADCIRC only) | `models/` and `patches/` gone |
+| 4 | `sandbox-configs` | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
+| 5 | `sandbox-provisioning` | nothing | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
+| 6 | `sandbox-terraform` | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 5's repository |
+| 7 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | `scripts/` and `misc/` gone |
+| 8 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |
 
 The machinery of this work does not move: `exportit/`, `INPROGRESS/`,
-`PLAN.md` and the root `Justfile` are deleted in step 9, and the
+`PLAN.md` and the root `Justfile` are deleted in step 8, and the
 umbrella gets its own `Justfile`.
 
 Not one of these steps has been carried out. `just full-test` rehearses
-the extraction of every unit (steps 1–8 and the umbrella's files) on
+the extraction of every unit (steps 1–7 and the umbrella's files) on
 throw-away clones; nothing has been pushed anywhere for a relocation,
 and no repository has been created.
