@@ -1,7 +1,7 @@
 # Stage 1: analysis and reconstruction plan
 
-*Status:* executed 2026-11-12 on `feature/stage-1-analysis`; committed
-locally, not pushed, not merged. Waits for the operator's validation.
+*Status:* executed on `feature/stage-1-analysis` and merged into `develop`
+2026-11-12.
 
 ## Why
 

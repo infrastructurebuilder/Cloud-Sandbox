@@ -1,7 +1,7 @@
 # Stage 4: Terraform as an independent unit
 
-*Status:* executed 2026-11-12 on `feature/stage-4-terraform`; committed
-locally, not pushed, not merged. Waits for the operator's validation.
+*Status:* executed on `feature/stage-4-terraform` and merged into `develop`
+2026-11-12.
 The decisions are under [Decisions taken](#decisions-taken); the
 result is under [Outcome](#outcome).
 

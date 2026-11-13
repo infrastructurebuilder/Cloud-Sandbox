@@ -37,9 +37,10 @@ any work starts.
 | [5](STAGE-5.md) | `model-*` (eight models) and `model-common` | Merged into `develop` 2026-11-12 |
 | [6](STAGE-6.md) | `sandbox-configs` | Merged into `develop` 2026-11-12 |
 | [7](STAGE-7.md) | `sandbox-ops`, and two roles in `sandbox-provisioning` | Merged into `develop` 2026-11-12 |
-| [8](STAGE-8.md) | Documentation and the umbrella | Executed 2026-11-12; waits for validation |
+| [8](STAGE-8.md) | Documentation and the umbrella | Merged into `develop` 2026-11-12 |
 
 ## Landed
 
-Stages 1 to 7, squash-merged into `develop` on 2026-11-12, one commit
-each; their feature branches are kept.
+All eight stages, squash-merged into `develop` on 2026-11-12, one commit
+each; their feature branches are kept. Nothing has been relocated: see
+[exportit/MAP.md](../exportit/MAP.md#the-order-of-the-real-relocations).

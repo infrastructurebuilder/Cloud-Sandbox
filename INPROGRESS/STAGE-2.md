@@ -1,8 +1,7 @@
 # Stage 2: cloudflow as an independent project
 
-*Status:* executed 2026-11-12 on `feature/stage-2-cloudflow`;
-committed locally, not pushed, not merged. Waits for the operator's
-validation. The decisions were asked first and are recorded under
+*Status:* executed on `feature/stage-2-cloudflow` and merged into `develop`
+2026-11-12. The decisions were asked first and are recorded under
 [Decisions taken](#decisions-taken); the outcome is under
 [Outcome](#outcome).
 
