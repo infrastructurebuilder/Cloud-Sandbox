@@ -8,7 +8,9 @@
 #
 # The other differences: ansible-core is installed along with git, the umask
 # is set, and Terraform's project tag is handed on (the script has a TODO for
-# that and uses a fixed name).
+# that and uses a fixed name). The playbooks' collections are installed before
+# site.yml runs, because ansible-pull installs none and site.yml needs one
+# (sandbox-provisioning's stage 10).
 #
 # Terraform has to pass two values more than it does today:
 #   provisioning_repo     where the playbooks are, as a git URL
@@ -85,6 +87,16 @@ sudo -u $RUNUSER git checkout $BRANCH
 
 PROVISIONING=/opt/sandbox-provisioning
 export ANSIBLE_CONFIG=$PROVISIONING/ansible.cfg
+
+# The checkout first, then its requirements.yml, then the plays: ansible-pull
+# updates the same checkout.
+if ! { git clone --quiet --branch "${provisioning_version}" "${provisioning_repo}" $PROVISIONING &&
+       ( cd $PROVISIONING && ansible-galaxy collection install -r requirements.yml ) ; } >> ~/setup.log 2>&1
+then
+  echo "Fetching the playbooks or their collections FAILED. No node image was created." >> ~/setup.log
+  echo `date` >> ~/setup.log
+  exit 1
+fi
 
 if ! ansible-pull \
        --url "${provisioning_repo}" --checkout "${provisioning_version}" \

@@ -31,9 +31,11 @@ spack_environment_specs:
   - "esmf@{{ esmf_version }}+pnetcdf+mpi ^intel-oneapi-mpi@{{ intel_mpi_version }} ^zlib-ng+compat %{{ spack_environment_compiler }}"
   - "petsc+mpi %{{ spack_environment_compiler }}"
 
-# Where Spack writes Tcl module files unless told otherwise. It is used only
-# to tell whether regenerating them changed anything.
-spack_environment_modules_root: "{{ spack_dir }}/share/spack/modules"
+# "installed" builds the environment; "concretized" only works out what it
+# would build. The container test uses "concretized" (stage 10): Spack's fake
+# installs leave python-venv without a python3, which the rest of the ESMF and
+# PETSc build tree needs.
+spack_environment_state: installed
 
 # The build compiles everything and takes hours. Ansible starts it, lets go of
 # the connection and asks after it once a minute, for at most this long.

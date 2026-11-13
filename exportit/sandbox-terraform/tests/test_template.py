@@ -51,6 +51,16 @@ def test_the_new_template_renders_with_the_two_new_values(tmp_path: Path) -> Non
     assert "setup-instance.sh" not in out.split("--checkout")[1]
 
 
+def test_the_new_template_installs_the_collections_before_the_plays(tmp_path: Path) -> None:
+    _, names = template_variables()
+    code, out = render(NEW_TEMPLATE, {**sample(names), **NEW_VALUES}, tmp_path)
+    assert code == 0, out
+    clone = out.index(f'git clone --quiet --branch "{NEW_VALUES["provisioning_version"]}"')
+    install = out.index("ansible-galaxy collection install -r requirements.yml")
+    pull = out.index("if ! ansible-pull")
+    assert clone < install < pull
+
+
 def test_the_new_template_needs_exactly_the_two_new_values(tmp_path: Path) -> None:
     _, names = template_variables()
     for missing in NEW_VALUES:

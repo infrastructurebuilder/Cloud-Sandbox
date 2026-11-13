@@ -16,6 +16,7 @@ This repository says which units, which versions, and in which order.
 | --- | --- |
 | `sandbox-terraform` | The AWS resources: network, security groups, EFS volume, IAM role, placement group, head node |
 | `sandbox-provisioning` | Ansible that builds the head node's software (compilers, MPI, Spack, Prefect), the compute-node image, the users, JupyterHub |
+| `ansible-collection-csis-spack` | The Ansible collection `infrastructurebuilder.csis_spack`, whose modules run Spack for `sandbox-provisioning`; in its own repository, installed from its tag by `sandbox-provisioning`'s `requirements.yml` |
 | `cloudflow` | The workflow engine that starts compute nodes and runs the models, and the plots of their output |
 | `model-common` and eight `model-<name>` units | The recipes that fetch, build and feed each model: ADCIRC (CORA), ECCOFS, LiveOcean, NECOFS, NOSOFS, SECOFS, UCLA ROMS, UFS Coastal |
 | `sandbox-configs` | The job and cluster descriptions cloudflow runs with, and their schema |

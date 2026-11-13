@@ -11,8 +11,11 @@
 #   relocate  the order of the real relocations: a unit goes after every unit
 #             it needs
 #   needs     units it refers to by version, which must exist first
+#   external  true for a unit that already lives in a repository of its own
+#             and is not copied into exportit/; its relocate is 0
 #
-# No repository exists yet for any unit: nothing has left Cloud-Sandbox.
+# Nothing has left Cloud-Sandbox. The one external unit was begun in its own
+# repository and was never part of it.
 # tests/check_units.py holds this file consistent.
 
 [[unit]]
@@ -25,12 +28,22 @@ needs = ["sandbox-provisioning"]
 what = "the network, EFS volume, IAM role, placement group and head node"
 
 [[unit]]
+name = "ansible-collection-csis-spack"
+version = "0.1.0"
+kind = "ansible"
+step = 2
+relocate = 0
+needs = []
+external = true
+what = "the Ansible collection infrastructurebuilder.csis_spack: the modules that run Spack for sandbox-provisioning"
+
+[[unit]]
 name = "sandbox-provisioning"
 version = "0.1.0"
 kind = "ansible"
 step = 2
 relocate = 5
-needs = []
+needs = ["ansible-collection-csis-spack"]
 what = "the head node's software (site.yml), the compute-node image, users, JupyterHub"
 
 [[unit]]

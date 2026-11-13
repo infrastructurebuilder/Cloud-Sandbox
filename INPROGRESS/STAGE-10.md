@@ -1,8 +1,8 @@
 # Stage 10: the Spack environment through the csis_spack collection
 
-*Status:* planned 2026-11-13 on `feature/stage-10-spack-module`; nothing
-executed. It is executed on "do 10", after each **YOUR DECISION** below
-has been asked, one at a time.
+*Status:* planned 2026-11-13 on `feature/stage-10-spack-module`, and
+executed the same day on "do 10". The decisions are under
+[Decisions taken](#decisions-taken).
 
 ## Why
 
@@ -116,6 +116,38 @@ reporting and check mode, and compares module files without the time.
    proves), the collection's section (now used, at 0.1.0), and the order
    of relocations.
 
+## Decisions taken
+
+Asked one at a time on 2026-11-13.
+
+1. **Source:** the collection's git repository at the tag `0.1.0`,
+   "until we decide if we are going to migrate to Ansible Galaxy".
+   Asked next, because that source needs the collection on GitHub: the
+   operator chose to push it then. Its `main`, `develop`,
+   `release/0.1.0`, both feature branches and the tag `0.1.0` were
+   pushed to `infrastructurebuilder/ansible-collection-csis-spack`,
+   which is public.
+2. **The container:** first "yes, with fake installs". The first
+   container run showed it cannot be done: Spack's `--fake` install of
+   `python-venv` leaves no `python3` in it, and `py-pip`, part of the
+   ESMF and PETSc build tree, then fails, because Spack needs that
+   `python3` to set it up. Concretizing with the real oneAPI had worked.
+   Asked again, the operator chose **concretize only**: a variable
+   `spack_environment_state` (default `installed`), set to `concretized`
+   in the container. `spack_environment_install_args` is therefore not
+   added. Installing and the module files are proved by the collection's
+   own tests against the real Spack.
+
+## Found
+
+- `ansible-pull` installs no collections, so the head node's first boot
+  could not have run a `site.yml` that needs one. The first-boot template
+  in `sandbox-terraform` now fetches the playbooks, installs their
+  `requirements.yml`, then runs `ansible-pull`; the container test does
+  the same.
+- Fake installs cannot stand in for a build whose tree uses Spack's own
+  Python (above).
+
 ## Out of scope
 
 - Pushing or publishing the collection; decision 1 says what each
@@ -131,3 +163,20 @@ reporting and check mode, and compares module files without the time.
 - With decision 3's default: the container applies `spack_environment`
   twice and the second run reports nothing changed, module files
   included.
+
+## Outcome
+
+- `spack_environment`: the three shell tasks after the template are one
+  `infrastructurebuilder.csis_spack.spack_env` task, with a task before
+  it that hands the module the Intel modules' environment. Six named
+  tasks in the role (seven before).
+- `requirements.yml` pins the collection's tag `0.1.0`; the first-boot
+  template and the container test install it before `ansible-pull`.
+- `units.toml`: the collection as the one `external` unit, needed by
+  `sandbox-provisioning`; the umbrella's check and `tools`' tests know
+  the field, and a test holds the pinned tag to the manifest's version.
+- `sandbox-provisioning`'s `just full-test` passes: the container
+  installs both collections, concretizes ESMF and PETSc with the real
+  oneAPI (36 packages), and the second run changes nothing. The root
+  `just test` passes.
+

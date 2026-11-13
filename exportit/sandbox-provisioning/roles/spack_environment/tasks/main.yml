@@ -46,70 +46,54 @@
   become_user: "{{ sandbox_user }}"
   when: spack_environment_save.stat.exists
 
-# Replaces funcs-setup-instance.sh L812
-# The script keeps the output in log.concretize in whatever directory it was
-# started from; here it is kept in the environment's own directory.
-- name: Work out what has to be built
+# New: the collection's spack_env module runs Spack without a shell, so the
+# Intel modules that the script has loaded at this point (see the top of this
+# file) are loaded once here, in bash, and what they change in the
+# environment is handed to the module. Only what changed is kept: the
+# module-system variables and what "module load" sets.
+- name: Work out the environment the Intel modules give Spack
   ansible.builtin.shell:
     cmd: |
+      environment() { python3 -c 'import json, os; print(json.dumps(dict(os.environ)))'; }
+      before=$(environment)
       {{ sandbox_modules_init }}
       set -eo pipefail
       {{ sandbox_load_intel_modules }}
-      lock={{ spack_environment_dir }}/spack.lock
-      before=$(sha256sum "$lock" 2>/dev/null || true)
-      {{ spack_exe }} -e {{ spack_environment_dir }} concretize --force --fresh 2>&1 \
-        | tee {{ spack_environment_dir }}/log.concretize
-      after=$(sha256sum "$lock")
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
+      environment | python3 -c '
+      import json, sys
+      before, after = json.loads(sys.argv[1]), json.load(sys.stdin)
+      skip = {"_", "SHLVL", "PWD", "OLDPWD"}
+      print(json.dumps({k: v for k, v in after.items()
+                        if before.get(k) != v and k not in skip and not k.startswith("BASH_FUNC_")}))
+      ' "$before"
     executable: /bin/bash
   become: true
   become_user: "{{ sandbox_user }}"
-  register: spack_environment_concretize
-  changed_when: "'SPACK-CHANGED' in spack_environment_concretize.stdout"
+  register: spack_environment_intel
+  changed_when: false
+  check_mode: false
 
-# Replaces funcs-setup-instance.sh L817
-# The script lets the build's output run to its own log. Here it goes to
-# log.install in the environment's directory, and the end of it is shown.
-- name: Build and install the environment (hours, the first time)
-  ansible.builtin.shell:
-    cmd: |
-      {{ sandbox_modules_init }}
-      set -eo pipefail
-      {{ sandbox_load_intel_modules }}
-      installed() { {{ spack_exe }} -e {{ spack_environment_dir }} find --format '{hash}' | sort | sha256sum; }
-      log={{ spack_environment_dir }}/log.install
-      before=$(installed)
-      {{ spack_exe }} -e {{ spack_environment_dir }} install {{ spack_opts }} > "$log" 2>&1 \
-        || { tail -50 "$log"; exit 1; }
-      tail -5 "$log"
-      after=$(installed)
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
+# Replaces funcs-setup-instance.sh L812 L817 L820-L822
+# One task for the script's concretize, install and module refresh, through
+# the infrastructurebuilder.csis_spack collection (stage 10). It reports a
+# change when spack.lock changes, when a spec is installed, and when module
+# files change, leaving out the time Spack writes into each of them; the
+# shell tasks this replaces reported the module files changed on every run.
+# Check mode concretizes a copy and says what would be installed.
+# The script keeps the concretizer's output in log.concretize; the module
+# does not write it. The build's output goes to log.install, as before.
+- name: Concretize, build and install the environment, and regenerate its module files (hours, the first time)
+  infrastructurebuilder.csis_spack.spack_env:
+    path: "{{ spack_environment_dir }}"
+    spack: "{{ spack_exe }}"
+    state: "{{ spack_environment_state }}"
+    fresh: true
+    install_args: "{{ spack_opts.split() }}"
+    modules: [tcl]
+    delete_tree: true
+    log_file: "{{ spack_environment_dir }}/log.install"
+  environment: "{{ spack_environment_intel.stdout | from_json }}"
   become: true
   become_user: "{{ sandbox_user }}"
   async: "{{ spack_environment_build_timeout }}"
   poll: 60
-  register: spack_environment_install
-  changed_when: "'SPACK-CHANGED' in spack_environment_install.stdout"
-
-# Replaces funcs-setup-instance.sh L820-L822
-# The module files are written again on every run, as in the script. A change
-# is reported only when their contents differ.
-- name: Regenerate the environment's module files
-  ansible.builtin.shell:
-    cmd: |
-      {{ sandbox_modules_init }}
-      set -eo pipefail
-      {{ sandbox_load_intel_modules }}
-      modulefiles() {
-        find {{ spack_environment_modules_root }} -type f -exec sha256sum {} + 2>/dev/null | sort | sha256sum
-      }
-      before=$(modulefiles)
-      {{ spack_exe }} -e {{ spack_environment_dir }} module tcl refresh --delete-tree -y
-      after=$(modulefiles)
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
-  become: true
-  become_user: "{{ sandbox_user }}"
-  register: spack_environment_modules
-  changed_when: "'SPACK-CHANGED' in spack_environment_modules.stdout"
