@@ -7,13 +7,24 @@ from pathlib import Path
 
 import pytest
 import yaml
-from support import FUNCS, LEGACY, ROLE_FUNCTIONS, SETUP, UNIT, expand, functions, lines_of
+from support import (
+    FUNCS,
+    LEGACY,
+    OPS_ROLES,
+    OPS_SCRIPTS,
+    ROLE_FUNCTIONS,
+    SETUP,
+    UNIT,
+    expand,
+    functions,
+    lines_of,
+)
 
 TASK = re.compile(r"^(\s*)- name: (.+)$")
-REPLACES = re.compile(r"#\s*Replaces (?P<file>[\w.-]+) (?P<lines>L\d+(?:-L\d+)?(?: L\d+(?:-L\d+)?)*)\s*$")
+REPLACES = re.compile(r"#\s*Replaces (?P<file>[\w./-]+) (?P<lines>L\d+(?:-L\d+)?(?: L\d+(?:-L\d+)?)*)\s*$")
 NEW = re.compile(r"#\s*New: \S")
 
-PLAYBOOKS = [UNIT / "site.yml", UNIT / "node-image.yml"]
+PLAYBOOKS = [UNIT / "site.yml", UNIT / "node-image.yml", UNIT / "users.yml", UNIT / "jupyterhub.yml"]
 TASK_FILES = sorted(UNIT.glob("roles/*/tasks/*.yml"))
 
 # Lines of a shell script that do nothing a task would have to do.
@@ -69,7 +80,7 @@ CLAIMS = [claim for path in [*PLAYBOOKS, *TASK_FILES] for claim in claims_in(pat
 
 
 def test_there_are_tasks_to_check() -> None:
-    assert len(TASK_FILES) == len(ROLE_FUNCTIONS)
+    assert len({path.parent.parent for path in TASK_FILES}) == len(ROLE_FUNCTIONS) + len(OPS_ROLES)
     assert len(CLAIMS) > 100
 
 
@@ -111,6 +122,41 @@ def unaccounted(script: Path, numbers: range) -> list[str]:
 
 
 CALLED = [function for names in ROLE_FUNCTIONS.values() for function in names]
+
+
+# Python lines that do nothing a task would have to do: structure, messages,
+# imports, and the lines of docstrings.
+PYTHON_STRUCTURE = re.compile(
+    r"(def \w+\(.*\):|try:|except\b.*:|else:|return\b.*|pass|print\(.*\)|import \w.*|from \S+ import .*"
+    r"|[\]\)}]|if __name__ == .__main__.:|main\(\))"
+)
+
+
+def python_actions(script: Path) -> set[int]:
+    """Give the lines of a Python script that do something."""
+    found: set[int] = set()
+    in_docstring = False
+    for number, line in enumerate(lines_of(script)):
+        text = line.strip()
+        quotes = text.count('"""') + text.count("'''")
+        if in_docstring or quotes:
+            in_docstring = in_docstring != (quotes % 2 == 1)
+            continue
+        if number and text and not text.startswith("#") and not PYTHON_STRUCTURE.fullmatch(text):
+            found.add(number)
+    return found
+
+
+@pytest.mark.parametrize("name", OPS_SCRIPTS)
+def test_every_line_of_an_operator_script_is_replaced_or_explained(name: str) -> None:
+    script = LEGACY / name
+    lines = lines_of(script)
+    known = accounted_for(name)
+    if script.suffix == ".py":
+        acting = python_actions(script)
+    else:
+        acting = {n for n in range(1, len(lines)) if is_action(lines[n])}
+    assert [f"L{n}: {lines[n].strip()}" for n in sorted(acting - known)] == []
 
 
 @pytest.mark.parametrize("function", CALLED)

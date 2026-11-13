@@ -3,7 +3,7 @@
 # converge.sh inside the container, after the second apply.
 
 - name: Check the result of the roles the container can run
-  hosts: sandbox_head
+  hosts: "{{ 'sandbox_head' if 'site' in (verify_plays | default('site')).split() else 'none' }}"
   become: true
   gather_facts: false
   vars_files:
@@ -181,3 +181,114 @@
       become_user: "{{ sandbox_user }}"
       changed_when: false
       when: (sandbox_modulefiles_dir ~ '/intel') is directory
+
+- name: Check the users that users.yml added
+  hosts: "{{ 'sandbox_head' if 'users' in (verify_plays | default('')).split() else 'none' }}"
+  become: true
+  gather_facts: false
+  vars_files:
+    - users.yml
+
+  tasks:
+    - name: Look at the test user
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          id jdoe
+          getent group jdoe developers staff | cut -d: -f1,3
+          stat -c '%U %a %n' /home/jdoe/.ssh/authorized_keys /home/jdoe/.spack/config.yaml /save/jdoe
+      register: users_id
+      changed_when: false
+
+    - name: Check the user, the groups and the owners
+      ansible.builtin.assert:
+        that:
+          - "'uid=1001(jdoe) gid=1001(jdoe)' in users_id.stdout"
+          - "'2001(developers)' in users_id.stdout and '12002(staff)' in users_id.stdout"
+          - "'jdoe:1001' in users_id.stdout_lines"
+          - "'developers:2001' in users_id.stdout_lines"
+          - "'staff:12002' in users_id.stdout_lines"
+          - "'jdoe 600 /home/jdoe/.ssh/authorized_keys' in users_id.stdout_lines"
+          - "'jdoe 644 /home/jdoe/.spack/config.yaml' in users_id.stdout_lines"
+          - "'jdoe 755 /save/jdoe' in users_id.stdout_lines"
+        quiet: true
+
+    - name: Read the test user's keys and shell files
+      ansible.builtin.slurp:
+        src: "/home/jdoe/{{ item }}"
+      loop: [.ssh/authorized_keys, .ssh/id_rsa.pub, .bashrc, .tcshrc]
+      register: users_files
+
+    - name: Check that both keys are authorised once and each line is written once
+      ansible.builtin.assert:
+        that:
+          - (users_files.results[0].content | b64decode).count(sandbox_users_present[0].public_key) == 1
+          - (users_files.results[0].content | b64decode).count(users_files.results[1].content | b64decode | trim) == 1
+          - (users_files.results[1].content | b64decode) is search('jdoe-mpi-ssh-key')
+          - (users_files.results[2].content | b64decode).count("alias cds='cd /save/jdoe'") == 1
+          - (users_files.results[2].content | b64decode).count('/share/spack/setup-env.sh') == 1
+          - (users_files.results[3].content | b64decode).count('alias cdpt cd /ptmp/jdoe') == 1
+        quiet: true
+
+    - name: Ask sudo what the test user may run
+      ansible.builtin.command:
+        cmd: sudo -l -U jdoe
+      register: users_sudo
+      changed_when: false
+
+    - name: Check the Lustre rules
+      ansible.builtin.assert:
+        that:
+          - "'/usr/bin/mount -t lustre -o * /ptmp/jdoe/*' in users_sudo.stdout"
+          - "'/usr/bin/umount * /ptmp/jdoe/*' in users_sudo.stdout"
+        quiet: true
+
+    - name: Report
+      ansible.builtin.debug:
+        msg: "OBSERVED users: jdoe {{ users_id.stdout_lines[0] }}"
+
+- name: Check the hub that jupyterhub.yml installed
+  hosts: "{{ 'sandbox_head' if 'jupyterhub' in (verify_plays | default('')).split() else 'none' }}"
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../../group_vars/all.yml
+    - ../../roles/jupyterhub/defaults/main.yml
+
+  tasks:
+    - name: Ask the hub whether it is up
+      ansible.builtin.uri:
+        url: http://127.0.0.1:8000/hub/health
+        status_code: 200
+      register: jupyterhub_health
+      retries: 30
+      delay: 5
+      until: jupyterhub_health.status == 200
+
+    - name: Look at the services, the files and their owners
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          systemctl is-enabled jupyterhub nginx
+          systemctl is-active nginx || true
+          stat -c '%U %n' {{ jupyterhub_conda_prefix }} {{ jupyterhub_config_dir }}/jupyterhub_config.py
+          visudo -cf /etc/sudoers.d/jupytersudoers
+          {{ jupyterhub_conda_prefix }}/bin/jupyterhub --version
+          nginx -T 2>/dev/null | grep -c 'server_name {{ jupyterhub_server_name }};' || true
+      register: jupyterhub_state
+      changed_when: false
+
+    - name: Check them
+      ansible.builtin.assert:
+        that:
+          - jupyterhub_state.stdout_lines[0:2] == ['enabled', 'enabled']
+          - "'inactive' in jupyterhub_state.stdout_lines[2]"
+          - "(sandbox_user ~ ' ' ~ jupyterhub_conda_prefix) in jupyterhub_state.stdout_lines"
+          - "('jupyter ' ~ jupyterhub_config_dir ~ '/jupyterhub_config.py') in jupyterhub_state.stdout_lines"
+        quiet: true
+
+    - name: Report
+      ansible.builtin.debug:
+        msg: >-
+          OBSERVED jupyterhub: up on port 8000, JupyterHub {{ jupyterhub_state.stdout_lines[-2] }};
+          nginx enabled and not started (no certificate in the container)

@@ -35,11 +35,11 @@ any work starts.
 | [3](STAGE-3.md) | `sandbox-provisioning` (Ansible) | Merged into `develop` 2026-11-12; live proof not run |
 | [4](STAGE-4.md) | `sandbox-terraform` | Merged into `develop` 2026-11-12 |
 | [5](STAGE-5.md) | `model-*` (eight models) and `model-common` | Merged into `develop` 2026-11-12 |
-| [6](STAGE-6.md) | `sandbox-configs` | Executed 2026-11-12; waits for validation |
-| [7](STAGE-7.md) | `sandbox-ops` | Planned; after stage 3 |
+| [6](STAGE-6.md) | `sandbox-configs` | Merged into `develop` 2026-11-12 |
+| [7](STAGE-7.md) | `sandbox-ops`, and two roles in `sandbox-provisioning` | Executed 2026-11-12; waits for validation |
 | [8](STAGE-8.md) | Documentation and the umbrella | Planned; last |
 
 ## Landed
 
-Stages 1 to 5, squash-merged into `develop` on 2026-11-12, one commit
+Stages 1 to 6, squash-merged into `develop` on 2026-11-12, one commit
 each; their feature branches are kept.

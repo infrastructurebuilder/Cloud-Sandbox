@@ -27,7 +27,7 @@ nothing leaves this repository).
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
 | `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
-| `sandbox-ops` | `exportit/sandbox-ops/` | the rest of `scripts/`, `misc/`, `jupyterhub/` | [7](../INPROGRESS/STAGE-7.md) | planned |
+| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the rest of `scripts/`, all of `misc/` | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
 | `cloud-sandbox` (umbrella) | `exportit/cloud-sandbox/` | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/`, `TODO`, `.github/`, `LICENSE`, `.gitignore` | [8](../INPROGRESS/STAGE-8.md) | planned |
 | not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/` | [8](../INPROGRESS/STAGE-8.md) | planned |
 
@@ -320,8 +320,11 @@ Three role files are text that the script writes with `tee` or
 `intel_oneapi/files/oneAPI.repo` and `hpc_tuning/files/tuned.conf`. A
 test requires each to equal the script's lines byte for byte.
 
-The other 84 files under `scripts/` stay with `sandbox-ops`
-([stage 7](../INPROGRESS/STAGE-7.md)). That includes
+Stage 7 added the users and JupyterHub as two more roles: 16 more
+files (15 under `scripts/`, 2 of them as role files, and
+`jupyterhub/README.md` as `docs/JUPYTERHUB.md`), described in
+[the ops section](#sandbox-ops). The other 69 files under `scripts/`
+are in `sandbox-ops`. That includes
 `scripts/system/etc.ssh.ssh_config.d/sandbox-local-net.conf`, which
 nothing installs and whose rules differ from the script's.
 
@@ -887,7 +890,124 @@ person who writes the description. The README has the table.
 
 ## sandbox-ops
 
-Planned. [Stage 7](../INPROGRESS/STAGE-7.md) fills this section.
+Done on 2026-11-12 by [stage 7](../INPROGRESS/STAGE-7.md). The
+project's own description is
+[sandbox-ops/README.md](sandbox-ops/README.md).
+
+### What the stage did with the 108 files left over
+
+After stage 3, 108 files of `scripts/`, `misc/` and `jupyterhub/` had no
+unit. Each was read and marked in use, superseded or dead, with the
+evidence (`sandbox-ops/CATALOGUE.tsv`, which keeps the reading for the
+92 that are copied). Then:
+
+| Files | Went to | Why |
+| ---: | --- | --- |
+| 8 | `sandbox-provisioning`, role `sandbox_users`, playbook `users.yml` | the user tools and their `sudoers` files: operator's decision 1 |
+| 8 | `sandbox-provisioning`, role `jupyterhub`, playbook `jupyterhub.yml` | the JupyterHub install, its files, and its README: decision 1 |
+| 16 | `sandbox-ops/bin/`, `keys/` | tools still in use |
+| 26 | `sandbox-ops/attic/superseded/` | replaced by something named in the catalogue |
+| 50 | `sandbox-ops/attic/dead/` | no longer apply: operator's decision 2 copies them rather than leaving them behind |
+
+With this, the copy check covers every tracked file under `scripts/`,
+`misc/` and `jupyterhub/`: the [sandbox-ops.map](sandbox-ops.map) says
+`covers` for all three, and `sandbox-provisioning.map` takes its part.
+
+### The two new roles
+
+Both are translations in the manner of stage 3: the originals are in
+`sandbox-provisioning/legacy/`, every task names the lines it replaces,
+and every line that does something is either replaced or listed in
+`tests/not_carried.yml` with the reason. A new test,
+`tests/test_ops_parity.py`, renders each template with the role's
+defaults and compares it with the file it replaces:
+`jupyterhub_config.py` (1244 lines) and the nginx file come out byte for
+byte; the two `sudoers` files and the users' shell lines match once the
+originals' one person is given as a variable. The container test now
+applies `users.yml` and `jupyterhub.yml` too, twice, checks the result,
+and removes the test user again.
+
+What the roles do differently from the scripts, on purpose, each noted
+above its task:
+
+- **Users:** the user list is a variable kept with the site's
+  settings, not a CSV file; the security group is a variable (the
+  script names one site's group) and the step needs AWS, so it is
+  skipped unless a group is named; the AMI prompt at the end of
+  `add-users.py` is `node-image.yml`; the Spack path comes from
+  `group_vars` (the script's own TODO); each user's Spack configuration
+  belongs to the user (the script hands `.bashrc` to them twice and
+  leaves the Spack file root's); `authorized_keys` is the user's, mode
+  0600, without the empty line the script adds for a user with no key.
+- **Lustre rules:** one person's four `sudoers` lines become a template
+  for a list of users, installed as `/etc/sudoers.d/sandbox-modelers`
+  and checked with `visudo`. sudo skips any file in `/etc/sudoers.d`
+  whose name contains a dot, which both original names do. cloudflow
+  needs these rules: `FSxScratchDisk.py` mounts with `sudo`.
+- **JupyterHub:** of the two install scripts, the conda one is
+  translated, because the service file, the run script and the README
+  describe it. Its configuration is written to `/etc/jupyterhub/`,
+  where they read it (the script writes `/opt/jupyterhub/`), and the
+  run script is put where the service runs it (the script never puts
+  it anywhere). conda comes from Miniforge, not the script's Miniconda 23.1
+  (whose download address has no host): with Miniconda's solver the
+  script's conda-forge install had not finished after 25 minutes, and
+  the operator chose Miniforge, with conda-forge as the only channel. conda is called by its path as the owner of `/opt/conda`
+  (the script's `conda activate` cannot work in a script, and its
+  `chown ec2-user/ec2-user` changes nothing). Ownership and modes under `/opt/conda` are set with
+  `find`, which touches only what is not so yet: Ansible's recursive
+  `file` checked every file on each run and took 25 minutes in the
+  container. nginx is enabled, and started only when the certificates
+  exist. `setenforce 0` is not carried.
+
+### Found
+
+- **Nothing installed JupyterHub before this stage.** Neither install
+  script is called by the setup, and neither could have run as it was
+  (a download address with no host, files copied where nothing reads
+  them). The role is the first install that works, in the container.
+  Whether a site wants it is its own decision; `jupyterhub.yml` is not
+  part of `site.yml`.
+- **One tool in use does not parse:** `scrub_liveocean.sh` never closes
+  the `if` at L88. It is recorded, and the test fails if it is fixed or
+  if another script breaks.
+- **`add-ufs-setup.sh` calls `install_gcc_toolset_yum` (L27)**, which
+  `funcs-setup-instance.sh` no longer defines, so the UFS add-on fails as
+  written. `models/ufscoastal/README` still points to
+  `ufs-setup-instance.sh`, which is superseded.
+- **The mirror tools carry RHEL 8 versions:** `spack-update-mirror.sh`
+  lists gcc 11.2.1 and oneAPI 2023.1.0; `ufs-envars.sh` names Spack
+  v0.22.5 and `linux-rhel8`.
+- **Personal data in the tree:** `scripts/system/patrick.gitconfig`
+  (a name and an address), the mirror key's user id (a work address),
+  and three `sudoers` files that name accounts. They are copied as they
+  are, like everything else; a real relocation should leave
+  `patrick.gitconfig` behind.
+- 16 of the 50 dead files are Slurm and munge: unit files, a
+  configuration and notes from before the sandbox used cloudflow's own
+  nodes.
+
+### How it is checked
+
+| Check | Where | Result on 2026-11-12 |
+| --- | --- | --- |
+| The catalogue and the files agree; each file sits where its status says | `sandbox-ops`' `just test` | pass, 92 files |
+| 50 scripts parse, except the one recorded; 559 shellcheck findings as recorded | `sandbox-ops`' `just test` | pass |
+| Every task of the two roles names its lines; every line is replaced or explained | `sandbox-provisioning`'s `just test` | pass |
+| The templates write the original files | `sandbox-provisioning`'s `just test` | pass |
+| `users.yml` and `jupyterhub.yml` applied twice in the container, the second run changing nothing; the user removed again | `sandbox-provisioning`'s `just full-test` | pass; the hub answers on port 8000 |
+| Extraction with history | root `just full-test` | `sandbox-ops`: the same 92 files, with 22 commits; `sandbox-provisioning`: 25 files, 19 commits |
+
+### What a real relocation would change
+
+- Extract with `just export-filter sandbox-ops`, then decide whether
+  the attic travels at all: it is there so that nothing is lost, not
+  because anything needs it. Leave `patrick.gitconfig` out either way.
+- Point the mirror tools at `sandbox-provisioning`'s `group_vars`
+  instead of sourcing `environment-vars.sh`, and update their versions.
+- Fix or retire `scrub_liveocean.sh` and `add-ufs-setup.sh`.
+- In Cloud-Sandbox: delete `scripts/`, `misc/` and `jupyterhub/`
+  ([stage 8](../INPROGRESS/STAGE-8.md)).
 
 ## cloud-sandbox (the umbrella)
 

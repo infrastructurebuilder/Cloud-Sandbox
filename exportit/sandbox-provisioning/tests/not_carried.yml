@@ -65,3 +65,66 @@
     the command never has an effect; the script does not notice. The
     binary mirror it names is the one the spack role adds to the site
     scope.
+
+# Stage 7: the operator scripts that the sandbox_users and jupyterhub roles
+# replace.
+
+- file: add-users.py
+  lines: L29-L38 L44-L47
+  why: >-
+    A helper that hands a file to its user, and the paths of the files. Each
+    task names its path and sets the owner itself.
+
+- file: add-users.py
+  lines: L115-L131 L201 L206
+  why: >-
+    Checks for an existing user or group, and the calls between the script's
+    functions. The modules check the state themselves.
+
+- file: add-users.py
+  lines: L376-L404
+  why: >-
+    Reading the user list from system/ioos.sb.users, a CSV file that was
+    never in the repository. The list is the variable sandbox_users_present,
+    kept with the site's settings.
+
+- file: add-users.py
+  lines: L313-L335 L341-L358 L430-L442
+  why: >-
+    Asking whether to make a new machine image, and making it. That is
+    node-image.yml, run after users.yml.
+
+- file: add_group.sh
+  lines: L5-L10
+  why: >-
+    A stub: it exits at L6 before creating its one group. Shared groups and
+    their gids are part of sandbox_users_present.
+
+- file: test_user.sh
+  lines: L3-L9
+  why: >-
+    A stub: the user name is empty, so useradd fails. The users task does
+    what it was for.
+
+- file: system/sudoers.d_sandbox_modelers
+  lines: L4-L8
+  why: >-
+    The same file as system/sudoers.d.sandbox-modelers, under a second name.
+    sudo skips any file in /etc/sudoers.d whose name contains a dot, so the
+    role installs it as /etc/sudoers.d/sandbox-modelers.
+
+- file: install_conda_jupyterhub.sh
+  lines: L40
+  why: >-
+    Turns SELinux enforcement off ("may or may not be needed") and never back
+    on. Not carried: whether the service needs it on RHEL 10 is not proved
+    yet (see docs/LIVE-PROOF.md); if it does, the run script needs a file
+    context, not a system without enforcement.
+
+- file: install_jupyterhub.sh
+  lines: L1-L87
+  why: >-
+    The other of two JupyterHub installs: a pip environment in /opt/jupyterhub,
+    Node.js 16 from NodeSource, Anaconda 2022.05 and a conda environment it
+    never fills. The service file, the run script and jupyterhub/README.md
+    describe the conda install, which the jupyterhub role translates.
