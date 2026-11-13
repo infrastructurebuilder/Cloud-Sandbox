@@ -29,7 +29,7 @@ nothing leaves this repository).
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
 | `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
-| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the tools still in use of the rest of `scripts/` and `misc/` | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
+| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 16 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 15 operator tools and the Spack mirror's public key | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
 | `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13 |
 | not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `INPROGRESS/`, `PLAN.md`, `Justfile` | [8](../INPROGRESS/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
 
