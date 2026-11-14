@@ -29,7 +29,7 @@ nothing leaves this repository).
 | `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
 | `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
 | `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
-| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 16 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 15 operator tools and the Spack mirror's public key | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
+| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 15 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 14 operator tools and the Spack mirror's public key (16 until stage 11 took `spack-pubkey.sh`) | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
 | `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13 |
 | not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `INPROGRESS/`, `PLAN.md`, `Justfile` | [8](../INPROGRESS/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
 
@@ -344,8 +344,8 @@ the functions; a test checks the order.
 | `efa_driver` | `install_efa_driver`, 498-589 | 13 |
 | `fsx_lustre_client` | `install_fsx_driver`, 1042-1079 | 4 |
 | `python_user_env` | `install_python_modules_user`, 1210-1249 | 1 |
-| `spack` | `install_spack`, 630-704 | 9 |
-| `intel_oneapi` | `install_intel_oneapi_dnf` and `add_spack_site_external`, 884-963 and 708-733 | 7 |
+| `spack` | `install_spack`, 630-704 | 10 tasks, with 9 steps in two lists since stage 11 (9 tasks before) |
+| `intel_oneapi` | `install_intel_oneapi_dnf` and `add_spack_site_external`, 884-963 and 708-733 | 5 tasks, with 4 steps in one list since stage 11 (7 tasks before) |
 | `spack_environment` | `create_spack-environment` and `build_spack-environment`, 737-766 and 770-826 | 6 (8 before stage 9, 7 before stage 10) |
 | `hpc_tuning` | `configure_optimizations`, 169-214 | 4 |
 | `node-image.yml` | `setup-instance.sh` 52-75, `create_image.sh`, `create_image.py` | 14 |
@@ -437,12 +437,18 @@ Cloud-Sandbox, because cloudflow runs from that checkout.
 - **On Spack v1.2.0, `spack-public` already exists** in Spack's
   defaults, as a source-only mirror. The script's add creates a binary
   mirror of the same name in the site scope, which takes precedence.
-- **The two `compiler find` steps undo each other.** Run without the
-  Intel modules, the `install_spack` step removes the Intel compilers
-  that `install_intel_oneapi_dnf` registered; that function then adds
-  them back. The script does this on every second run. The `spack`
-  role loads the Intel modules when they exist, so a second run
-  changes nothing.
+- **The two `compiler find` steps undo each other.** *(Corrected
+  2026-11-14: they do not; see
+  [stage 11](#spack-set-up-through-the-collection-stage-11).)* As
+  recorded in stage 3: run without the Intel modules, the
+  `install_spack` step removes the Intel compilers that
+  `install_intel_oneapi_dnf` registered; that function then adds them
+  back; the `spack` role loads the Intel modules when they exist, so a
+  second run changes nothing. Tried again with the real oneAPI and Spack
+  v1.2.0, detection never removes anything: without the modules it finds
+  no Intel compiler and leaves the registered ones alone. What stage 3
+  saw change between runs was the order in which Spack wrote
+  `packages.yaml`, not what it said.
 
 ### How it was tested, and what was not
 
@@ -556,6 +562,82 @@ naming the script's L812, L817 and L820-L822 as the three did:
 - **Not proved in the container:** the build. Spack's fake installs leave
   `python-venv` without the `python3` that the rest of the ESMF and PETSc
   tree needs, so the container concretizes only.
+
+### Spack set up through the collection (stage 11)
+
+By [stage 11](../INPROGRESS/STAGE-11.md), 2026-11-14, planned as the
+collection's stage 3, the shell that set Spack up is gone from the
+`spack` and `intel_oneapi` roles. Each role hands a list of steps to the
+`setup` role of `infrastructurebuilder.csis_spack` 0.3.0, applied as the
+login user. The lists are in the roles' tasks files, where the shell
+was, and each step names the lines of the script it replaces.
+
+| Role | The script's lines | Now |
+| --- | --- | --- |
+| `spack` | L672-L673, L680, L691, L692, L699, L700: two `config add`, `compiler find`, `external find` twice, `mirror add`, `buildcache keys` | six steps: `config`, `detect` three times, `mirror`, `gpg_key` |
+| `intel_oneapi` | L919-L937: load the modules, `compiler find`. L709-L732, L941-L955: two externals appended to `packages.yaml` by a here-document, five `config add`. L959: `buildcache keys` | four steps: `environment`, `detect` with `require`, `config` with one mapping (`intel_oneapi_spack_packages`), `gpg_key` |
+| `spack` (new, off) | `spack-pubkey.sh` L8-L19, run by hand until now: fetch and trust the site mirror's key, `mirror add s3-mirror`, `buildcache keys` | three steps, applied only when `spack_site_mirror` is true |
+
+What is different from the script, on purpose, each noted where it is:
+
+- **The two settings are in the site scope.** The script's two
+  `spack config add` lines have no `--scope`, so the install-tree padding
+  and the Tcl modules were in the login user's `~/.spack`, and only that
+  user had them. They are now in the site scope with everything else
+  (the operator's decision). A head node built earlier still has the old
+  copies in the user scope, which wins over the site scope; see
+  [REMINDERS.md](REMINDERS.md).
+- **A missing compiler is a failure.** Run without the Intel modules,
+  `compiler find` finds nothing and says nothing, and the script goes on.
+  The `detect` step requires `intel-oneapi-compilers` at `oneapi_version`.
+- **A changed external is corrected.** The here-document skipped any
+  package whose name was already in the file.
+- **Module files** are regenerated when needed, not on every run
+  (`refresh_modules: when_needed` in `spack_environment`; 0.2.0 of the
+  collection changed its default, and the role now says which it wants).
+- **The site mirror's key is trusted by its fingerprint**
+  (`spack_key_fingerprint`), which is the key kept in
+  `sandbox-ops/keys/` and what the address served on 2026-11-14. The
+  script trusts whatever it downloads. The mirror goes to the site
+  scope; the script's `mirror add` has no `--scope` either.
+
+Gone with the shell: `spack_config_json` and `spack_fingerprint` (the
+hash of Spack's whole configuration through `spack python -c`),
+`intel_oneapi_spack_externals`, `intel_oneapi_spack_providers` and
+`intel_oneapi_spack_packages_file`. `spack_key` stays, unused, because
+the script exports it and every exported variable is held to the script.
+`spack-pubkey.sh` moved from `sandbox-ops/bin/` to this unit's `legacy/`,
+like the other scripts a role replaces; it does not go to the attic,
+because the tests read it.
+
+How it is held:
+
+- **Traceability:** `tests/test_traceability.py` reads a step's comment
+  as it reads a task's. Every line of `install_spack`,
+  `install_intel_oneapi_dnf`, `add_spack_site_external` and
+  `spack-pubkey.sh` that does something is replaced by a task or a step
+  that names it, or is in `tests/not_carried.yml`.
+- **Parity:** `tests/test_parity.py` reads the script's Spack commands
+  and writes them as steps (two `config add` in a row are one `config`
+  step; nothing else differs), and holds each list to them, in order.
+- **In the container, with the real oneAPI:** the roles are applied
+  twice from a fresh clone of Spack; the second run changes nothing, and
+  a third pass of the three roles in check mode finds nothing to change.
+  `tests/container/expected-spack-config.json` is what the shell roles
+  left in this container's site and user scopes, dumped just before they
+  were replaced; `compare-spack-config.py` holds what the new roles
+  leave to it, as data, with the one decided difference stated in the
+  script. Externals are compared by package name, because their versions
+  are the image's; the versions the roles state themselves are checked
+  against the variables.
+- **Not proved:** the site mirror's list, which needs the site's bucket.
+  Its first application is the live proof on AWS.
+
+Found by the check-mode pass: **`spack_environment` could not be
+previewed at all.** Its build task is asynchronous, for a build of
+hours, and Ansible refuses a task that is both asynchronous and in
+check mode; stage 10 said the role had check mode and had not run it.
+The task is now synchronous when previewing, which builds nothing.
 
 ### What a real relocation would change
 
@@ -1238,14 +1320,17 @@ this file's copy check covers it.
   Spack (concretize, install, regenerate module files, push to the build
   cache), as a module with Ansible's change reporting and check mode,
   in place of shell tasks that hash files before and after.
-- **State:** 0.1.0, tagged and pushed on 2026-11-13 (the repository is
-  public). Two modules, `spack_env` and `spack_buildcache_push`, tested
-  against a stand-in for Spack and against the real Spack v1.2.0, and
-  passing `ansible-test sanity`. Its `PLAN.md` holds the plan, the
-  decisions and what was found. Not on Ansible Galaxy: whether it goes
-  there is not decided.
+- **State:** 0.3.0, tagged and pushed on 2026-11-14 (the repository is
+  public); 0.1.0 and 0.2.0 before it. Eight modules, a `setup` role and
+  two filters, tested against a stand-in for Spack and against the real
+  Spack v1.2.0, and passing `ansible-test sanity`. It names no package,
+  compiler, mirror or path of any site; the sandbox's own lists are one
+  of its examples. Its `PLAN.md` and `COLL-INPROGRESS/` hold the plans,
+  the decisions and what was found. Not on Ansible Galaxy: whether it
+  goes there is not decided.
 - **How `sandbox-provisioning` uses it** (since [stage 10](../INPROGRESS/STAGE-10.md)):
-  a line in `requirements.yml` naming the repository at the tag `0.1.0`
+  a line in `requirements.yml` naming the repository at a tag, `0.3.0`
+  since [stage 11](../INPROGRESS/STAGE-11.md)
   (the operator's decision: the git tag until Galaxy is decided),
   installed into `.collections/` by `just init`, by the container test,
   and by the head node's first boot before `site.yml` runs.

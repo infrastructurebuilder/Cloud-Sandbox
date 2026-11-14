@@ -75,45 +75,94 @@
     - spack_save.stat.exists
     - spack_bashrc is changed
 
-# Replaces funcs-setup-instance.sh L661-L700
-# The script's Spack commands, in its order. Spack v1.2.0 already has a
-# source-only mirror called spack-public in its defaults; the script's add
-# puts a binary one of the same name in the site scope, which takes
-# precedence. Adding it a second time is an error, which the script runs into
-# and ignores on a repeated run; here it is added when the site scope does not
-# have it yet.
+# Replaces funcs-setup-instance.sh L661
+# The script loads Spack into its shell and then runs seven Spack commands.
+# Here Spack is called by its path, and the commands are a list of steps for
+# the setup role of the infrastructurebuilder.csis_spack collection (stage
+# 11): each step is compared with what Spack has and changes only what
+# differs, so nothing has to be hashed before and after. Each step names the
+# line it replaces.
 #
-# Once the intel_oneapi role has run, its modules are loaded here first. On the
-# first run they do not exist yet, which is the script's situation. On a later
-# run, "compiler find" without them would remove the Intel compilers that the
-# intel_oneapi role registered, and that role would add them back: the end
-# state is the same, as it is when the script runs twice, but both steps would
-# report a change every time.
+# The steps are applied as the login user, who owns Spack's tree.
+#
+# Until stage 11 the Intel modules were loaded here first, once the
+# intel_oneapi role had run, in the belief that "compiler find" without them
+# removes the Intel compilers. With Spack v1.2.0 it does not: detection only
+# ever adds (tried with the real oneAPI). Nothing is loaded here any more.
 - name: Configure Spack, find the compilers and externals, add the public mirror
-  ansible.builtin.shell:
-    cmd: |
-      {{ sandbox_modules_init }}
-      set -eo pipefail
-      if [ -d {{ sandbox_modulefiles_dir }}/intel ]; then
-        {{ sandbox_load_intel_modules | indent(2) }}
-      fi
-      spack={{ spack_exe }}
-      before=$({{ spack_fingerprint }})
-      $spack config add "config:install_tree:padded_length:73"
-      $spack config add "modules:default:enable:[tcl]"
-      $spack compiler find --scope site
-      $spack external find --scope site
-      $spack external find --not-buildable --scope site cmake
-      mirrors=$($spack mirror list --scope site)
-      if ! grep -q '^spack-public ' <<<"$mirrors"; then
-        $spack mirror add --scope site spack-public https://cache.spack.io
-      fi
-      $spack buildcache keys --install --trust
-      after=$({{ spack_fingerprint }})
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
-  become: true
-  become_user: "{{ sandbox_user }}"
-  register: spack_configure
-  changed_when: "'SPACK-CHANGED' in spack_configure.stdout"
+  ansible.builtin.include_role:
+    name: infrastructurebuilder.csis_spack.setup
+    apply:
+      become: true
+      become_user: "{{ sandbox_user }}"
+  vars:
+    spack_setup_spack: "{{ spack_exe }}"
+    spack_setup_scope: site
+    spack_setup:
+      # Replaces funcs-setup-instance.sh L672-L673
+      # The script's "config add" has no --scope, so its two settings land in
+      # the login user's ~/.spack and no other user has them. Here they go to
+      # the site scope with everything else (stage 11, decision 3).
+      - kind: config
+        settings:
+          config:
+            install_tree:
+              padded_length: 73
+          modules:
+            default:
+              enable: [tcl]
+      # Replaces funcs-setup-instance.sh L680
+      - kind: detect
+        compilers: true
+      # Replaces funcs-setup-instance.sh L691
+      - kind: detect
+        externals: true
+      # Replaces funcs-setup-instance.sh L692
+      - kind: detect
+        externals: [cmake]
+        not_buildable: true
+      # Replaces funcs-setup-instance.sh L699
+      # Spack v1.2.0 already has a source-only mirror called spack-public in
+      # its defaults; this puts a binary one of the same name in the site
+      # scope, which takes precedence. The script's second run fails on
+      # "already exists" and ignores it; the step changes nothing then.
+      - kind: mirror
+        name: spack-public
+        url: https://cache.spack.io
+      # Replaces funcs-setup-instance.sh L700
+      - kind: gpg_key
+        from_mirrors: true
   when: spack_save.stat.exists
+
+# New: the site's own build cache and its key, which the script leaves
+# commented out (L663-L670, L675-L678) and the operator added by hand with
+# spack-pubkey.sh. It is applied only when spack_site_mirror is true, which it
+# is not by default (stage 11, decision 5), so a build does what it did.
+- name: Trust the site mirror's key and add the site mirror
+  ansible.builtin.include_role:
+    name: infrastructurebuilder.csis_spack.setup
+    apply:
+      become: true
+      become_user: "{{ sandbox_user }}"
+  vars:
+    spack_setup_spack: "{{ spack_exe }}"
+    spack_setup_scope: site
+    spack_setup:
+      # Replaces spack-pubkey.sh L8-L9 L11
+      # The script downloads the key to a file and trusts whatever it got.
+      # Here the key is trusted only if it has the fingerprint expected.
+      - kind: gpg_key
+        key: "{{ spack_key_url }}"
+        fingerprint: "{{ spack_key_fingerprint }}"
+      # Replaces spack-pubkey.sh L18
+      # The script's "mirror add" has no --scope either; the mirror goes to
+      # the site scope here, as the settings above do.
+      - kind: mirror
+        name: s3-mirror
+        url: "{{ spack_mirror }}"
+      # Replaces spack-pubkey.sh L19
+      - kind: gpg_key
+        from_mirrors: true
+  when:
+    - spack_save.stat.exists
+    - spack_site_mirror | bool

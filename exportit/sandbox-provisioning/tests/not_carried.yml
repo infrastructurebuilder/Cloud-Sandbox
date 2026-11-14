@@ -128,3 +128,18 @@
     Node.js 16 from NodeSource, Anaconda 2022.05 and a conda environment it
     never fills. The service file, the run script and jupyterhub/README.md
     describe the conda install, which the jupyterhub role translates.
+
+# Stage 11: the site mirror's script, which the spack role's third list
+# replaces.
+
+- file: spack-pubkey.sh
+  lines: L1
+  why: >-
+    Reads the versions and paths from environment-vars.sh. The role has them
+    from group_vars/all.yml, where test_parity.py holds them to that file.
+
+- file: spack-pubkey.sh
+  lines: L12
+  why: >-
+    Lists Spack's keys on the terminal. The step that trusts the key reports
+    the fingerprint it trusted.

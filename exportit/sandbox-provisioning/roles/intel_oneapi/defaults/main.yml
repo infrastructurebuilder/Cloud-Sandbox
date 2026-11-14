@@ -16,16 +16,24 @@ intel_oneapi_packages:
 intel_oneapi_root: /opt/intel/oneapi
 intel_oneapi_modulefiles_dir: "{{ sandbox_modulefiles_dir }}/intel"
 
-# Spack is told to use these instead of building its own.
-intel_oneapi_spack_externals:
-  - {package: intel-oneapi-mkl, spec: "intel-oneapi-mkl@{{ oneapi_major_minor }}", prefix: "{{ intel_oneapi_root }}"}
-  - {package: intel-oneapi-mpi, spec: "intel-oneapi-mpi@{{ intel_mpi_version }}", prefix: "{{ intel_oneapi_root }}"}
-
-intel_oneapi_spack_providers:
-  - "packages:all:providers:mkl:[intel-oneapi-mkl]"
-  - "packages:all:providers:blas:[intel-oneapi-mkl]"
-  - "packages:all:providers:lapack:[intel-oneapi-mkl]"
-  - "packages:all:providers:scalapack:[intel-oneapi-mkl]"
-  - "packages:all:providers:mpi:[intel-oneapi-mpi]"
-
-intel_oneapi_spack_packages_file: "{{ spack_dir }}/etc/spack/site/packages.yaml"
+# What Spack is told about MKL and MPI, in the shape of the "packages" section
+# of its configuration (stage 11): they are installed outside it, at these
+# prefixes, are never to be built, and provide these virtual packages.
+intel_oneapi_spack_packages:
+  intel-oneapi-mkl:
+    externals:
+      - spec: "intel-oneapi-mkl@{{ oneapi_major_minor }}"
+        prefix: "{{ intel_oneapi_root }}"
+    buildable: false
+  intel-oneapi-mpi:
+    externals:
+      - spec: "intel-oneapi-mpi@{{ intel_mpi_version }}"
+        prefix: "{{ intel_oneapi_root }}"
+    buildable: false
+  all:
+    providers:
+      mkl: [intel-oneapi-mkl]
+      blas: [intel-oneapi-mkl]
+      lapack: [intel-oneapi-mkl]
+      scalapack: [intel-oneapi-mkl]
+      mpi: [intel-oneapi-mpi]

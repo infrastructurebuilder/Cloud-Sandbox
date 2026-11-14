@@ -31,73 +31,45 @@
     chdir: "{{ intel_oneapi_root }}"
     creates: "{{ intel_oneapi_modulefiles_dir }}/compiler/{{ oneapi_version }}"
 
-# Replaces funcs-setup-instance.sh L919 L928-L937
-- name: Let Spack find the Intel compilers
-  ansible.builtin.shell:
-    cmd: |
-      {{ sandbox_modules_init }}
-      set -eo pipefail
-      {{ sandbox_load_intel_modules }}
-      before=$({{ spack_fingerprint }})
-      {{ spack_exe }} compiler find --scope site
-      after=$({{ spack_fingerprint }})
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
-  become: true
-  become_user: "{{ sandbox_user }}"
-  register: intel_oneapi_compilers
-  changed_when: "'SPACK-CHANGED' in intel_oneapi_compilers.stdout"
-
-# Replaces funcs-setup-instance.sh L709-L732 L941-L949
-# The function add_spack_site_external, kept as the shell it is: it already
-# takes care not to add a package twice.
-- name: Tell Spack that MKL and MPI are installed outside it
-  ansible.builtin.shell:
-    cmd: |
-      set -euo pipefail
-      file={{ intel_oneapi_spack_packages_file }}
-      mkdir -p "$(dirname "$file")"
-      if [ ! -f "$file" ]; then
-        printf '%s\n' 'packages:' > "$file"
-      fi
-      if grep -q "^  {{ item.package }}:" "$file"; then
-        exit 0
-      fi
-      cat >> "$file" <<EOF
-        {{ item.package }}:
-          externals:
-          - spec: {{ item.spec }}
-            prefix: {{ item.prefix }}
-          buildable: false
-
-      EOF
-      echo SPACK-CHANGED
-    executable: /bin/bash
-  become: true
-  become_user: "{{ sandbox_user }}"
-  loop: "{{ intel_oneapi_spack_externals }}"
-  loop_control:
-    label: "{{ item.package }}"
-  register: intel_oneapi_externals
-  changed_when: "'SPACK-CHANGED' in intel_oneapi_externals.stdout"
-
-# Replaces funcs-setup-instance.sh L951-L955 L959
-# The script's "mirror add" between these lines is not carried: see
-# tests/not_carried.yml.
-- name: Make the Intel libraries Spack's providers
-  ansible.builtin.shell:
-    cmd: |
-      set -euo pipefail
-      spack={{ spack_exe }}
-      before=$({{ spack_fingerprint }})
-      {% for provider in intel_oneapi_spack_providers %}
-      $spack config --scope site add '{{ provider }}'
-      {% endfor %}
-      $spack buildcache keys --install --trust
-      after=$({{ spack_fingerprint }})
-      [ "$before" = "$after" ] || echo SPACK-CHANGED
-    executable: /bin/bash
-  become: true
-  become_user: "{{ sandbox_user }}"
-  register: intel_oneapi_providers
-  changed_when: "'SPACK-CHANGED' in intel_oneapi_providers.stdout"
+# New: what the script does to Spack once the compilers are installed is a
+# list of steps for the setup role of the infrastructurebuilder.csis_spack
+# collection (stage 11), applied as the login user. Each step names the
+# lines it replaces.
+- name: Tell Spack about the Intel compilers, MKL and MPI
+  ansible.builtin.include_role:
+    name: infrastructurebuilder.csis_spack.setup
+    apply:
+      become: true
+      become_user: "{{ sandbox_user }}"
+  vars:
+    spack_setup_spack: "{{ spack_exe }}"
+    spack_setup_scope: site
+    spack_setup:
+      # Replaces funcs-setup-instance.sh L919 L928-L934
+      # The only shell left: what makes the compilers visible.
+      - kind: environment
+        name: intel
+        shell: |
+          {{ sandbox_modules_init }}
+          set -eo pipefail
+          {{ sandbox_load_intel_modules }}
+      # Replaces funcs-setup-instance.sh L937
+      # Without the modules Spack finds no Intel compiler and says nothing;
+      # the script would go on. Here that is a failure.
+      - kind: detect
+        compilers: true
+        environment: intel
+        require: ["intel-oneapi-compilers@{{ oneapi_version }}"]
+      # Replaces funcs-setup-instance.sh L709-L732 L941-L949 L951-L955
+      # The function add_spack_site_external appends text to the site's
+      # packages.yaml unless the package's name is there already, so a changed
+      # version or prefix is never corrected. Declared here, it is.
+      # "spack external find" does not detect these two (tried).
+      - kind: config
+        settings:
+          packages: "{{ intel_oneapi_spack_packages }}"
+      # Replaces funcs-setup-instance.sh L959
+      # The script's "mirror add" just before it is not carried: see
+      # tests/not_carried.yml.
+      - kind: gpg_key
+        from_mirrors: true

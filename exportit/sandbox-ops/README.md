@@ -30,12 +30,16 @@ when it holds personal data.
 
 | Status | Means | Where | Files |
 | --- | --- | --- | ---: |
-| in use | still makes sense on today's sandbox (RHEL 10, Spack, oneAPI, EFS, Prefect), even if nothing calls it | here, in `bin/` and `keys/` | 16 |
+| in use | still makes sense on today's sandbox (RHEL 10, Spack, oneAPI, EFS, Prefect), even if nothing calls it | here, in `bin/` and `keys/` | 15 |
 | superseded | what it did is done by something else, named in the catalogue: mostly a role of `sandbox-provisioning` | the umbrella's `attic/superseded/<original path>` | 26 |
 | dead | refers to what no longer exists (Slurm and munge, RHEL 7 and 8, old Spack trees), or is a one-off note | the umbrella's `attic/dead/<original path>` | 50 |
 
-[CATALOGUE.tsv](CATALOGUE.tsv) here holds the 16 rows of the tools in
-use; `cloud-sandbox/attic/CATALOGUE.tsv` holds the other 76.
+[CATALOGUE.tsv](CATALOGUE.tsv) here holds the 15 rows of the tools in
+use; `cloud-sandbox/attic/CATALOGUE.tsv` holds the 76 that are
+superseded or dead. The 92nd, `spack-pubkey.sh`, was in use here until
+stage 11 made it a list of steps in `sandbox-provisioning`'s `spack`
+role (applied when `spack_site_mirror` is true); the script is in that
+unit's `legacy/` now, where its tests read it.
 
 At first the attic was copied here, so that every file was accounted
 for. On 2026-11-13 the operator decided that the attic does not travel
@@ -48,7 +52,6 @@ unit's map.
 | Tool | What it is for |
 | --- | --- |
 | `bin/spack-update-mirror.sh` | Push the built Spack packages to the S3 binary mirror. Its list of specs (gcc 11.2.1, Intel 2021.9.0, oneAPI 2023.1.0) is RHEL 8's and needs updating |
-| `bin/spack-pubkey.sh` | Trust the mirror's key and add the S3 mirror, by hand; the setup leaves these steps commented out |
 | `bin/scp-secret.sh` | Copy the mirror's private signing key from the local machine to the head node. The file holds only the key's path |
 | `bin/spack-stack-mirror-create.sh`, `bin/spack-stack-update-mirror.sh` | The same for the spack-stack v2.0 tree that UFS Coastal uses |
 | `keys/22DC0120263F329AE5C9DA08F525C05B06DCA266.pub` | The public half of the mirror's signing key; its user id carries a person's work address |
@@ -62,7 +65,7 @@ unit's map.
 
 The tools came from one directory and some still expect its neighbours:
 
-- `bin/spack-update-mirror.sh` and `bin/spack-pubkey.sh` source
+- `bin/spack-update-mirror.sh` sources
   `environment-vars.sh`, and `bin/add-ufs-setup.sh` sources
   `funcs-setup-instance.sh` and runs `./create_image.sh`. Those are now
   `sandbox-provisioning`'s, in its `legacy/`; its `group_vars/all.yml`

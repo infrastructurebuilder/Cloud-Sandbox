@@ -11,6 +11,9 @@
 # The plays are site.yml (with the roles below), users.yml (with the users of
 # tests/container/users.yml) and jupyterhub.yml, in that order.
 #
+# After the second apply, the roles that reach Spack through the csis_spack
+# collection are run once more in check mode, which must find nothing to change.
+#
 # spack_environment is applied with spack_environment_state: concretized
 # (tests/container/vars.yml): ESMF and PETSc are concretized with the real
 # oneAPI and Spack, and not built. Fake installs cannot stand in for the build:
@@ -138,6 +141,33 @@ for play in $plays; do
         exit 1
     fi
 done
+
+# Stage 11: the three roles that reach Spack through the csis_spack collection
+# can be previewed. After two applies a preview must find nothing to change.
+check_roles=""
+for role in spack intel_oneapi spack_environment; do
+    case ",$roles," in *",$role,"*) check_roles="${check_roles:+$check_roles,}$role" ;; esac
+done
+case " $plays " in
+    *" site "*)
+        if [ -n "$check_roles" ]; then
+            echo "== check mode (roles: $check_roles)"
+            # shellcheck disable=SC2016 # $1 is expanded by the shell in the container
+            if ! in_container bash -c 'cd /opt/sandbox-provisioning && ANSIBLE_CONFIG=/opt/sandbox-provisioning/ansible.cfg exec ansible-playbook --inventory inventories/local/hosts.yml --extra-vars @/srv/provisioning/tests/container/vars.yml --check --tags "$1" site.yml' _ "$check_roles" \
+                >"$logs/check.log" 2>&1; then
+                tail -60 "$logs/check.log"
+                echo "FAILED: check mode did not finish; full log in $logs/check.log"
+                exit 1
+            fi
+            echo "   site.yml --check: $(recap "$logs/check.log")"
+            if [ "$(count "$logs/check.log" changed)" != 0 ]; then
+                grep -B1 -A6 '^changed:' "$logs/check.log" | head -80
+                echo "FAILED: check mode after two applies would change something"
+                exit 1
+            fi
+        fi
+        ;;
+esac
 
 echo "== checking what the roles left behind"
 # shellcheck disable=SC2016 # $1 is expanded by the shell in the container

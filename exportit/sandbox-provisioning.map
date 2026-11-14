@@ -38,6 +38,11 @@ copy scripts/install_jupyterhub.sh            legacy/install_jupyterhub.sh
 copy scripts/system/jupyterhub_config.py      legacy/system/jupyterhub_config.py
 copy scripts/system/jupyterhub.conf           legacy/system/jupyterhub.conf
 copy scripts/system/jupytersudoers            legacy/system/jupytersudoers
+
+# Stage 11: the site mirror and its key, as a list of steps for the
+# csis_spack collection's setup role. The script it replaces was a tool of
+# sandbox-ops, run by hand; it is carried in legacy/ like the others.
+copy scripts/spack-pubkey.sh                  legacy/spack-pubkey.sh
 copy scripts/system/jupyterhub.service        roles/jupyterhub/files/jupyterhub.service
 copy scripts/system/runJupyterhub.sh          roles/jupyterhub/files/runJupyterhub.sh
 copy jupyterhub/README.md                     docs/JUPYTERHUB.md

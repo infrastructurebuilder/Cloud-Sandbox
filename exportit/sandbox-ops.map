@@ -22,7 +22,6 @@ copy scripts/newamised.sh                                        bin/newamised.s
 copy scripts/scp-secret.sh                                       bin/scp-secret.sh
 copy scripts/scrub_liveocean.sh                                  bin/scrub_liveocean.sh
 copy scripts/scrub_nosofs.sh                                     bin/scrub_nosofs.sh
-copy scripts/spack-pubkey.sh                                     bin/spack-pubkey.sh
 copy scripts/spack-stack-mirror-create.sh                        bin/spack-stack-mirror-create.sh
 copy scripts/spack-stack-update-mirror.sh                        bin/spack-stack-update-mirror.sh
 copy scripts/spack-update-mirror.sh                              bin/spack-update-mirror.sh

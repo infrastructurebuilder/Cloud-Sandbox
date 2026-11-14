@@ -28,3 +28,18 @@ aside and why, and where the details are.
   Cloud-Sandbox. That is decided once the commit tree is in good order;
   until then [MAP.md](MAP.md#the-order-of-the-real-relocations) says how
   it would be done, not that it will be.
+- **Leftover Spack settings in the login user's scope on head nodes built
+  before stage 11** (put aside 2026-11-14). The script's two
+  `spack config add` lines have no `--scope`, so on a head node built by
+  the script, or by the playbooks before stage 11, the install-tree
+  padding (73) and the Tcl modules setting are in the login user's
+  `~/.spack/config.yaml` and `~/.spack/modules.yaml`. Stage 11 writes them
+  to the site scope instead and leaves the old copies alone: they have
+  the same values, and the user scope wins over the site scope, so they
+  do no harm until someone changes the site's values, when the login user
+  alone would keep the old ones. To fix: a step of state `absent` in the
+  user scope for those two paths (`spack_config` does this), run once on
+  each existing head node, or added to the `spack` role's list for a
+  while. Decide which, and whether any other user has the same in their
+  own `~/.spack`. See [MAP.md](MAP.md#spack-set-up-through-the-collection-stage-11) and
+  [STAGE-11.md](../INPROGRESS/STAGE-11.md).

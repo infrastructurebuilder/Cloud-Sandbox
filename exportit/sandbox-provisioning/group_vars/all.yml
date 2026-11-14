@@ -43,10 +43,21 @@ spack_target: x86_64_v3                                         # target
 spack_arch: "arch=linux-rhel10-{{ spack_target }}"              # SPACKTARGET
 
 # Exported by the script and used by none of the functions it calls: the lines
-# that would add this mirror are commented out there.
+# that would add this mirror are commented out there, and the operator added
+# it by hand with spack-pubkey.sh. The spack role adds it when
+# spack_site_mirror is true (stage 11).
 spack_mirror: s3://ioos-cloud-sandbox/public/spack/mirror       # SPACK_MIRROR
 spack_key_url: https://ioos-cloud-sandbox.s3.amazonaws.com/public/spack/mirror/spack.mirror.gpgkey.pub    # SPACK_KEY_URL
+# Where the script downloads the key to. Nothing here uses it: the key is
+# fetched and trusted by its fingerprint. Kept because the script exports it.
 spack_key: "{{ spack_dir }}/opt/spack/gpg/spack.mirror.gpgkey.pub"    # SPACK_KEY
+
+# New (stage 11): whether to trust the site mirror's key and use the site
+# mirror. False, so that a build does what the script does.
+spack_site_mirror: false
+# New (stage 11): the fingerprint the key at spack_key_url must have. It is
+# the key kept in sandbox-ops/keys/, and what the URL served on 2026-11-14.
+spack_key_fingerprint: 22DC0120263F329AE5C9DA08F525C05B06DCA266
 
 # ---------------------------------------------------------------------------
 # The node image
@@ -93,19 +104,3 @@ sandbox_load_intel_modules: |
   {% for module in sandbox_intel_modules %}
   module load {{ module }}
   {% endfor %}
-
-# Spack's configuration as one line of JSON with sorted keys. Sorted, because
-# Spack rewrites packages.yaml in a different order each time it detects
-# externals, without changing what it says. One expression, because
-# "spack python -c" compiles its argument as a single interactive statement:
-# given two, it prints an error and still exits 0.
-spack_config_json: >-
-  {{ spack_exe }} python -c 'print(__import__("json").dumps({s: __import__("spack.config").config.get(s)
-  for s in ("config", "modules", "packages", "mirrors")}, sort_keys=True, default=str))'
-
-# A fingerprint of that configuration and of Spack's trusted keys. A step that
-# runs Spack commands takes it before and after, and reports a change only
-# when it differs. It fails rather than give the fingerprint of nothing.
-spack_fingerprint: >-
-  ( config=$({{ spack_config_json }}) && [ -n "$config" ] && printf '%s\n' "$config"
-  && {{ spack_exe }} gpg list ) | sha256sum
