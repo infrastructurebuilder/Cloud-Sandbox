@@ -29,7 +29,7 @@ what = "the network, EFS volume, IAM role, placement group and head node"
 
 [[unit]]
 name = "ansible-collection-csis-spack"
-version = "0.3.0"
+version = "0.3.1"
 kind = "ansible"
 step = 2
 relocate = 0

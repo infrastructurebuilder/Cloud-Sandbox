@@ -134,6 +134,52 @@
         from_mirrors: true
   when: spack_save.stat.exists
 
+# New: (stage 12) on a head node built by the script, or by these playbooks
+# before stage 11, the two settings of the first step are in the login user's
+# scope (~/.spack), where the script's "config add" without --scope put them.
+# The user scope wins over the site scope, so once the site's values change
+# the login user alone would keep the old ones. Where the user scope holds
+# exactly what the site scope now holds, that copy is a leftover and is
+# removed; where it holds something else, someone chose it, and it is left
+# and reported.
+#
+# These three tasks, and tasks/user_scope.yml, can go once no head node built before stage 11 is left
+# (REMINDERS.md). A node built since has nothing to remove, and they change
+# nothing on it.
+- name: Work out which of the two are leftovers in the login user's scope
+  ansible.builtin.include_tasks: user_scope.yml
+  when: spack_save.stat.exists
+
+# New: (stage 12) the removal, through the collection like the steps above.
+- name: Remove the leftovers from the login user's scope
+  ansible.builtin.include_role:
+    name: infrastructurebuilder.csis_spack.setup
+    apply:
+      become: true
+      become_user: "{{ sandbox_user }}"
+  vars:
+    spack_setup_spack: "{{ spack_exe }}"
+    spack_setup:
+      # New: see the comment on the stage 12 tasks above.
+      - kind: config
+        scope: user
+        state: absent
+        settings: "{{ spack_user_scope.leftover }}"
+  when:
+    - spack_save.stat.exists
+    - spack_user_scope.leftover | length > 0
+
+# New: (stage 12) a value someone chose is left, and said.
+- name: Say which settings in the login user's scope were chosen, and left
+  ansible.builtin.debug:
+    msg: >-
+      Left in {{ sandbox_user }}'s scope, because it differs from the site's:
+      {% for item in spack_user_scope.chosen %}{{ item.path }} is {{ item.user | to_json }}
+      there and {{ item.site | to_json }} in the site scope{{ '; ' if not loop.last else '' }}{% endfor %}.
+  when:
+    - spack_save.stat.exists
+    - spack_user_scope.chosen | length > 0
+
 # New: the site's own build cache and its key, which the script leaves
 # commented out (L663-L670, L675-L678) and the operator added by hand with
 # spack-pubkey.sh. It is applied only when spack_site_mirror is true, which it

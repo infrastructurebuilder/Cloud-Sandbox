@@ -584,9 +584,13 @@ What is different from the script, on purpose, each noted where it is:
   `spack config add` lines have no `--scope`, so the install-tree padding
   and the Tcl modules were in the login user's `~/.spack`, and only that
   user had them. They are now in the site scope with everything else
-  (the operator's decision). A head node built earlier still has the old
-  copies in the user scope, which wins over the site scope; see
-  [REMINDERS.md](REMINDERS.md).
+  (the operator's decision). A head node built earlier also has the old
+  copies in the user scope, which wins over the site scope. Since
+  [stage 12](../INPROGRESS/STAGE-12.md) the `spack` role removes them
+  where they hold what the site scope holds, and leaves, and reports,
+  any value someone changed (`tasks/user_scope.yml`, then a `config` step
+  of state `absent` in the user scope). Its tasks can go once no head
+  node built before stage 11 is left ([REMINDERS.md](REMINDERS.md)).
 - **A missing compiler is a failure.** Run without the Intel modules,
   `compiler find` finds nothing and says nothing, and the script goes on.
   The `detect` step requires `intel-oneapi-compilers` at `oneapi_version`.
@@ -1320,8 +1324,10 @@ this file's copy check covers it.
   Spack (concretize, install, regenerate module files, push to the build
   cache), as a module with Ansible's change reporting and check mode,
   in place of shell tasks that hash files before and after.
-- **State:** 0.3.0, tagged and pushed on 2026-11-14 (the repository is
-  public); 0.1.0 and 0.2.0 before it. Eight modules, a `setup` role and
+- **State:** 0.3.1, tagged and pushed on 2026-11-14 (the repository is
+  public); 0.1.0, 0.2.0 and 0.3.0 before it. 0.3.1 fixed what the
+  sandbox's stage 12 found: Spack leaves a mapping it empties behind, and
+  `spack_config` now removes the emptied mapping itself. Eight modules, a `setup` role and
   two filters, tested against a stand-in for Spack and against the real
   Spack v1.2.0, and passing `ansible-test sanity`. It names no package,
   compiler, mirror or path of any site; the sandbox's own lists are one
@@ -1329,8 +1335,9 @@ this file's copy check covers it.
   the decisions and what was found. Not on Ansible Galaxy: whether it
   goes there is not decided.
 - **How `sandbox-provisioning` uses it** (since [stage 10](../INPROGRESS/STAGE-10.md)):
-  a line in `requirements.yml` naming the repository at a tag, `0.3.0`
-  since [stage 11](../INPROGRESS/STAGE-11.md)
+  a line in `requirements.yml` naming the repository at a tag: `0.3.0`
+  since [stage 11](../INPROGRESS/STAGE-11.md), `0.3.1` since
+  [stage 12](../INPROGRESS/STAGE-12.md)
   (the operator's decision: the git tag until Galaxy is decided),
   installed into `.collections/` by `just init`, by the container test,
   and by the head node's first boot before `site.yml` runs.

@@ -69,6 +69,26 @@ in_container bash -c '
     chown ec2-user:ec2-user /mnt/efs/fs1/save/ec2-user
 '
 
+case " $plays " in
+    *" site "*)
+        case ",$roles," in
+            *",spack,"*)
+                echo "== the login user's Spack scope, as a head node built before stage 11 has it"
+                # The script's "config add" without --scope left the padding and
+                # the Tcl modules here. The padding is as the script left it,
+                # and goes; the modules setting is changed, as if by hand, and
+                # stays (stage 12).
+                in_container sudo -u ec2-user bash -c '
+                    set -e
+                    mkdir -p ~/.spack
+                    printf "config:\n  install_tree:\n    padded_length: 73\n" > ~/.spack/config.yaml
+                    printf "modules:\n  default:\n    enable:\n    - lmod\n" > ~/.spack/modules.yaml
+                '
+                ;;
+        esac
+        ;;
+esac
+
 echo "== putting the playbooks in a git repository inside the container"
 in_container mkdir -p /srv/provisioning
 # ustar: no extended attributes from the host. Extracted as root's own files,

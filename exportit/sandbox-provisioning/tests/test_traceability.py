@@ -92,8 +92,11 @@ def test_the_steps_of_the_setup_lists_are_checked_like_tasks() -> None:
     by_role: dict[str, int] = {}
     for claim in steps:
         by_role[claim.source.parent.parent.name] = by_role.get(claim.source.parent.parent.name, 0) + 1
-    assert by_role == {"spack": 9, "intel_oneapi": 4}
-    assert all(claim.replaces for claim in steps), "every step replaces lines of a script"
+    assert by_role == {"spack": 10, "intel_oneapi": 4}
+    # Every step replaces lines of a script, but stage 12's removal of what
+    # the script left in the wrong scope, which is new.
+    assert [claim.name for claim in steps if not claim.replaces] == ["kind: config"]
+    assert all(claim.replaces or claim.new for claim in steps)
 
 
 @pytest.mark.parametrize("claim", CLAIMS, ids=str)

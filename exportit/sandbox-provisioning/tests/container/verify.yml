@@ -155,7 +155,6 @@
           grep -q '"enable":\["tcl"\]' <<<"$site"
           grep -q 'cache.spack.io' <<<"$($spack config --scope site get --json mirrors)"
           [ -z "$(find {{ spack_dir }}/etc/spack/site ! -user {{ sandbox_user }})" ]
-          [ ! -e {{ sandbox_user_home }}/.spack/config.yaml ]
         executable: /bin/bash
       become: true
       become_user: "{{ sandbox_user }}"
@@ -278,6 +277,38 @@
       become_user: "{{ sandbox_user }}"
       changed_when: false
       when: (sandbox_modulefiles_dir ~ '/intel') is directory
+
+    # Stage 12: converge.sh left the padding in the login user's scope as the
+    # script would, and the modules setting changed. The padding is a
+    # leftover and is gone; the modules setting was chosen and is there.
+    # It is then taken away here, so that the comparison below sees what
+    # the roles alone leave.
+    - name: Check what the spack role did with the login user's scope
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          spack={{ spack_exe }}
+          user_config=$($spack config --scope user get --json config)
+          user_modules=$($spack config --scope user get --json modules)
+          ! grep -q padded_length <<<"$user_config" || { echo "the leftover padding is still there"; exit 1; }
+          grep -q '"enable":\["lmod"\]' <<<"$user_modules" || { echo "the chosen modules setting is gone"; exit 1; }
+          # The whole mapping: removing only its key would leave "default: {}"
+          # behind, which is how Spack removes (stage 12).
+          $spack config --scope user remove modules:default
+          echo "the leftover padding removed, the chosen modules setting kept"
+        executable: /bin/bash
+      become: true
+      become_user: "{{ sandbox_user }}"
+      register: user_scope_check
+      changed_when: false
+      when:
+        - spack_dir is directory
+        - (sandbox_user_home ~ '/.spack/modules.yaml') is file
+
+    - name: Report the login user's scope
+      ansible.builtin.debug:
+        msg: "OBSERVED the login user's Spack scope: {{ user_scope_check.stdout_lines[-1] }}"
+      when: user_scope_check is not skipped
 
     # Stage 11: the spack and intel_oneapi roles set Spack up through the
     # csis_spack collection. What they leave is held to what the shell tasks
