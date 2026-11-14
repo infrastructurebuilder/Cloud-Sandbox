@@ -1,7 +1,7 @@
 # Stage 11: Spack set up through the csis_spack collection, at 0.3.0
 
 *Status:* executed 2026-11-14 on `feature/stage-11-csis-spack-0.3.0`, on
-the operator's "do coll 3". Committed locally; not merged.
+the operator's "do coll 3", and merged into `develop` the same day.
 
 ## The plan is in the collection's repository
 
