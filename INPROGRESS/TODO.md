@@ -41,6 +41,7 @@ any work starts.
 | [9](STAGE-9.md) | `spack.yaml` from a template; the `csis_spack` collection begun | Merged into `develop` 2026-11-13 |
 | [10](STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Merged into `develop` 2026-11-14 |
 | [11](STAGE-11.md) | Spack set up through the `csis_spack` collection at 0.3.0 (the collection's stage 3) | Merged into `develop` 2026-11-14 |
+| [12](STAGE-12.md) | The live proof on AWS | Planned 2026-11-14 |
 
 ## Landed
 
