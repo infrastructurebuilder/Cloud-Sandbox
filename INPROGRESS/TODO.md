@@ -41,6 +41,20 @@ any work starts.
 | [9](STAGE-9.md) | `spack.yaml` from a template; the `csis_spack` collection begun | Merged into `develop` 2026-11-13 |
 | [10](STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Merged into `develop` 2026-11-14 |
 | [11](STAGE-11.md) | Spack set up through the `csis_spack` collection at 0.3.0 (the collection's stage 3) | Merged into `develop` 2026-11-14 |
+| [12](STAGE-12.md) | The old Spack settings in the login user's scope | Planned 2026-11-14 |
+| [13](STAGE-13.md) | JupyterHub, decided | Planned 2026-11-14 |
+| [14](STAGE-14.md) | Clearing old model output on a timer | Planned 2026-11-14 |
+| [15](STAGE-15.md) | The live proof on AWS | Planned 2026-11-14 |
+| [16](STAGE-16.md) | A build cache for RHEL 10, pushed by the collection | Planned 2026-11-14 |
+| [17](STAGE-17.md) | The Lambda functions, owned | Planned 2026-11-14 |
+| [18](STAGE-18.md) | spack-stack for UFS Coastal | Planned 2026-11-14 |
+| [19](STAGE-19.md) | Relocate, or not | Planned 2026-11-14 |
+| [20](STAGE-20.md) | `sandbox-configs` split by owner | Planned 2026-11-14; only if 19 relocates it |
+| [21](STAGE-21.md) | The first boot runs the playbooks | Planned 2026-11-14; only if 19 relocates |
+| [22](STAGE-22.md) | The real relocations | Planned 2026-11-14; only if 19 relocates |
+
+The order of the work is in [PLAN.md](../PLAN.md), with the collection's
+stages 4 and 5 among these.
 
 ## Landed
 
