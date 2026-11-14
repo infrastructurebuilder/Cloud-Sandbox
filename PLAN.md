@@ -1,5 +1,37 @@
 # Plans
 
+## The remaining work, in order (2026-11-14)
+
+*Status:* planned 2026-11-14, every item on its own; nothing executed.
+Each is a stage, executed on its "do", with its decisions asked one at a
+time first. The stage numbers follow this order.
+
+The order is set by what each item needs first; where two items need
+nothing of each other, the smaller comes first. Defects that stages 2 to
+8 found in the originals and left as they are (cloudflow's missing flows
+and cron target, its lint findings, `scrub_liveocean.sh`'s parse error)
+are not in it.
+
+| # | Stage | What | Needs first | Size |
+| ---: | --- | --- | --- | --- |
+| 1 | [collection 4](../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-4.md) | `spack_env`: document `async` with check mode (0.3.1) | nothing | minutes |
+| 2 | [12](INPROGRESS/STAGE-12.md) | The old Spack settings in the login user's scope on existing head nodes | nothing | small |
+| 3 | [13](INPROGRESS/STAGE-13.md) | JupyterHub: an option, part of every build, or removed (a decision, then its work) | nothing; before 15, so the proof covers it | small |
+| 4 | [14](INPROGRESS/STAGE-14.md) | Clearing old model output on a timer, in place of the two scrub scripts | nothing; before 15, so the proof covers it | medium |
+| 5 | [15](INPROGRESS/STAGE-15.md) | **The live proof on AWS** | 12 to 14 done or dropped; the AWS session | large: hours of a head node |
+| 6 | [16](INPROGRESS/STAGE-16.md) | A build cache for RHEL 10, and the mirror-push scripts replaced by `spack_buildcache_push` | 15: a real build to push | medium |
+| 7 | [collection 5](../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-5.md) | Ansible Galaxy, or the git tag (a decision, then its work) | nothing; before 22, so the source is named once | medium if published |
+| 8 | [17](INPROGRESS/STAGE-17.md) | The Lambda functions: an owner, a module, tests (a decision, then its work) | nothing; before 22, step 1 | medium to large |
+| 9 | [18](INPROGRESS/STAGE-18.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 15: a head node to build on | large |
+| 10 | [19](INPROGRESS/STAGE-19.md) | Relocate all, some, or none (a decision) | 1 to 9, as "a good commit tree" | a decision |
+| 11 | [20](INPROGRESS/STAGE-20.md) | `sandbox-configs` split by owner | 19 relocates it | medium |
+| 12 | [21](INPROGRESS/STAGE-21.md) | The first boot runs the playbooks (`main.tf`'s two values) | 19 relocates both units; put into use at 22, step 6 | small |
+| 13 | [22](INPROGRESS/STAGE-22.md) | The real relocations, eight steps in MAP.md's order | 19, 20, 21 | large |
+
+Standing beside all of them: the parity watch on `main` (the next
+section), which, while it lasts, comes before any of these whenever
+`origin/main` has moved.
+
 ## Keeping exportit/ in parity with main (from 2026-11-13)
 
 *Status:* standing, from 2026-11-13 until the operator says otherwise:
