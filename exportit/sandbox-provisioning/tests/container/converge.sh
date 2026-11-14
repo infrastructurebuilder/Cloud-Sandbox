@@ -11,8 +11,13 @@
 # The plays are site.yml (with the roles below), users.yml (with the users of
 # tests/container/users.yml) and jupyterhub.yml, in that order.
 #
-# Not exercised here: efa_driver, fsx_lustre_client, spack_environment,
-# hpc_tuning and node-image.yml. See docs/LIVE-PROOF.md.
+# spack_environment is applied with spack_environment_state: concretized
+# (tests/container/vars.yml): ESMF and PETSc are concretized with the real
+# oneAPI and Spack, and not built. Fake installs cannot stand in for the build:
+# they leave python-venv without the python3 that the rest of the tree needs.
+#
+# Not exercised here: efa_driver, fsx_lustre_client, hpc_tuning and
+# node-image.yml. See docs/LIVE-PROOF.md.
 
 set -euo pipefail
 
@@ -20,7 +25,7 @@ unit=$(cd "$(dirname "$0")/../.." && pwd)
 image=sandbox-provisioning-test:alma10
 container=sandbox-provisioning-test-$$
 logs=$(mktemp -d)
-roles=${ROLES:-sandbox_paths,user_shell,base_system,prefect_server,mpi_ssh,python_user_env,spack,intel_oneapi}
+roles=${ROLES:-sandbox_paths,user_shell,base_system,prefect_server,mpi_ssh,python_user_env,spack,intel_oneapi,spack_environment}
 plays=${PLAYS:-site users jupyterhub}
 
 cleanup() {
@@ -75,6 +80,21 @@ in_container bash -c '
     git add --all
     git -c user.name=test -c user.email=test@example.invalid commit --quiet --message "under test"
 '
+
+echo "== fetching the playbooks and installing their collections, as the first-boot template does"
+# ansible-pull installs no collections, and site.yml needs one: the checkout
+# comes first, then requirements.yml, then the plays.
+if ! in_container bash -c '
+    set -e
+    git clone --quiet --branch main /srv/provisioning /opt/sandbox-provisioning
+    cd /opt/sandbox-provisioning
+    ANSIBLE_CONFIG=/opt/sandbox-provisioning/ansible.cfg ansible-galaxy collection install -r requirements.yml
+' >"$logs/collections.log" 2>&1; then
+    tail -30 "$logs/collections.log"
+    echo "FAILED: the collections did not install; full log in $logs/collections.log"
+    exit 1
+fi
+grep -E 'was installed successfully' "$logs/collections.log" | sed 's/^/   /'
 
 # ansible-pull hands the extra variables to its checkout step too, so the files
 # have to exist before the checkout does: they are read from the source repository.

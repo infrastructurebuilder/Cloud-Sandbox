@@ -12,6 +12,9 @@ from pathlib import Path
 
 UMBRELLA = Path(__file__).resolve().parents[1]
 FIELDS = {"name", "version", "kind", "step", "relocate", "needs", "what"}
+# A unit that already lives in a repository of its own, and is not copied
+# into exportit/, says so with external = true and has relocate = 0.
+OPTIONAL = {"external"}
 KINDS = {"python", "ansible", "terraform", "scripts", "data"}
 VERSION = re.compile(r"^\d+\.\d+\.\d+([ab]\d+)?$")
 
@@ -26,9 +29,16 @@ def problems() -> list[str]:
     by_name = {unit["name"]: unit for unit in units}
     for unit in units:
         name = unit.get("name", "?")
-        if set(unit) != FIELDS:
-            found.append(f"{name}: fields {sorted(set(unit) ^ FIELDS)} are missing or unknown")
+        if set(unit) - OPTIONAL != FIELDS:
+            found.append(f"{name}: fields {sorted((set(unit) - OPTIONAL) ^ FIELDS)} are missing or unknown")
             continue
+        if unit.get("external", False) is True:
+            if unit["relocate"] != 0:
+                found.append(f"{name} is external, so it is not relocated: relocate must be 0")
+        elif "external" in unit:
+            found.append(f"{name}: external must be true, or left out")
+        elif unit["relocate"] < 1:
+            found.append(f"{name}: relocate must be 1 or more; only an external unit has 0")
         if not VERSION.match(unit["version"]):
             found.append(f"{name}: {unit['version']!r} is not a version")
         if unit["kind"] not in KINDS:

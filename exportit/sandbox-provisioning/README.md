@@ -94,7 +94,7 @@ those differences are not carried.
 | 8 | `python_user_env` | `install_python_modules_user` | yes |
 | 9 | `spack` | `install_spack` | yes |
 | 10 | `intel_oneapi` | `install_intel_oneapi_dnf` | yes |
-| 11 | `spack_environment` | `create_spack-environment`, `build_spack-environment` | no: hours of compiling |
+| 11 | `spack_environment` | `create_spack-environment`, `build_spack-environment` | concretized only: the build takes hours (it runs Spack through `infrastructurebuilder.csis_spack`) |
 | 12 | `hpc_tuning` | `configure_optimizations` | no: changes kernel settings |
 
 Two more roles, added in [stage 7](../../INPROGRESS/STAGE-7.md), replace
@@ -132,7 +132,7 @@ that role's `defaults/main.yml`.
 You need `just`, `uv` and `shellcheck`; `full-test` also needs Docker.
 
 ```sh
-just init        # tool environment, and the amazon.aws collection
+just init        # tool environment, and the collections: infrastructurebuilder.csis_spack (tag 0.1.0) and amazon.aws
 just test        # syntax, ansible-lint, shellcheck, and the comparisons with the scripts
 just full-test   # also applies eight roles, users.yml and jupyterhub.yml to an AlmaLinux 10 container, twice
 ```

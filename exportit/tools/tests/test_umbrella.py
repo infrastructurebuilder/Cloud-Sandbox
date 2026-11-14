@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tomllib
 from pathlib import Path
 
@@ -19,7 +20,24 @@ def manifest() -> dict[str, dict[str, object]]:
 
 def test_the_manifest_names_every_mapped_unit() -> None:
     mapped = {path.stem for path in EXPORT.glob("*.map")} - NOT_UNITS
-    assert set(manifest()) == mapped
+    copied = {name for name, unit in manifest().items() if not unit.get("external")}
+    assert copied == mapped
+
+
+def test_an_external_unit_is_not_copied_here() -> None:
+    for name, unit in manifest().items():
+        if unit.get("external"):
+            assert not (EXPORT / f"{name}.map").exists(), name
+            assert not (EXPORT / name).exists(), name
+
+
+def test_the_collection_is_pinned_where_it_is_used_at_its_manifest_version() -> None:
+    requirements = (EXPORT / "sandbox-provisioning" / "requirements.yml").read_text()
+    pinned = re.search(
+        r"ansible-collection-csis-spack\.git\n\s+type: git\n\s+version: \"([^\"]+)\"", requirements
+    )
+    assert pinned, "sandbox-provisioning/requirements.yml does not pin the collection"
+    assert pinned.group(1) == manifest()["ansible-collection-csis-spack"]["version"]
 
 
 def test_a_unit_with_a_pyproject_has_that_version_in_the_manifest() -> None:
@@ -35,7 +53,7 @@ def test_a_unit_with_a_pyproject_has_that_version_in_the_manifest() -> None:
 
 def test_every_unit_has_a_justfile_with_the_five_targets() -> None:
     missing: list[str] = []
-    for name in [*manifest(), UMBRELLA]:
+    for name in [*(name for name, unit in manifest().items() if not unit.get("external")), UMBRELLA]:
         text = (EXPORT / name / "Justfile").read_text()
         missing += [
             f"{name}: {target}"

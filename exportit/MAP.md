@@ -346,7 +346,7 @@ the functions; a test checks the order.
 | `python_user_env` | `install_python_modules_user`, 1210-1249 | 1 |
 | `spack` | `install_spack`, 630-704 | 9 |
 | `intel_oneapi` | `install_intel_oneapi_dnf` and `add_spack_site_external`, 884-963 and 708-733 | 7 |
-| `spack_environment` | `create_spack-environment` and `build_spack-environment`, 737-766 and 770-826 | 7 (8 before stage 9) |
+| `spack_environment` | `create_spack-environment` and `build_spack-environment`, 737-766 and 770-826 | 6 (8 before stage 9, 7 before stage 10) |
 | `hpc_tuning` | `configure_optimizations`, 169-214 | 4 |
 | `node-image.yml` | `setup-instance.sh` 52-75, `create_image.sh`, `create_image.py` | 14 |
 
@@ -452,7 +452,8 @@ Cloud-Sandbox, because cloudflow runs from that checkout.
 | Traceability and parity with the scripts (310 tests) | `just test` | pass |
 | Eight roles (all but the four below) applied with `ansible-pull` to an AlmaLinux 10 container, twice; the second run must change nothing; the result is checked | `just full-test` | pass: 49 changes, then 0 |
 | `spack_environment`'s `spack.yaml` (stage 9): an environment made with the script's commands and one written by the role's template, side by side with the real Spack v1.2.0, give the same manifest and the same merged `concretizer`, `modules` and `packages` | `just full-test` | pass (2026-11-13) |
-| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and the rest of `spack_environment` (concretize, build, module files) | nowhere | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
+| `spack_environment` through `spack_env` (stage 10), with `spack_environment_state: concretized`: ESMF and PETSc concretized with the real oneAPI and Spack v1.2.0, 36 packages, Intel's compilers and MPI among them; the second run changes nothing | `just full-test` | pass (2026-11-13) |
+| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and building `spack_environment` and its module files | nowhere (the build and the module files are proved by the collection's own tests against the real Spack) | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
 | Anything on RHEL, or on AWS | nowhere | **not proved** |
 | The first-boot script | nowhere | **not proved**: it needs a real EFS volume |
 | Whether the playbook leaves the same node the script does | nowhere | **not proved** |
@@ -461,7 +462,8 @@ Cloud-Sandbox, because cloudflow runs from that checkout.
 procedure that would settle the last four rows. It costs a head node
 for several hours. It has not been run either.
 
-Two guesses in the untested roles are marked where they are made. The
+One guess in the untested roles is marked where it is made, and a second
+was until stage 10. The
 `efa_driver` role reads the installer's record in
 `/opt/amazon/efa_installed_packages` to skip a second install; if the
 record's form differs, the installer simply runs every time, as in the
@@ -477,8 +479,8 @@ wrote it (`## Module file created by spack (...) on 2026-11-13
 role's "Regenerate the environment's module files" task reports a
 change on every run, so a second run of `site.yml` is never "nothing
 changed" once the environment is built. The collection's `spack_env`
-module leaves that line out when it compares module trees; the task
-here is left as it is until the role uses the module.
+module leaves that line out when it compares module trees. Since stage 10
+the role uses the module, and the shell task is gone.
 
 ### The environment's spack.yaml, written whole (stage 9)
 
@@ -526,6 +528,34 @@ Spack reads as data, not as text.
 What is left for a module is what has to call Spack: concretize,
 install, regenerate module files, push to a build cache. That is
 [the collection](#ansible-collection-csis-spack-outside-this-repository)'s.
+
+### Spack through the collection (stage 10)
+
+By [stage 10](../INPROGRESS/STAGE-10.md), 2026-11-13, the role's three
+shell tasks after the template (concretize, install, regenerate the
+module files) are one task of the collection's `spack_env` module,
+naming the script's L812, L817 and L820-L822 as the three did:
+
+- **The Intel modules:** a task before it loads them once in bash, as
+  the script's shell has them loaded, and hands the module only what
+  that changed in the environment, through `environment:`. The module
+  runs no shell.
+- **Change and check mode:** a change is a new `spack.lock`, a spec
+  installed, or module files that differ, leaving out the time Spack
+  writes into them. `--check` concretizes a copy and says what would be
+  installed.
+- **New:** `spack_environment_state` (default `installed`; the container
+  test sets `concretized`). Gone: `spack_environment_modules_root`, since
+  the module asks Spack for its module roots, and `log.concretize`,
+  which the module does not write.
+- **The collection** comes from `requirements.yml`, at the tag `0.1.0` of
+  its repository. `ansible-pull` installs no collections, so the
+  first-boot template in `sandbox-terraform` now fetches the playbooks,
+  installs `requirements.yml`, and then runs `ansible-pull`; the
+  container test does the same.
+- **Not proved in the container:** the build. Spack's fake installs leave
+  `python-venv` without the `python3` that the rest of the ESMF and PETSc
+  tree needs, so the container concretizes only.
 
 ### What a real relocation would change
 
@@ -1208,15 +1238,20 @@ this file's copy check covers it.
   Spack (concretize, install, regenerate module files, push to the build
   cache), as a module with Ansible's change reporting and check mode,
   in place of shell tasks that hash files before and after.
-- **State:** metadata (`galaxy.yml`: 0.1.0, GPL-3.0-or-later,
-  ansible-core 2.16 on Python 3.12), tests, a build that installs, and
-  `ansible-test sanity` in `full-test`. No module yet; the plan for the
-  first two, `spack_env` and `spack_buildcache_push`, is the
-  collection's `PLAN.md`. Committed locally there; nothing pushed.
-- **How `sandbox-provisioning` will use it:** once there is a module, as
-  a line in `requirements.yml` pinned to a tag, installed into
-  `.collections/` by `just init` like `amazon.aws`, and a line in
-  `units.toml` with `sandbox-provisioning` needing it.
+- **State:** 0.1.0, tagged and pushed on 2026-11-13 (the repository is
+  public). Two modules, `spack_env` and `spack_buildcache_push`, tested
+  against a stand-in for Spack and against the real Spack v1.2.0, and
+  passing `ansible-test sanity`. Its `PLAN.md` holds the plan, the
+  decisions and what was found. Not on Ansible Galaxy: whether it goes
+  there is not decided.
+- **How `sandbox-provisioning` uses it** (since [stage 10](../INPROGRESS/STAGE-10.md)):
+  a line in `requirements.yml` naming the repository at the tag `0.1.0`
+  (the operator's decision: the git tag until Galaxy is decided),
+  installed into `.collections/` by `just init`, by the container test,
+  and by the head node's first boot before `site.yml` runs.
+  `units.toml` lists it as the one `external` unit, with
+  `sandbox-provisioning` needing it; a test in `tools` holds the pinned
+  tag to its version there.
 
 ## The order of the real relocations
 
@@ -1233,7 +1268,7 @@ step is done.
 | 2 | `model-common` | nothing | `models/modulefiles/`, `models/utils/` and the three notes gone; `adcirc-cora`'s `../modulefiles` no longer resolves in the original |
 | 3 | the eight `model-<name>` units | `model-common` (ADCIRC only) | `models/` and `patches/` gone |
 | 4 | `sandbox-configs` | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
-| 5 | `sandbox-provisioning` | nothing | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
+| 5 | `sandbox-provisioning` | `ansible-collection-csis-spack`, which is in its own repository already | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
 | 6 | `sandbox-terraform` | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 5's repository |
 | 7 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | the attic's 76 files moved to `attic/`, which stays; the rest of `scripts/` and `misc/` gone |
 | 8 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |

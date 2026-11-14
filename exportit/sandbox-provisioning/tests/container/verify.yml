@@ -275,6 +275,34 @@
       changed_when: false
       when: (sandbox_modulefiles_dir ~ '/intel') is directory
 
+    # Stage 10: spack_environment, applied with spack_environment_state: concretized.
+    - name: Check what the spack_environment role leaves, when it was applied
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          lock={{ spack_environment_dir }}/spack.lock
+          python3 - "$lock" <<'EOF'
+          import json, sys
+          lock = json.load(open(sys.argv[1]))
+          roots = sorted(root["spec"].split("@")[0].split("+")[0].split()[0] for root in lock["roots"])
+          names = {spec["name"] for spec in lock["concrete_specs"].values()}
+          assert roots == ["esmf", "petsc"], roots
+          for name in ("intel-oneapi-compilers", "intel-oneapi-mpi"):
+              assert name in names, f"{name} is not in the concretized environment"
+          print(f"{len(names)} packages concretized for esmf and petsc, with Intel's compilers and MPI")
+          EOF
+        executable: /bin/bash
+      become: true
+      become_user: "{{ sandbox_user }}"
+      register: environment_check
+      changed_when: false
+      when: (spack_environment_dir ~ '/spack.yaml') is file
+
+    - name: Report what the environment holds
+      ansible.builtin.debug:
+        msg: "OBSERVED spack_environment: {{ environment_check.stdout_lines[-1] }}"
+      when: environment_check is not skipped
+
 - name: Check the users that users.yml added
   hosts: "{{ 'sandbox_head' if 'users' in (verify_plays | default('')).split() else 'none' }}"
   become: true
