@@ -84,6 +84,28 @@ stage. It is in [REMINDERS.md](../exportit/REMINDERS.md).
 - **The key at the site mirror's address** has the fingerprint of the key
   kept in `sandbox-ops/keys/` (fetched and compared on 2026-11-14).
 
+## Outcome
+
+- The pin is 0.3.0 in `requirements.yml` and `units.toml`.
+- `spack`: six steps replace the shell task; a second list of three, for
+  the site mirror, is applied only when `spack_site_mirror` is true.
+  `intel_oneapi`: four steps replace three shell tasks. No task of either
+  role runs Spack through a shell; a test holds that.
+- `spack_environment`: `refresh_modules: when_needed`; the build task is
+  synchronous in check mode.
+- `sandbox-provisioning`'s `just test`: ansible-lint at the production
+  profile, pyright, 437 tests (traceability, with steps read like tasks;
+  parity, with the script's commands written as steps).
+- **The container, with the real oneAPI** (root `just full-test`,
+  2026-11-14): the collection installed from its tag; first apply of
+  `site.yml`, 55 changes; second, 0; the three roles once more in check
+  mode, 0 changes and no failure; what Spack was told is as the shell
+  roles left it (28 packages with externals, the providers, the mirror),
+  with the padding and the Tcl modules in the site scope.
+- Extraction: `sandbox-provisioning` gives the same 26 files with 19
+  commits of history, `sandbox-ops` the same 15 with 14.
+- The root `just test` and `just full-test` pass.
+
 ## Out of scope
 
 As the plan's: `spack_buildcache_push` for the `sandbox-ops` mirror
