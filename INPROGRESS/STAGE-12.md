@@ -113,5 +113,8 @@ with nothing to change.
   kept, and Spack's configuration is as the shell left it, with the
   decided difference.
 - `sandbox-provisioning`'s `just test` (452 tests) and `just full-test`
-  pass; the root's are below.
+  pass. The root `just test` and `just full-test` pass (2026-11-14; the
+  first full run stopped on a TLS error cloning Spack from GitHub inside
+  the container, and the second passed): every unit, and all 15
+  extraction proofs.
 
