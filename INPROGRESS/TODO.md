@@ -39,7 +39,7 @@ any work starts.
 | [7](STAGE-7.md) | `sandbox-ops`, and two roles in `sandbox-provisioning` | Merged into `develop` 2026-11-12 |
 | [8](STAGE-8.md) | Documentation and the umbrella | Merged into `develop` 2026-11-12 |
 | [9](STAGE-9.md) | `spack.yaml` from a template; the `csis_spack` collection begun | Merged into `develop` 2026-11-13 |
-| [10](STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Executed 2026-11-13 on `feature/stage-10-spack-module`; not merged |
+| [10](STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Merged into `develop` 2026-11-14 |
 
 ## Landed
 
