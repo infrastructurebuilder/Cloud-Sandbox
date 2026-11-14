@@ -305,8 +305,7 @@ def test_the_intel_list_is_the_scripts_commands_in_order(values: dict, script: d
 
 
 def test_the_site_mirror_list_is_spack_pubkeys_commands_and_is_off_by_default(values: dict) -> None:
-    task = setup_lists("spack")[1]
-    assert "spack_site_mirror | bool" in task["when"]
+    (task,) = [task for task in setup_lists("spack") if "spack_site_mirror | bool" in task.get("when", [])]
     assert values["spack_site_mirror"] is False
     pubkey = [line.strip() for line in (UNIT / "legacy" / "spack-pubkey.sh").read_text().splitlines()]
     theirs = as_steps(spack_commands([line for line in pubkey if line != "spack gpg list"]))
@@ -379,3 +378,24 @@ def test_the_lustre_repository_gets_the_edits_sed_would_make(
     assert ours == theirs
     assert "gpgcheck=1" not in ours
     assert ("/el/10.1/" in ours) == (len(edits) == 2)
+
+
+def test_stage_12_removes_only_the_two_paths_the_script_left_in_the_user_scope() -> None:
+    """The removal names the script's two settings, the only ones the shell left there."""
+    (task,) = [task for task in setup_lists("spack") if task["name"].startswith("Remove the leftovers")]
+    (step,) = task["vars"]["spack_setup"]
+    assert step == {
+        "kind": "config",
+        "scope": "user",
+        "state": "absent",
+        "settings": "{{ spack_user_scope.leftover }}",
+    }
+    found = (UNIT / "roles" / "spack" / "tasks" / "user_scope.yml").read_text()
+    for keys in (["config", "install_tree", "padded_length"], ["modules", "default", "enable"]):
+        section, middle, leaf = keys
+        assert f"{{'{section}': {{'{middle}': {{'{leaf}': none}}}}}}" in found
+    first = setup_lists("spack")[0]["vars"]["spack_setup"][0]["settings"]
+    assert first == {
+        "config": {"install_tree": {"padded_length": 73}},
+        "modules": {"default": {"enable": ["tcl"]}},
+    }

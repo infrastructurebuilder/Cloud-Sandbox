@@ -1,8 +1,11 @@
 # Stage 12: the old Spack settings in the login user's scope
 
-*Status:* planned 2026-11-14 on `feature/remaining-plans`; nothing
-executed. It is executed on "do 12", after each **YOUR DECISION** below
-has been asked, one at a time. Second in the order of the remaining work
+*Status:* planned 2026-11-14 on `feature/remaining-plans`, and executed
+the same day on "do 12", on `feature/stage-12-user-scope` (cut from
+`feature/remaining-plans`, which is not merged yet). Committed locally;
+not merged. It found a defect in the collection, fixed there and released
+as 0.3.1, which this stage pins. The decision is under [Decisions taken](#decisions-taken),
+the result under [Outcome](#outcome). Second in the order of the remaining work
 ([PLAN.md](../PLAN.md)): it depends on nothing, and it is small.
 
 ## Why
@@ -51,16 +54,21 @@ would keep the old ones.
 2. **Tests.**
    - Parity: the step names the two paths the stage 11 dump holds, and
      nothing else.
-   - The container test: before the first apply, the two settings are
-     written to the login user's scope, as a node built before stage 11
-     has them, and one of them a second time with a different value in a
-     separate run, to be left alone. After the apply: the matching one
-     is gone, the different one is still there and reported, and the
-     second apply changes nothing.
+   - The container test: before the first apply, the login user's scope
+     is written as a node built before stage 11 has it, but with one
+     setting changed, as if by hand: the padding at 73, as the script
+     left it, and the modules setting at `[lmod]` instead of `[tcl]`.
+     After the apply: the padding is gone, the modules setting is still
+     there and reported, and the second apply changes nothing.
 
 3. **Records:** MAP.md (stage 11's section, the difference now handled),
    REMINDERS.md (the item closed, or, with the default, replaced by "the
    step can go when...").
+
+## Decisions taken
+
+Asked on 2026-11-14: **a step of the `spack` role, for a while**, the
+default.
 
 ## Out of scope
 
@@ -71,3 +79,42 @@ Other users' `~/.spack/`: they never had the two settings.
 The root `just test` and `just full-test` pass; the container test shows
 the matching settings removed, a deliberate one kept, and a second run
 with nothing to change.
+
+## Found
+
+- **Spack leaves a mapping it empties behind.** Removing
+  `config:install_tree:padded_length`, the only key of `install_tree`,
+  leaves `install_tree: {}`; the same at every level tried, by hand,
+  against Spack v1.2.0. The collection's `spack_config` 0.3.0 assumed the
+  opposite and failed its own check after removing, in this stage's
+  container test. The operator chose to fix it in the collection and
+  release it with collection stage 4's documentation as **0.3.1**
+  (tagged and pushed 2026-11-14), and to move this sandbox's pin to it
+  here. The collection's stand-in `spack` had the same wrong model, which
+  is why its unit tests had not caught it. The container test's own
+  clean-up met the same behaviour, and removes the whole mapping.
+
+## Outcome
+
+- `roles/spack/tasks/user_scope.yml` reads the two settings from the
+  login user's and the site's files (no Spack, no shell) and says which
+  are leftovers and which were chosen; `main.yml` removes the leftovers
+  with a `config` step of state `absent` in the user scope, and reports
+  the chosen. Three tasks and the file, each with its `# New:` comment and
+  when they can go.
+- The pin is 0.3.1, in `requirements.yml` and `units.toml`.
+- `tests/test_user_scope.py` applies the task file alone against scope
+  files it writes (8 tests); the parity test holds the removal to the
+  stage 11 dump's two paths; traceability reads the new step.
+- **The container, with the real oneAPI:** the login user's scope is
+  written as a head node built before stage 11 has it, with the modules
+  setting changed to `[lmod]`. First apply of `site.yml`, 56 changes;
+  second, 0; check mode, 0. Afterwards the padding is gone, `[lmod]` is
+  kept, and Spack's configuration is as the shell left it, with the
+  decided difference.
+- `sandbox-provisioning`'s `just test` (452 tests) and `just full-test`
+  pass. The root `just test` and `just full-test` pass (2026-11-14; the
+  first full run stopped on a TLS error cloning Spack from GitHub inside
+  the container, and the second passed): every unit, and all 15
+  extraction proofs.
+
