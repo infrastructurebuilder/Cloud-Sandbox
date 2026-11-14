@@ -49,6 +49,8 @@ OPS_SCRIPTS = [
     "system/sudoers.s_ioos-sb-admins",
     "install_conda_jupyterhub.sh",
     "install_jupyterhub.sh",
+    # Stage 11: the site mirror's script, replaced by a list of steps in the spack role.
+    "spack-pubkey.sh",
 ]
 
 # The name each exported variable of environment-vars.sh has in group_vars/all.yml.

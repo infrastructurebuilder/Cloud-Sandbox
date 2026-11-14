@@ -55,7 +55,8 @@
               'spack_specs': spack_environment_specs,
               'spack_config': spack_environment_config,
               'intel_modules': sandbox_intel_modules,
-              'spack_providers': intel_oneapi_spack_providers,
-              'spack_externals': intel_oneapi_spack_externals,
+              'spack_packages': intel_oneapi_spack_packages,
+              'spack_site_mirror': spack_site_mirror,
+              'spack_key_fingerprint': spack_key_fingerprint,
             } | to_json
           }}

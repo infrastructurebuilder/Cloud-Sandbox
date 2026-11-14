@@ -61,3 +61,10 @@ def test_every_unit_has_a_justfile_with_the_five_targets() -> None:
             if f"\n{target}:" not in text and f"\n{target} " not in text
         ]
     assert not missing, missing
+
+
+def test_the_site_mirror_keys_fingerprint_is_the_key_sandbox_ops_keeps() -> None:
+    """sandbox-provisioning trusts the site mirror's key by a fingerprint; it is this key's."""
+    variables = (EXPORT / "sandbox-provisioning" / "group_vars" / "all.yml").read_text()
+    (fingerprint,) = re.findall(r"^spack_key_fingerprint: ([0-9A-F]{40})$", variables, re.MULTILINE)
+    assert (EXPORT / "sandbox-ops" / "keys" / f"{fingerprint}.pub").is_file()

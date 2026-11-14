@@ -21,6 +21,9 @@ from support import (
 )
 
 TASK = re.compile(r"^(\s*)- name: (.+)$")
+# A step of a list for the csis_spack collection's setup role (stage 11). It
+# stands where a task stood, and says what it replaces in the same way.
+STEP = re.compile(r"^(\s*)- (kind: .+)$")
 REPLACES = re.compile(r"#\s*Replaces (?P<file>[\w./-]+) (?P<lines>L\d+(?:-L\d+)?(?: L\d+(?:-L\d+)?)*)\s*$")
 NEW = re.compile(r"#\s*New: \S")
 
@@ -64,7 +67,7 @@ def claims_in(path: Path) -> list[Claim]:
     found: list[Claim] = []
     lines = path.read_text().splitlines()
     for index, line in enumerate(lines):
-        match = TASK.match(line)
+        match = TASK.match(line) or STEP.match(line)
         if not match or (path in PLAYBOOKS and not match.group(1)):
             continue
         comments: list[str] = []
@@ -82,6 +85,15 @@ CLAIMS = [claim for path in [*PLAYBOOKS, *TASK_FILES] for claim in claims_in(pat
 def test_there_are_tasks_to_check() -> None:
     assert len({path.parent.parent for path in TASK_FILES}) == len(ROLE_FUNCTIONS) + len(OPS_ROLES)
     assert len(CLAIMS) > 100
+
+
+def test_the_steps_of_the_setup_lists_are_checked_like_tasks() -> None:
+    steps = [claim for claim in CLAIMS if claim.name.startswith("kind: ")]
+    by_role: dict[str, int] = {}
+    for claim in steps:
+        by_role[claim.source.parent.parent.name] = by_role.get(claim.source.parent.parent.name, 0) + 1
+    assert by_role == {"spack": 9, "intel_oneapi": 4}
+    assert all(claim.replaces for claim in steps), "every step replaces lines of a script"
 
 
 @pytest.mark.parametrize("claim", CLAIMS, ids=str)

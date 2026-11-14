@@ -148,10 +148,14 @@
           grep -q '^spack-public .*https://cache.spack.io' <<<"$mirrors"
           compilers=$($spack compiler list)
           grep -q gcc <<<"$compilers"
-          config=$({{ spack_config_json }})
-          grep -q '"padded_length": 73' <<<"$config"
-          grep -q 'cache.spack.io' <<<"$config"
-          [ -n "$({{ spack_fingerprint }})" ]
+          # Stage 11: the two settings are in the site scope, and the steps
+          # ran as the login user, so what they wrote is that user's.
+          site=$($spack config --scope site get --json config)$($spack config --scope site get --json modules)
+          grep -q '"padded_length":73' <<<"$site"
+          grep -q '"enable":\["tcl"\]' <<<"$site"
+          grep -q 'cache.spack.io' <<<"$($spack config --scope site get --json mirrors)"
+          [ -z "$(find {{ spack_dir }}/etc/spack/site ! -user {{ sandbox_user }})" ]
+          [ ! -e {{ sandbox_user_home }}/.spack/config.yaml ]
         executable: /bin/bash
       become: true
       become_user: "{{ sandbox_user }}"
@@ -261,12 +265,12 @@
           {{ sandbox_load_intel_modules }}
           ifx --version >/dev/null
           mpiifx -v >/dev/null 2>&1 || mpiifort -v >/dev/null 2>&1
-          config=$({{ spack_config_json }})
+          config=$({{ spack_exe }} config get --json packages)
           # Spack puts the site's providers in front of its own defaults, so
           # the Intel libraries must come first in each list.
           for want in '"intel-oneapi-mkl@{{ oneapi_major_minor }}"' '"intel-oneapi-mpi@{{ intel_mpi_version }}"' \
-                      '"mpi": \["intel-oneapi-mpi"' '"blas": \["intel-oneapi-mkl"' '"lapack": \["intel-oneapi-mkl"' \
-                      'intel-oneapi-compilers'; do
+                      '"mpi":\["intel-oneapi-mpi"' '"blas":\["intel-oneapi-mkl"' '"lapack":\["intel-oneapi-mkl"' \
+                      '"intel-oneapi-compilers@{{ oneapi_version }}'; do
             grep -q "$want" <<<"$config" || { echo "missing from Spack's configuration: $want"; exit 1; }
           done
         executable: /bin/bash
@@ -274,6 +278,29 @@
       become_user: "{{ sandbox_user }}"
       changed_when: false
       when: (sandbox_modulefiles_dir ~ '/intel') is directory
+
+    # Stage 11: the spack and intel_oneapi roles set Spack up through the
+    # csis_spack collection. What they leave is held to what the shell tasks
+    # they replaced left in this container (expected-spack-config.json), but
+    # for the one difference that was decided. See the script.
+    - name: Compare what Spack was told with what the shell roles left
+      ansible.builtin.command:
+        cmd: >-
+          python3 /opt/sandbox-provisioning/tests/container/compare-spack-config.py
+          --spack {{ spack_exe }}
+          --expected /opt/sandbox-provisioning/tests/container/expected-spack-config.json
+      become: true
+      become_user: "{{ sandbox_user }}"
+      register: spack_config_compared
+      changed_when: false
+      when:
+        - spack_dir is directory
+        - (sandbox_modulefiles_dir ~ '/intel') is directory
+
+    - name: Report the comparison
+      ansible.builtin.debug:
+        msg: "OBSERVED Spack's configuration: {{ spack_config_compared.stdout_lines[-1] }}"
+      when: spack_config_compared is not skipped
 
     # Stage 10: spack_environment, applied with spack_environment_state: concretized.
     - name: Check what the spack_environment role leaves, when it was applied

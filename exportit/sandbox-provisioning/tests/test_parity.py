@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -113,12 +114,20 @@ def test_the_intel_modules_are_the_ones_the_script_loads(values: dict) -> None:
 
 
 def test_spack_is_told_about_the_same_externals_and_providers(values: dict, script: dict[str, str]) -> None:
+    """The role's one mapping is what the script's two calls and five commands add up to."""
     text = "\n".join(body("install_intel_oneapi_dnf")).replace("\\\n", " ")
     externals = re.findall(r"add_spack_site_external\s+(\S+)\s+(\S+)\s+(\S+)", text)
-    ours = [(item["package"], item["spec"], item["prefix"]) for item in values["spack_externals"]]
-    assert ours == externals
+    assert len(externals) == 2
+    # What add_spack_site_external appends for each (funcs-setup-instance.sh L725-L730).
+    expected: dict = {
+        package: {"externals": [{"spec": spec, "prefix": prefix}], "buildable": False}
+        for package, spec, prefix in externals
+    }
     providers = re.findall(r"spack config --scope site add '([^']+)'", text)
-    assert values["spack_providers"] == providers
+    assert len(providers) == 5
+    for provider in providers:
+        expected = merged(expected, config_add(provider)["packages"])
+    assert values["spack_packages"] == expected
 
 
 # What "spack env create" writes into a new spack.yaml besides an empty list of
@@ -164,15 +173,177 @@ def test_the_spack_environment_gets_the_same_settings_and_specs(values: dict, sc
     assert values["spack_specs"] == [substitute(spec, known) for spec in specs]
 
 
-def test_the_spack_role_runs_the_scripts_commands_in_order() -> None:
-    theirs = [line for line in body("install_spack") if line.startswith("spack ")]
-    role = (UNIT / "roles/spack/tasks/main.yml").read_text()
-    ours = [
-        line.strip().replace("$spack ", "spack ", 1)
-        for line in role.splitlines()
-        if line.strip().startswith("$spack ")
+# --- Stage 11: the script's Spack commands, as lists of steps ----------------
+#
+# The spack and intel_oneapi roles hand lists of steps to the setup role of the
+# infrastructurebuilder.csis_spack collection. Each list is held here to the
+# Spack commands of the script it replaces, command for step, in order.
+
+SETUP_ROLE = "infrastructurebuilder.csis_spack.setup"
+
+
+def setup_lists(role: str) -> list[dict]:
+    """Give the tasks of a role that apply the collection's setup role."""
+    tasks = yaml.safe_load((UNIT / "roles" / role / "tasks" / "main.yml").read_text())
+    return [task for task in tasks if task.get("ansible.builtin.include_role", {}).get("name") == SETUP_ROLE]
+
+
+def as_steps(commands: list[str]) -> list[dict]:
+    """Write a script's Spack commands as the steps that do the same.
+
+    Consecutive ``config add`` commands for one scope are one ``config`` step,
+    which is all the difference there is between a command and a step. The
+    scope a command names is kept as "scope"; a command that names none
+    writes to the user scope, and has none here.
+    """
+    steps: list[dict] = []
+    for command in commands:
+        words = shlex.split(command)[1:]
+        scope = words[words.index("--scope") + 1] if "--scope" in words else None
+        if scope:
+            at = words.index("--scope")
+            words = words[:at] + words[at + 2 :]
+        if words[:2] == ["config", "add"]:
+            setting = config_add(words[2])
+            last = steps[-1] if steps else {}
+            if last.get("kind") == "config" and last.get("scope") == scope:
+                last["settings"] = merged(last["settings"], setting)
+            else:
+                steps.append({"kind": "config", "settings": setting} | ({"scope": scope} if scope else {}))
+        elif words[:2] == ["compiler", "find"]:
+            steps.append({"kind": "detect", "compilers": True} | ({"scope": scope} if scope else {}))
+        elif words[:2] == ["external", "find"]:
+            names = [word for word in words[2:] if not word.startswith("--")]
+            step = {"kind": "detect", "externals": names or True}
+            if "--not-buildable" in words:
+                step["not_buildable"] = True
+            steps.append(step | ({"scope": scope} if scope else {}))
+        elif words[:2] == ["mirror", "add"]:
+            steps.append(
+                {"kind": "mirror", "name": words[2], "url": words[3]} | ({"scope": scope} if scope else {})
+            )
+        elif words[:2] == ["buildcache", "keys"]:
+            assert words[2:] == ["--install", "--trust"]
+            steps.append({"kind": "gpg_key", "from_mirrors": True})
+        elif words[:2] == ["gpg", "trust"]:
+            steps.append({"kind": "gpg_key", "key": words[2]})
+        else:
+            raise AssertionError(f"a Spack command the lists have no step for: {command}")
+    return steps
+
+
+def spack_commands(lines: list[str]) -> list[str]:
+    return [line.split(" >&")[0] for line in lines if line.startswith("spack ")]
+
+
+def test_as_steps_reads_commands_as_the_collection_would_carry_them_out() -> None:
+    assert as_steps(
+        [
+            'spack config add "a:b:1"',
+            "spack config add 'a:c:[x]'",
+            "spack config --scope site add 'a:d:2'",
+            "spack external find --not-buildable --scope site tool",
+        ]
+    ) == [
+        {"kind": "config", "settings": {"a": {"b": 1, "c": ["x"]}}},
+        {"kind": "config", "settings": {"a": {"d": 2}}, "scope": "site"},
+        {"kind": "detect", "externals": ["tool"], "not_buildable": True, "scope": "site"},
     ]
-    assert ours == theirs
+
+
+def test_the_spack_roles_first_list_is_the_scripts_commands_in_order() -> None:
+    task = setup_lists("spack")[0]
+    assert task["vars"]["spack_setup_scope"] == "site"
+    ours = task["vars"]["spack_setup"]
+    theirs = as_steps(spack_commands(body("install_spack")))
+    assert len(theirs) == 6
+    # The one difference, decided in stage 11: the script's two settings have
+    # no --scope and so are the login user's; the step has none either, and
+    # takes the role's, which is the site scope.
+    assert "scope" not in theirs[0]
+    assert "scope" not in ours[0]
+    assert ours[0] == theirs[0]
+    # Everything else the script puts in the site scope, and so does the role.
+    assert all(step.pop("scope", "site") == "site" for step in theirs[1:])
+    assert ours[1:] == theirs[1:]
+    assert task["ansible.builtin.include_role"]["apply"] == {
+        "become": True,
+        "become_user": "{{ sandbox_user }}",
+    }
+
+
+def test_the_intel_list_is_the_scripts_commands_in_order(values: dict, script: dict[str, str]) -> None:
+    (task,) = setup_lists("intel_oneapi")
+    ours = task["vars"]["spack_setup"]
+    lines = body("install_intel_oneapi_dnf")
+    # In the script: the modules are loaded, then "compiler find", then the two
+    # externals, then five "config add", then "mirror add" (not carried, see
+    # tests/not_carried.yml), then "buildcache keys".
+    theirs = as_steps(spack_commands(lines))
+    assert [step["kind"] for step in theirs] == ["detect", "config", "mirror", "gpg_key"]
+    assert [step["kind"] for step in ours] == ["environment", "detect", "config", "gpg_key"]
+
+    environment, detect, config, keys = ours
+    loads = [line for line in lines if line.startswith(("module ", ". /usr/share/Modules"))]
+    assert len(loads) == 7
+    assert environment["shell"].split() == [
+        "{{", "sandbox_modules_init", "}}", "set", "-eo", "pipefail", "{{", "sandbox_load_intel_modules", "}}"
+    ]  # fmt: skip
+    assert detect == {
+        "kind": "detect",
+        "compilers": True,
+        "environment": environment["name"],
+        "require": ["intel-oneapi-compilers@{{ oneapi_version }}"],
+    }
+    assert theirs[0] == {"kind": "detect", "compilers": True, "scope": "site"}
+    # The step's settings are one variable, held to the script above.
+    assert config == {"kind": "config", "settings": {"packages": "{{ intel_oneapi_spack_packages }}"}}
+    assert theirs[1]["settings"]["packages"]["all"] == values["spack_packages"]["all"]
+    assert theirs[1]["scope"] == "site"
+    assert keys == theirs[3]
+    assert script["ONEAPI_VER"] in values["intel_modules"][0]
+
+
+def test_the_site_mirror_list_is_spack_pubkeys_commands_and_is_off_by_default(values: dict) -> None:
+    task = setup_lists("spack")[1]
+    assert "spack_site_mirror | bool" in task["when"]
+    assert values["spack_site_mirror"] is False
+    pubkey = [line.strip() for line in (UNIT / "legacy" / "spack-pubkey.sh").read_text().splitlines()]
+    theirs = as_steps(spack_commands([line for line in pubkey if line != "spack gpg list"]))
+    assert theirs == [
+        {"kind": "gpg_key", "key": "$SPACK_KEY"},
+        {"kind": "mirror", "name": "s3-mirror", "url": "$SPACK_MIRROR"},
+        {"kind": "gpg_key", "from_mirrors": True},
+    ]
+    # The script downloads $SPACK_KEY_URL to $SPACK_KEY and trusts that file;
+    # the step fetches the same URL, and trusts it only with the fingerprint.
+    assert "wget $SPACK_KEY_URL -O $SPACK_KEY" in pubkey
+    assert task["vars"]["spack_setup"] == [
+        {"kind": "gpg_key", "key": "{{ spack_key_url }}", "fingerprint": "{{ spack_key_fingerprint }}"},
+        {"kind": "mirror", "name": "s3-mirror", "url": "{{ spack_mirror }}"},
+        {"kind": "gpg_key", "from_mirrors": True},
+    ]
+    # The script sets the two addresses itself; they are the ones in group_vars.
+    for name in ("SPACK_MIRROR", "SPACK_KEY_URL"):
+        (theirs_value,) = re.findall(rf"^{name}='([^']+)'$", "\n".join(pubkey), re.MULTILINE)
+        assert values[name] == theirs_value
+    assert re.fullmatch(r"[0-9A-F]{40}", values["spack_key_fingerprint"])
+
+
+def test_no_task_of_the_two_roles_runs_spack_through_a_shell() -> None:
+    for role in ("spack", "intel_oneapi"):
+        text = (UNIT / "roles" / role / "tasks" / "main.yml").read_text()
+        shells = [
+            task
+            for task in yaml.safe_load(text)
+            if "ansible.builtin.shell" in task or "ansible.builtin.command" in task
+        ]
+        for task in shells:
+            command = str(task.get("ansible.builtin.shell") or task.get("ansible.builtin.command"))
+            assert "spack" not in command, task["name"]
+    variables = (UNIT / "group_vars" / "all.yml").read_text()
+    assert "spack_fingerprint" not in variables
+    assert "spack_config_json" not in variables
 
 
 @pytest.mark.parametrize(

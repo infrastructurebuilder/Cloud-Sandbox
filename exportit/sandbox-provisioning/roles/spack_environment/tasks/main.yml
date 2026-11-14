@@ -90,10 +90,18 @@
     fresh: true
     install_args: "{{ spack_opts.split() }}"
     modules: [tcl]
+    # The script regenerates the module files on every run. Here they are
+    # regenerated when something was concretized or installed, or when
+    # spack.lock, the modules configuration or the files themselves have
+    # changed since (stage 11, decision 1): a second run touches none of them,
+    # and a file deleted or edited by hand is still put back.
+    refresh_modules: when_needed
     delete_tree: true
     log_file: "{{ spack_environment_dir }}/log.install"
   environment: "{{ spack_environment_intel.stdout | from_json }}"
   become: true
   become_user: "{{ sandbox_user }}"
-  async: "{{ spack_environment_build_timeout }}"
-  poll: 60
+  # Ansible refuses a task that is both asynchronous and in check mode. A
+  # preview builds nothing and is over in a minute, so it runs as it is.
+  async: "{{ 0 if ansible_check_mode else spack_environment_build_timeout }}"
+  poll: "{{ 0 if ansible_check_mode else 60 }}"
