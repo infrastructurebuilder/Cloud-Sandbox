@@ -2,7 +2,8 @@
 
 ## The remaining work, in order (2026-11-14)
 
-*Status:* planned 2026-11-14, every item on its own; nothing executed.
+*Status:* planned 2026-11-14, every item on its own. Done: items 1 and 2
+(collection stage 4, released with a fix as 0.3.1; stage 12).
 Each is a stage, executed on its "do", with its decisions asked one at a
 time first. The stage numbers follow this order.
 
