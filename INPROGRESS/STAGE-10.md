@@ -1,7 +1,7 @@
 # Stage 10: the Spack environment through the csis_spack collection
 
 *Status:* planned 2026-11-13 on `feature/stage-10-spack-module`, and
-executed the same day on "do 10". The decisions are under
+executed the same day on "do 10"; merged into `develop` 2026-11-14. The decisions are under
 [Decisions taken](#decisions-taken).
 
 ## Why
