@@ -92,7 +92,9 @@ loses the item; MAP.md says what was decided.
   blank, and passes with everything; a test holds the defaults free of
   the one site's values. The container gives test values
   (`hub.example.invalid`) and checks the hub as before.
-- `sandbox-provisioning`'s `just test`: 458 tests.
+- `sandbox-provisioning`'s `just test`: 458 tests. The root `just test`
+  and `just full-test` pass (2026-11-14): every unit, all 15 extraction
+  proofs, and the container test with every play checked.
 
 ## Found
 
