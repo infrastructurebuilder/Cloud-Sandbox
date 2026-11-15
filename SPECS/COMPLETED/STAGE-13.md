@@ -5,13 +5,13 @@ the same day on "do 13", on `feature/stage-13-jupyterhub`, and merged
 into `develop` on 2026-11-15. The decision is under
 [Decisions taken](#decisions-taken), the result under
 [Outcome](#outcome). Third in the order
-of the remaining work ([PLAN.md](../PLAN.md)): it depends on nothing,
+of the remaining work ([PLAN.md](../../PLAN.md)): it depends on nothing,
 and it comes before the live proof (stage 15) so that the proof covers
 what is decided.
 
 ## Why
 
-Put aside on 2026-11-13 ([REMINDERS.md](../exportit/REMINDERS.md)).
+Put aside on 2026-11-13 ([REMINDERS.md](../../exportit/REMINDERS.md)).
 Stage 7 found that nothing ever installed JupyterHub: both install
 scripts were broken and neither was called. Its `jupyterhub` role is the
 first install that works, in the container, and is applied by

@@ -6,7 +6,7 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[scripts/](../scripts/) holds more than provisioning. Once the setup
+[scripts/](../../scripts/) holds more than provisioning. Once the setup
 path has gone to Ansible, what is left is a set of unrelated operator
 tools, some current and some dead. They need sorting before they can
 be moved, and some of them are better as an Ansible role than as a
@@ -21,18 +21,18 @@ The part of the 93 files under `scripts/` that
   `test_user.sh`, the sample user list and three `sudoers` files.
 - **Spack mirror upkeep:** `spack-mirror-create.sh`,
   `spack-update-mirror.sh`, `spack-pubkey.sh`, `scp-secret.sh`, the
-  spack-stack equivalents, and [misc/spack/](../misc/spack/).
+  spack-stack equivalents, and [misc/spack/](../../misc/spack/).
 - **Data scrubbing:** `scrub_nosofs.sh`, `scrub_liveocean.sh`.
 - **Instance helpers:** `change-instance-type.sh`, `disableHT.sh`,
   `mountEFS.sh`, `update_efs_driver.sh`, `newamised.sh`, `getaws.sh`.
 - **Reporting:** `weekly_summary.nu`, which reads the DynamoDB table
   of C8.
 - **JupyterHub:** two install scripts, five files under
-  `scripts/system/`, and [jupyterhub/README.md](../jupyterhub/README.md).
+  `scripts/system/`, and [jupyterhub/README.md](../../jupyterhub/README.md).
 - **Slurm leftovers:** unit files and notes under `scripts/system/`,
-  `scripts/archived/` and [misc/](../misc/).
+  `scripts/archived/` and [misc/](../../misc/).
 - **Other stacks:** the UFS, spack-stack and `ncdis` entry scripts.
-- **Notes and one-offs** in [misc/](../misc/).
+- **Notes and one-offs** in [misc/](../../misc/).
 
 ## Items
 
@@ -48,7 +48,7 @@ The part of the 93 files under `scripts/` that
    with `README.md`, `LICENSE` and a `Justfile` (`test` =
    `shellcheck` and `bash -n`, under the same rule as
    [stage 5](STAGE-5.md)).
-5. The ops section of [MAP.md](../exportit/MAP.md).
+5. The ops section of [MAP.md](../../exportit/MAP.md).
 
 ## Decisions taken
 
@@ -57,7 +57,7 @@ The part of the 93 files under `scripts/` that
 2. **Dead files:** *(changed by the operator on 2026-11-13: the attic
    does not travel with the code; it stays with the original
    repository, as `attic/` of the umbrella `cloud-sandbox`; see
-   [MAP.md](../exportit/MAP.md#the-attic-stays-with-the-original-repository).)*
+   [MAP.md](../../exportit/MAP.md#the-attic-stays-with-the-original-repository).)*
    copied into `attic/` of the export, under their
    status and original path.
 3. **Conda for JupyterHub** (surfaced by the container test, where the
@@ -83,20 +83,20 @@ About 100 files read and sorted. Branch `feature/stage-7-ops`.
 - Item 1: all 108 files read and marked with evidence: 21 in use, 28
   superseded, 59 dead (the reading was delegated to a subagent and
   spot-checked). The catalogue in
-  [exportit/sandbox-ops/CATALOGUE.tsv](../exportit/sandbox-ops/CATALOGUE.tsv)
+  [exportit/sandbox-ops/CATALOGUE.tsv](../../exportit/sandbox-ops/CATALOGUE.tsv)
   keeps it for the 92 files copied there.
 - Item 2: `users.yml` with role `sandbox_users`, and `jupyterhub.yml`
   with role `jupyterhub`, in
-  [sandbox-provisioning](../exportit/sandbox-provisioning/README.md):
+  [sandbox-provisioning](../../exportit/sandbox-provisioning/README.md):
   16 files moved there (the originals into `legacy/`, two as role
   files). Traceability and parity tests cover them; the container test
   applies both twice and removes its test user.
-- Items 3 and 4: [exportit/sandbox-ops/](../exportit/sandbox-ops/README.md),
+- Items 3 and 4: [exportit/sandbox-ops/](../../exportit/sandbox-ops/README.md),
   92 files byte-identical: 16 tools in `bin/` and `keys/`, 26
   superseded and 50 dead in `attic/`. Tests: the catalogue matches the
   files; 50 scripts parse except one recorded; 559 shellcheck findings
   recorded.
-- Item 5: [MAP.md](../exportit/MAP.md#sandbox-ops).
+- Item 5: [MAP.md](../../exportit/MAP.md#sandbox-ops).
 - Root `just full-test` passed: the container applies all of `site.yml`'s
   testable roles, `users.yml` and `jupyterhub.yml` twice with nothing
   changed the second time, the hub answers, the test user is removed;

@@ -12,13 +12,13 @@ agreed order of work.
 
 ## What this stage produces
 
-- [ANALYSIS.md](ANALYSIS.md): the inventory, the couplings, the
+- [ANALYSIS.md](../ANALYSIS.md): the inventory, the couplings, the
   step-by-step reading of `setup-instance.sh`, and the defects
   noticed on the way.
 - One plan per unit: [stage 2](STAGE-2.md) to [stage 8](STAGE-8.md).
-- [TODO.md](TODO.md): the open list and the standing decisions.
-- A section in [PLAN.md](../PLAN.md) that points here.
-- A first [exportit/MAP.md](../exportit/MAP.md): every tracked path
+- [TODO.md](../TODO.md): the open list and the standing decisions.
+- A section in [PLAN.md](../../PLAN.md) that points here.
+- A first [exportit/MAP.md](../../exportit/MAP.md): every tracked path
   assigned to a unit, and the relocation method. Each later stage
   fills in its own section when it copies its unit.
 
@@ -45,8 +45,8 @@ created or changed. Nothing is copied and no playbook is written.
 ## Acceptance
 
 - Every tracked top-level path appears in the inventory of
-  [ANALYSIS.md](ANALYSIS.md) and in the unit table of
-  [exportit/MAP.md](../exportit/MAP.md).
+  [ANALYSIS.md](../ANALYSIS.md) and in the unit table of
+  [exportit/MAP.md](../../exportit/MAP.md).
 - `git status` shows changes only under `INPROGRESS/`, `exportit/`
   and `PLAN.md`.
 - There is no `Justfile` yet, so there is no `just test` to run for

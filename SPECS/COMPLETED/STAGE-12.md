@@ -5,12 +5,12 @@ the same day on "do 12", on `feature/stage-12-user-scope` (cut from
 `feature/remaining-plans`), and merged into `develop` the same day. It found a defect in the collection, fixed there and released
 as 0.3.1, which this stage pins. The decision is under [Decisions taken](#decisions-taken),
 the result under [Outcome](#outcome). Second in the order of the remaining work
-([PLAN.md](../PLAN.md)): it depends on nothing, and it is small.
+([PLAN.md](../../PLAN.md)): it depends on nothing, and it is small.
 
 ## Why
 
 The reminder the operator asked for in stage 11
-([REMINDERS.md](../exportit/REMINDERS.md)). The script's two
+([REMINDERS.md](../../exportit/REMINDERS.md)). The script's two
 `spack config add` lines have no `--scope`, so a head node built by the
 script, or by the playbooks before stage 11, has the install-tree padding
 (73) and the Tcl modules setting in the login user's `~/.spack/`. Since

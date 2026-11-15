@@ -6,13 +6,13 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[job.configs/](../job.configs/) and
-[cluster.configs/](../cluster.configs/) are data, not code. cloudflow
+[job.configs/](../../job.configs/) and
+[cluster.configs/](../../cluster.configs/) are data, not code. cloudflow
 reads them by a path given on the command line. Many of them carry
 one site's AWS identifiers (image id, security groups, subnet, key
 name), so they are that site's configuration and have a different
 owner and a different rate of change from the software (C2 and C7 in
-[ANALYSIS.md](ANALYSIS.md)).
+[ANALYSIS.md](../ANALYSIS.md)).
 
 ## What exists
 
@@ -44,7 +44,7 @@ image id).
    kind).
 5. Say which values come from Terraform's outputs and which from the
    node image, so that C7 has an owner.
-6. The configs section of [MAP.md](../exportit/MAP.md).
+6. The configs section of [MAP.md](../../exportit/MAP.md).
 
 ## Decisions taken
 
@@ -68,11 +68,11 @@ schema names the line of code that reads it.
 
 ## Outcome
 
-- [exportit/sandbox-configs/](../exportit/sandbox-configs/): all 130
+- [exportit/sandbox-configs/](../../exportit/sandbox-configs/): all 130
   files, unchanged, under their own directory names, with a README,
   `Justfile` and tests.
 - The schema (item 1) is written from cloudflow's code by
-  [tools/configs_schema.py](../exportit/tools/configs_schema.py),
+  [tools/configs_schema.py](../../exportit/tools/configs_schema.py),
   not by hand: 17 `JOBTYPE`s and 2 platforms, every key with the line
   that reads it. A tools test fails when the code and the schema part.
 - Every file classified (item 2) by written rules and recorded in a
@@ -83,8 +83,8 @@ schema names the line of code that reads it.
   readable, 23 are not, each with its reason, since the copies are not
   edited.
 - Item 5: the owners of each cluster value are in the README and
-  [MAP.md](../exportit/MAP.md#where-the-cluster-values-come-from).
+  [MAP.md](../../exportit/MAP.md#where-the-cluster-values-come-from).
 - Found: the cluster template a new site copies lacks `table_name`,
   which cloudflow now requires; the 40 AWS cluster descriptions span
   19 images and 13 placement groups, and only 4 match the latest
-  deployment. Details in [MAP.md](../exportit/MAP.md#sandbox-configs).
+  deployment. Details in [MAP.md](../../exportit/MAP.md#sandbox-configs).

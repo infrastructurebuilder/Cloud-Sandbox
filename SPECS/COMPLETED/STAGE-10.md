@@ -12,14 +12,14 @@ calls Spack through three shell tasks. Each hashes something before and
 after to say whether it changed, none supports `--check`, and one is
 wrong: Spack stamps every module file with the time it wrote it, so the
 module-file task reports a change on every run
-([MAP.md](../exportit/MAP.md#how-it-was-tested-and-what-was-not)). The
+([MAP.md](../../exportit/MAP.md#how-it-was-tested-and-what-was-not)). The
 collection `infrastructurebuilder.csis_spack` 0.1.0, built for this,
 does the same work as a module, `spack_env`, with Ansible's own change
 reporting and check mode, and compares module files without the time.
 
 ## What exists
 
-- [roles/spack_environment/tasks/main.yml](../exportit/sandbox-provisioning/roles/spack_environment/tasks/main.yml):
+- [roles/spack_environment/tasks/main.yml](../../exportit/sandbox-provisioning/roles/spack_environment/tasks/main.yml):
   after the template, "Work out what has to be built"
   (`concretize --force --fresh`, output to `log.concretize`), "Build and
   install the environment" (`install {{ spack_opts }}`, under
@@ -27,7 +27,7 @@ reporting and check mode, and compares module files without the time.
   the environment's module files" (`module tcl refresh --delete-tree
   -y`). Each first runs `sandbox_modules_init` and
   `sandbox_load_intel_modules` in bash.
-- [requirements.yml](../exportit/sandbox-provisioning/requirements.yml)
+- [requirements.yml](../../exportit/sandbox-provisioning/requirements.yml)
   holds `amazon.aws`; `just init` installs it into `.collections/`, and
   the first-boot template runs `ansible-galaxy collection install -r
   requirements.yml` on the head node before `ansible-pull`.

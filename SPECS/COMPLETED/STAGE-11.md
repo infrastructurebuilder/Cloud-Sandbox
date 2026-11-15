@@ -12,7 +12,7 @@ with what exists, the items, and how each decision changes them, is
 `COLL-INPROGRESS/COLL-STAGE-3.md` in
 `git@github.com:infrastructurebuilder/ansible-collection-csis-spack.git`
 (in a clone beside this one:
-[../../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-3.md](../../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-3.md)).
+[../../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-3.md](../../../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-3.md)).
 
 Every change it makes is in this repository, under this repository's
 rules. This file holds what this repository needs to know without the
@@ -23,7 +23,7 @@ other: what was decided, what was done, and what was found.
 `sandbox-provisioning` moves its pin of the collection from 0.1.0 to
 0.3.0, and the shell that set Spack up in its `spack` and `intel_oneapi`
 roles becomes lists of steps for the collection's `setup` role. See
-[MAP.md](../exportit/MAP.md#spack-set-up-through-the-collection-stage-11).
+[MAP.md](../../exportit/MAP.md#spack-set-up-through-the-collection-stage-11).
 
 ## Decisions taken
 
@@ -45,7 +45,7 @@ Asked one at a time on 2026-11-14, before execution.
 
 Asked during execution (2026-11-14): a reminder for the two settings
 that stay in the login user's scope on head nodes built before this
-stage. It is in [REMINDERS.md](../exportit/REMINDERS.md).
+stage. It is in [REMINDERS.md](../../exportit/REMINDERS.md).
 
 ## What differs from the plan
 

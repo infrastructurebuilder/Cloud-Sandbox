@@ -10,8 +10,8 @@ will be. This page says, for each unit, where its files come from,
 where the copy is, and how the real relocation would be done.
 
 The reasons behind the split are in
-[INPROGRESS/ANALYSIS.md](../INPROGRESS/ANALYSIS.md); the work is
-staged in [INPROGRESS/TODO.md](../INPROGRESS/TODO.md).
+[SPECS/ANALYSIS.md](../SPECS/ANALYSIS.md); the work is
+staged in [SPECS/TODO.md](../SPECS/TODO.md).
 
 ## Units
 
@@ -23,15 +23,15 @@ nothing leaves this repository).
 
 | Unit | Copy | Source paths | Stage | State |
 | --- | --- | --- | ---: | --- |
-| `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` (plotting included since 2026-11-13); root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../INPROGRESS/STAGE-2.md) | copied 2026-11-12 |
-| cloudflow's documentation | [cloudflow/docs/sphinx/](cloudflow/docs/sphinx/) | `docs/source/` and the files that built it | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12 |
-| `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../INPROGRESS/STAGE-3.md) | translated 2026-11-12 |
-| `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../INPROGRESS/STAGE-4.md) | copied 2026-11-12 |
-| `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../INPROGRESS/STAGE-5.md) | copied 2026-11-12 |
-| `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../INPROGRESS/STAGE-6.md) | copied 2026-11-12 |
-| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 15 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 14 operator tools and the Spack mirror's public key (16 until stage 11 took `spack-pubkey.sh`) | [7](../INPROGRESS/STAGE-7.md) | copied 2026-11-12 |
-| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../INPROGRESS/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13 |
-| not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `INPROGRESS/`, `PLAN.md`, `Justfile` | [8](../INPROGRESS/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
+| `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` (plotting included since 2026-11-13); root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../SPECS/COMPLETED/STAGE-2.md) | copied 2026-11-12 |
+| cloudflow's documentation | [cloudflow/docs/sphinx/](cloudflow/docs/sphinx/) | `docs/source/` and the files that built it | [8](../SPECS/COMPLETED/STAGE-8.md) | copied 2026-11-12 |
+| `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../SPECS/COMPLETED/STAGE-3.md) | translated 2026-11-12 |
+| `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../SPECS/COMPLETED/STAGE-4.md) | copied 2026-11-12 |
+| `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../SPECS/COMPLETED/STAGE-5.md) | copied 2026-11-12 |
+| `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../SPECS/COMPLETED/STAGE-6.md) | copied 2026-11-12 |
+| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 15 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 14 operator tools and the Spack mirror's public key (16 until stage 11 took `spack-pubkey.sh`) | [7](../SPECS/COMPLETED/STAGE-7.md) | copied 2026-11-12 |
+| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../SPECS/COMPLETED/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13 |
+| not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `SPECS/`, `PLAN.md`, `Justfile` | [8](../SPECS/COMPLETED/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
 
 Every tracked top-level path of the repository appears in one row.
 `scripts/` is divided file by file between three units
@@ -111,7 +111,7 @@ path is added to the directives.
 
 ## cloudflow
 
-Copied on 2026-11-12 by [stage 2](../INPROGRESS/STAGE-2.md). The
+Copied on 2026-11-12 by [stage 2](../SPECS/COMPLETED/STAGE-2.md). The
 project's own description is
 [cloudflow/README.md](cloudflow/README.md).
 
@@ -227,7 +227,7 @@ counts every such place per file, and a test fails if one is added.
 
 - **`sandbox-configs`:** a cluster description and a job description,
   as JSON files, by path. The keys are whatever `cluster/` and `job/`
-  read; [stage 6](../INPROGRESS/STAGE-6.md) writes that schema down.
+  read; [stage 6](../SPECS/COMPLETED/STAGE-6.md) writes that schema down.
 - **`sandbox-provisioning`:** a shared filesystem with `/save`, `/com`
   and `/ptmp`; Intel MPI and the modules the launchers load; a Prefect
   server; and Python with cloudflow installed. Today provisioning
@@ -256,7 +256,7 @@ Afterwards Cloud-Sandbox would delete `cloudflow/` and the five root
 files, `scripts/funcs-setup-instance.sh` would install the
 distribution instead of a hand-kept list, and `docs/source/conf.py`
 would document the installed package
-([stage 8](../INPROGRESS/STAGE-8.md)).
+([stage 8](../SPECS/COMPLETED/STAGE-8.md)).
 
 The name `cloudflow` has not been checked against any package index.
 Nothing is published.
@@ -295,7 +295,7 @@ What changed:
 
 ## sandbox-provisioning
 
-Translated on 2026-11-12 by [stage 3](../INPROGRESS/STAGE-3.md). The
+Translated on 2026-11-12 by [stage 3](../SPECS/COMPLETED/STAGE-3.md). The
 project's own description is
 [sandbox-provisioning/README.md](sandbox-provisioning/README.md).
 
@@ -420,7 +420,7 @@ installs `ansible-core`, runs `ansible-pull` against the provisioning
 repository at a version, then runs `node-image.yml`. It stops before
 the image if the playbook fails. Terraform would have to pass two more
 values, `provisioning_repo` and `provisioning_version`;
-[stage 4](../INPROGRESS/STAGE-4.md) owns that change. It still clones
+[stage 4](../SPECS/COMPLETED/STAGE-4.md) owns that change. It still clones
 Cloud-Sandbox, because cloudflow runs from that checkout.
 
 ### Found while testing
@@ -537,7 +537,7 @@ install, regenerate module files, push to a build cache. That is
 
 ### Spack through the collection (stage 10)
 
-By [stage 10](../INPROGRESS/STAGE-10.md), 2026-11-13, the role's three
+By [stage 10](../SPECS/COMPLETED/STAGE-10.md), 2026-11-13, the role's three
 shell tasks after the template (concretize, install, regenerate the
 module files) are one task of the collection's `spack_env` module,
 naming the script's L812, L817 and L820-L822 as the three did:
@@ -565,7 +565,7 @@ naming the script's L812, L817 and L820-L822 as the three did:
 
 ### Spack set up through the collection (stage 11)
 
-By [stage 11](../INPROGRESS/STAGE-11.md), 2026-11-14, planned as the
+By [stage 11](../SPECS/COMPLETED/STAGE-11.md), 2026-11-14, planned as the
 collection's stage 3, the shell that set Spack up is gone from the
 `spack` and `intel_oneapi` roles. Each role hands a list of steps to the
 `setup` role of `infrastructurebuilder.csis_spack` 0.3.0, applied as the
@@ -586,7 +586,7 @@ What is different from the script, on purpose, each noted where it is:
   user had them. They are now in the site scope with everything else
   (the operator's decision). A head node built earlier also has the old
   copies in the user scope, which wins over the site scope. Since
-  [stage 12](../INPROGRESS/STAGE-12.md) the `spack` role removes them
+  [stage 12](../SPECS/COMPLETED/STAGE-12.md) the `spack` role removes them
   where they hold what the site scope holds, and leaves, and reports,
   any value someone changed (`tasks/user_scope.yml`, then a `config` step
   of state `absent` in the user scope). Its tasks can go once no head
@@ -659,7 +659,7 @@ nine source files, with 15 commits of history.
 
 ## sandbox-terraform
 
-Copied on 2026-11-12 by [stage 4](../INPROGRESS/STAGE-4.md). The
+Copied on 2026-11-12 by [stage 4](../SPECS/COMPLETED/STAGE-4.md). The
 project's own description is
 [sandbox-terraform/README.md](sandbox-terraform/README.md).
 
@@ -782,11 +782,11 @@ Things noticed and left as they are:
 - Decide where the site's settings and backend file live: they would
   no longer sit in a shared repository.
 - In Cloud-Sandbox: delete `terraform/`; the root `DEPLOYMENT.md` goes
-  to the umbrella's `history/` ([stage 8](../INPROGRESS/STAGE-8.md)).
+  to the umbrella's `history/` ([stage 8](../SPECS/COMPLETED/STAGE-8.md)).
 
 ## The model units
 
-Copied on 2026-11-12 by [stage 5](../INPROGRESS/STAGE-5.md). By the
+Copied on 2026-11-12 by [stage 5](../SPECS/COMPLETED/STAGE-5.md). By the
 operator's decision there is one unit per model, and a ninth,
 `model-common`, for what several of them share. Each unit's own
 description is its `UNIT.md`: two of the models already have a
@@ -930,7 +930,7 @@ and `python_mpi_basic_run.sh` loads two more.
   `adcircofs` script in one person's home directory.
 - **Paths fixed to one person:** `necofs/tidal_barotropic/build.sh`
   builds in `/save/patrick/...`; many job configurations name
-  `/save/patrick` ([stage 6](../INPROGRESS/STAGE-6.md)).
+  `/save/patrick` ([stage 6](../SPECS/COMPLETED/STAGE-6.md)).
 - `liveocean/get_LO_ROMS.sh` defaults to `/save/$USER/liveocean`, and
   the rest of the recipe to `/save/$USER/LiveOcean`; it works only when
   `setup_LiveOcean.sh` exports `MODEL_DIR` first.
@@ -969,11 +969,11 @@ re-record, rather than with 53 differences.
 - Pin the three recipes that follow a branch head.
 - In Cloud-Sandbox: delete `models/` and `patches/`, and point the job
   configurations at installs, not at a checkout
-  ([stage 6](../INPROGRESS/STAGE-6.md)).
+  ([stage 6](../SPECS/COMPLETED/STAGE-6.md)).
 
 ## sandbox-configs
 
-Copied on 2026-11-12 by [stage 6](../INPROGRESS/STAGE-6.md). The
+Copied on 2026-11-12 by [stage 6](../SPECS/COMPLETED/STAGE-6.md). The
 project's own description is
 [sandbox-configs/README.md](sandbox-configs/README.md).
 
@@ -1021,7 +1021,7 @@ it; the unit's test fails when any of that changes.
 
 ### Where the cluster values come from
 
-This gives C7 of [ANALYSIS.md](../INPROGRESS/ANALYSIS.md) its owners:
+This gives C7 of [ANALYSIS.md](../SPECS/ANALYSIS.md) its owners:
 `region`, `key_name`, `sg_ids`, `subnet_id` and `placement_group` come
 from `sandbox-terraform`'s outputs; `image_id` from
 `sandbox-provisioning`'s `node-image.yml`; `table_name` from the
@@ -1077,11 +1077,11 @@ person who writes the description. The README has the table.
   published with the code that reads it.
 - In Cloud-Sandbox: delete `job.configs/` and `cluster.configs/`, and
   update the paths in the documentation
-  ([stage 8](../INPROGRESS/STAGE-8.md)).
+  ([stage 8](../SPECS/COMPLETED/STAGE-8.md)).
 
 ## sandbox-ops
 
-Done on 2026-11-12 by [stage 7](../INPROGRESS/STAGE-7.md). The
+Done on 2026-11-12 by [stage 7](../SPECS/COMPLETED/STAGE-7.md). The
 project's own description is
 [sandbox-ops/README.md](sandbox-ops/README.md).
 
@@ -1232,11 +1232,11 @@ above its task:
 - In Cloud-Sandbox: move the attic's 76 files to
   `attic/<status>/<original path>` with `git mv`, so that they keep their
   history there, then delete what is left of `scripts/`, `misc/` and
-  `jupyterhub/` ([stage 8](../INPROGRESS/STAGE-8.md)).
+  `jupyterhub/` ([stage 8](../SPECS/COMPLETED/STAGE-8.md)).
 
 ## cloud-sandbox (the umbrella)
 
-Made on 2026-11-12 by [stage 8](../INPROGRESS/STAGE-8.md). By the
+Made on 2026-11-12 by [stage 8](../SPECS/COMPLETED/STAGE-8.md). By the
 operator's decision, Cloud-Sandbox does not disappear: it becomes a
 small repository that says what a sandbox is made of, at which versions,
 and in which order. Its own description is
@@ -1314,7 +1314,7 @@ and `just full-test` there checks the build.
 
 ## ansible-collection-csis-spack (outside this repository)
 
-Begun on 2026-11-13 by [stage 9](../INPROGRESS/STAGE-9.md). The Ansible
+Begun on 2026-11-13 by [stage 9](../SPECS/COMPLETED/STAGE-9.md). The Ansible
 collection `infrastructurebuilder.csis_spack` is new code, not a copy of
 anything in Cloud-Sandbox, so by the operator's decision it is not under
 `exportit/`: it lives in its own repository from the start,
@@ -1339,10 +1339,10 @@ this file's copy check covers it.
   of its examples. Its `PLAN.md` and `COLL-INPROGRESS/` hold the plans,
   the decisions and what was found. Not on Ansible Galaxy: whether it
   goes there is not decided.
-- **How `sandbox-provisioning` uses it** (since [stage 10](../INPROGRESS/STAGE-10.md)):
+- **How `sandbox-provisioning` uses it** (since [stage 10](../SPECS/COMPLETED/STAGE-10.md)):
   a line in `requirements.yml` naming the repository at a tag: `0.3.0`
-  since [stage 11](../INPROGRESS/STAGE-11.md), `0.3.1` since
-  [stage 12](../INPROGRESS/STAGE-12.md)
+  since [stage 11](../SPECS/COMPLETED/STAGE-11.md), `0.3.1` since
+  [stage 12](../SPECS/COMPLETED/STAGE-12.md)
   (the operator's decision: the git tag until Galaxy is decided),
   installed into `.collections/` by `just init`, by the container test,
   and by the head node's first boot before `site.yml` runs.
@@ -1370,7 +1370,7 @@ step is done.
 | 7 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | the attic's 76 files moved to `attic/`, which stays; the rest of `scripts/` and `misc/` gone |
 | 8 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |
 
-The machinery of this work does not move: `exportit/`, `INPROGRESS/`,
+The machinery of this work does not move: `exportit/`, `SPECS/`,
 `PLAN.md` and the root `Justfile` are deleted in step 8, and the
 umbrella gets its own `Justfile`.
 

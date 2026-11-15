@@ -8,6 +8,11 @@ it, and it is executed only on an explicit "do N". At "do N" every
 **YOUR DECISION** in the file is asked, one question at a time, before
 any work starts.
 
+The plans of the stages still to do are in this directory. A stage
+merged into `develop` moves to [COMPLETED/](COMPLETED/); a plan the
+operator sets aside moves to [ATTIC/](ATTIC/). (Until 2026-11-15 this
+directory was `INPROGRESS/`.)
+
 ## Standing decisions
 
 - **Nothing leaves this repository.** A unit is relocated by copying
@@ -22,7 +27,7 @@ any work starts.
   `develop`, until the operator says so.
 - **`just test` is the acceptance bar**, and `just full-test` before
   a stage is called done. The repository's `Justfile` arrived with
-  [stage 2](STAGE-2.md).
+  [stage 2](COMPLETED/STAGE-2.md).
 - **Copies are byte-identical to their originals.** A correction is a
   patch beside the unit's mapping file, never an edit to the copy.
 
@@ -30,19 +35,19 @@ any work starts.
 
 | Stage | Unit | State |
 | ---: | --- | --- |
-| [1](STAGE-1.md) | Analysis and plan | Merged into `develop` 2026-11-12 |
-| [2](STAGE-2.md) | `cloudflow` and `cloudflow-plotting` (plotting folded back into cloudflow 2026-11-13) | Merged into `develop` 2026-11-12 |
-| [3](STAGE-3.md) | `sandbox-provisioning` (Ansible) | Merged into `develop` 2026-11-12; live proof not run |
-| [4](STAGE-4.md) | `sandbox-terraform` | Merged into `develop` 2026-11-12 |
-| [5](STAGE-5.md) | `model-*` (eight models) and `model-common` | Merged into `develop` 2026-11-12 |
-| [6](STAGE-6.md) | `sandbox-configs` | Merged into `develop` 2026-11-12 |
-| [7](STAGE-7.md) | `sandbox-ops`, and two roles in `sandbox-provisioning` | Merged into `develop` 2026-11-12 |
-| [8](STAGE-8.md) | Documentation and the umbrella | Merged into `develop` 2026-11-12 |
-| [9](STAGE-9.md) | `spack.yaml` from a template; the `csis_spack` collection begun | Merged into `develop` 2026-11-13 |
-| [10](STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Merged into `develop` 2026-11-14 |
-| [11](STAGE-11.md) | Spack set up through the `csis_spack` collection at 0.3.0 (the collection's stage 3) | Merged into `develop` 2026-11-14 |
-| [12](STAGE-12.md) | The old Spack settings in the login user's scope | Merged into `develop` 2026-11-14 |
-| [13](STAGE-13.md) | JupyterHub, decided | Merged into `develop` 2026-11-15 |
+| [1](COMPLETED/STAGE-1.md) | Analysis and plan | Merged into `develop` 2026-11-12 |
+| [2](COMPLETED/STAGE-2.md) | `cloudflow` and `cloudflow-plotting` (plotting folded back into cloudflow 2026-11-13) | Merged into `develop` 2026-11-12 |
+| [3](COMPLETED/STAGE-3.md) | `sandbox-provisioning` (Ansible) | Merged into `develop` 2026-11-12; live proof not run |
+| [4](COMPLETED/STAGE-4.md) | `sandbox-terraform` | Merged into `develop` 2026-11-12 |
+| [5](COMPLETED/STAGE-5.md) | `model-*` (eight models) and `model-common` | Merged into `develop` 2026-11-12 |
+| [6](COMPLETED/STAGE-6.md) | `sandbox-configs` | Merged into `develop` 2026-11-12 |
+| [7](COMPLETED/STAGE-7.md) | `sandbox-ops`, and two roles in `sandbox-provisioning` | Merged into `develop` 2026-11-12 |
+| [8](COMPLETED/STAGE-8.md) | Documentation and the umbrella | Merged into `develop` 2026-11-12 |
+| [9](COMPLETED/STAGE-9.md) | `spack.yaml` from a template; the `csis_spack` collection begun | Merged into `develop` 2026-11-13 |
+| [10](COMPLETED/STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Merged into `develop` 2026-11-14 |
+| [11](COMPLETED/STAGE-11.md) | Spack set up through the `csis_spack` collection at 0.3.0 (the collection's stage 3) | Merged into `develop` 2026-11-14 |
+| [12](COMPLETED/STAGE-12.md) | The old Spack settings in the login user's scope | Merged into `develop` 2026-11-14 |
+| [13](COMPLETED/STAGE-13.md) | JupyterHub, decided | Merged into `develop` 2026-11-15 |
 | [14](ATTIC/STAGE-14.md) | Clearing old model output on a timer | Set aside 2026-11-15 by the operator; the plan is in `ATTIC/` |
 | [15](STAGE-15.md) | The live proof on AWS | Planned 2026-11-14 |
 | [16](STAGE-16.md) | A build cache for RHEL 10, pushed by the collection | Planned 2026-11-14 |

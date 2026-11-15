@@ -6,11 +6,11 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[models/](../models/) holds the recipes that fetch, patch and build
+[models/](../../models/) holds the recipes that fetch, patch and build
 each ocean model on a sandbox. They are not used by any code in the
 repository; they are run by hand, and they leave executables and
 module files at paths that the cloudflow launchers then assume (C3 in
-[ANALYSIS.md](ANALYSIS.md)). That assumption is the only tie, and it
+[ANALYSIS.md](../ANALYSIS.md)). That assumption is the only tie, and it
 is written down nowhere.
 
 ## What exists
@@ -18,7 +18,7 @@ is written down nowhere.
 147 tracked files: eight model directories (`adcirc-cora` with 55
 files is the largest; then `necofs`, `ufscoastal`, `secofs`, `eccofs`,
 `liveocean`, `nosofs` and `ucla-roms`), shared `modulefiles` and
-`utils`, and three notes. Two scripts under [patches/](../patches/)
+`utils`, and three notes. Two scripts under [patches/](../../patches/)
 belong to `adcirc-cora`. The recipes were read only as a file list.
 
 ## Items
@@ -40,7 +40,7 @@ belong to `adcirc-cora`. The recipes were read only as a file list.
    editing them.
 4. Write the install contract: for each model, the paths that
    cloudflow's launchers expect, taken from the launchers themselves.
-5. The models section of [MAP.md](../exportit/MAP.md).
+5. The models section of [MAP.md](../../exportit/MAP.md).
 
 ## Decisions taken
 
@@ -68,7 +68,7 @@ contract.
 
 ## Outcome
 
-- Nine units under [exportit/](../exportit/): `model-adcirc-cora`,
+- Nine units under [exportit/](../../exportit/): `model-adcirc-cora`,
   `model-eccofs`, `model-liveocean`, `model-necofs`, `model-nosofs`,
   `model-secofs`, `model-ucla-roms`, `model-ufscoastal` and
   `model-common`; 149 files, byte-identical, each model directory at
@@ -83,14 +83,14 @@ contract.
   53 scripts parse, 4 templates do not and are listed, 943 shellcheck
   findings recorded with shellcheck 0.11.0.
 - The install contract, 42 rows, in
-  [MAP.md](../exportit/MAP.md#the-install-contract), with a check in
+  [MAP.md](../../exportit/MAP.md#the-install-contract), with a check in
   `tools` that fails on a launcher path without a row or a row
   without a launcher path.
 - Found: module names carry Spack build hashes that a rebuilt sandbox
   will not reproduce; five setup scripts exit 1 when they create
   their install directory; several recipes assume their place in a
   Cloud-Sandbox checkout; some installs have no recipe at all.
-  Details in [MAP.md](../exportit/MAP.md#found).
+  Details in [MAP.md](../../exportit/MAP.md#found).
 - Correction to the question asked at "do 5": the common
   `intel_x86_64.impi_2021.12.1` is used only by `adcirc-cora`'s
   build. The cloudflow launchers load a module of the same name from

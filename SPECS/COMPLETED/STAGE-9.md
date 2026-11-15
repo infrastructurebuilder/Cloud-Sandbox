@@ -28,11 +28,11 @@ its place and does the `spack.yaml` work; the module is the next.
 
 ## What exists
 
-- [roles/spack_environment/](../exportit/sandbox-provisioning/roles/spack_environment/):
+- [roles/spack_environment/](../../exportit/sandbox-provisioning/roles/spack_environment/):
   the tasks named above; its defaults hold `spack_environment_settings`
   (three `config add` paths) and `spack_environment_specs` (ESMF and
   PETSc).
-- [tests/test_parity.py](../exportit/sandbox-provisioning/tests/test_parity.py)
+- [tests/test_parity.py](../../exportit/sandbox-provisioning/tests/test_parity.py)
   holds the two lists to the script's `spack config add` and
   `spack add` lines (`funcs-setup-instance.sh` L754–L806).
 - The container test clones Spack v1.2.0 (role `spack`) but does not
@@ -125,7 +125,7 @@ Asked one at a time on 2026-11-13, before execution.
 
 ## Outcome
 
-- The collection: [its own clone](../../ansible-collection-csis-spack/README.md),
+- The collection: [its own clone](../../../ansible-collection-csis-spack/README.md),
   `infrastructurebuilder.csis_spack` 0.1.0, two local commits on its
   `feature/skeleton`. `just test` (lint, type-check, six metadata tests,
   a build that installs) and `just full-test` (adding `ansible-test
@@ -141,7 +141,7 @@ Asked one at a time on 2026-11-13, before execution.
   `spack python -c` takes one statement; `spack add` rewrites specs
   (variants sorted, `%intel-oneapi-compilers` as `%oneapi`); and
   `config add` writes lists in flow style. Each is recorded in
-  [MAP.md](../exportit/MAP.md#the-environments-spackyaml-written-whole-stage-9).
+  [MAP.md](../../exportit/MAP.md#the-environments-spackyaml-written-whole-stage-9).
   The comparison was also tried on the local machine against Spack
   v1.2.0, and fails on a changed setting and on a changed spec.
 - The root `just test` passes.
