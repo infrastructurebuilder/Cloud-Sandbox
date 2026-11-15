@@ -1,10 +1,13 @@
 # Stage 14: clearing old model output on a timer
 
-*Status:* planned 2026-11-14 on `feature/remaining-plans`; nothing
-executed. It is executed on "do 14", after each **YOUR DECISION** below
-has been asked, one at a time. Fourth in the order of the remaining work
-([PLAN.md](../PLAN.md)): it depends on nothing, is of middling size, and
-comes before the live proof (stage 15) so that the proof covers it.
+*Status:* **set aside, 2026-11-15, by the operator: "We are not going to
+do this at this time."** Moved to `INPROGRESS/ATTIC/`, with nothing
+executed. The two scrub scripts stay in `sandbox-ops/bin/`, run by hand,
+as they were. The plan is kept as written, below, in case it is taken
+up: it would need a stage number of its own again, and a place in
+[PLAN.md](../../PLAN.md)'s order (it needs nothing first, and was to come
+before the live proof so that the proof covers it). Planned 2026-11-14,
+as the fourth item of the remaining work.
 
 ## Why
 

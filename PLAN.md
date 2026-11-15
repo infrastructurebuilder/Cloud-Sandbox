@@ -18,8 +18,8 @@ are not in it.
 | 1 | [collection 4](../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-4.md) | `spack_env`: document `async` with check mode (0.3.1) | nothing | minutes |
 | 2 | [12](INPROGRESS/STAGE-12.md) | The old Spack settings in the login user's scope on existing head nodes | nothing | small |
 | 3 | [13](INPROGRESS/STAGE-13.md) | JupyterHub: an option, part of every build, or removed (a decision, then its work) | nothing; before 15, so the proof covers it | small |
-| 4 | [14](INPROGRESS/STAGE-14.md) | Clearing old model output on a timer, in place of the two scrub scripts | nothing; before 15, so the proof covers it | medium |
-| 5 | [15](INPROGRESS/STAGE-15.md) | **The live proof on AWS** | 12 to 14 done or dropped; the AWS session | large: hours of a head node |
+| 4 | ~~14~~ ([set aside](INPROGRESS/ATTIC/STAGE-14.md)) | Clearing old model output on a timer, in place of the two scrub scripts. **Set aside by the operator on 2026-11-15**; the plan is in `INPROGRESS/ATTIC/` | | |
+| 5 | [15](INPROGRESS/STAGE-15.md) | **The live proof on AWS** | 12 and 13 done (14 set aside); the AWS session | large: hours of a head node |
 | 6 | [16](INPROGRESS/STAGE-16.md) | A build cache for RHEL 10, and the mirror-push scripts replaced by `spack_buildcache_push` | 15: a real build to push | medium |
 | 7 | [collection 5](../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-5.md) | Ansible Galaxy, or the git tag (a decision, then its work) | nothing; before 22, so the source is named once | medium if published |
 | 8 | [17](INPROGRESS/STAGE-17.md) | The Lambda functions: an owner, a module, tests (a decision, then its work) | nothing; before 22, step 1 | medium to large |

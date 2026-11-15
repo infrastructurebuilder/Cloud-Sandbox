@@ -3,7 +3,8 @@
 *Status:* planned 2026-11-14 (first written as stage 12, renumbered the
 same day so that the stage numbers follow the order of the work in
 [PLAN.md](../PLAN.md)); nothing executed and nothing created on AWS. It
-is executed on "do 15", after stages 12 to 14 and each **YOUR DECISION**
+is executed on "do 15", after stages 12 and 13 (14 was set aside on
+2026-11-15) and each **YOUR DECISION**
 below has been asked, one at a time. **The first thing done at "do 15" is
 to check the AWS session** and, if it is not fresh, to ask for it to be
 refreshed before anything else.
@@ -165,7 +166,7 @@ to date and then runs it.
     volume, the image and its snapshot at the end (default), each step
     asked first; or keep the node for a look, billed while it stands.
 
-11. **What stages 12 to 14 add to the proof.** They come first so that
+11. **What stages 12 and 13 add to the proof.** They come first so that
     the head node proves them too:
     - stage 12 (the old settings in the login user's scope): the node is
       built fresh and has none, so the stage's own container test is its
@@ -173,10 +174,8 @@ to date and then runs it.
     - stage 13 (JupyterHub), if it makes JupyterHub part of the build:
       `jupyterhub.yml`, or `site.yml` with it, applied and checked as the
       container test checks it, the hub answering on its port;
-    - stage 14 (the scrub timer): the timer enabled, its next run listed
-      by `systemctl list-timers`, and one run started by hand against a
-      `/com` that holds a dated directory old enough to go and one that
-      is not.
+    - stage 14 (the scrub timer) was set aside on 2026-11-15; nothing of
+      it is proved here.
 
 12. **Records.** In `exportit/MAP.md`, each row of the table above
     marked proved, with the date and what was seen, or left "not
