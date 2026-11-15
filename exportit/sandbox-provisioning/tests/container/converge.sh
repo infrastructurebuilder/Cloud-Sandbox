@@ -191,13 +191,25 @@ esac
 
 echo "== checking what the roles left behind"
 # shellcheck disable=SC2016 # $1 is expanded by the shell in the container
-if ! in_container bash -c 'cd /opt/sandbox-provisioning && exec ansible-playbook tests/container/verify.yml --extra-vars "verify_plays=$1"' _ "$plays" \
+# As JSON: given as key=value, a value with spaces is cut at the first one,
+# so "site users jupyterhub" became "site" and the checks of users.yml and
+# jupyterhub.yml were skipped, with the run still passing (found in stage 13).
+if ! in_container bash -c 'cd /opt/sandbox-provisioning && exec ansible-playbook tests/container/verify.yml --extra-vars "{\"verify_plays\": \"$1\"}"' _ "$plays" \
     >"$logs/verify.log" 2>&1; then
     tail -60 "$logs/verify.log"
     echo "FAILED: the result is not what the roles should leave"
     exit 1
 fi
 grep -E 'OBSERVED|^localhost +: ok=' "$logs/verify.log" | sed -E 's/^ *(msg: )?/   /'
+# Every play asked for must have been checked: a play skipped for want of a
+# host is a test that did not run.
+skipped=$(grep -c 'skipping: no hosts matched' "$logs/verify.log" || true)
+expected_skips=$((3 - $(wc -w <<<"$plays")))
+if [ "$skipped" != "$expected_skips" ]; then
+    grep -B1 'skipping: no hosts matched' "$logs/verify.log"
+    echo "FAILED: $skipped of verify.yml's plays were skipped; with plays '$plays', $expected_skips should be"
+    exit 1
+fi
 
 case " $plays " in
     *" users "*)

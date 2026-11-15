@@ -1219,7 +1219,7 @@ above its task:
 | The attic and its catalogue agree; each file sits where its status says (2026-11-13) | `cloud-sandbox`' `just test` | pass, 76 files: 26 superseded, 50 dead |
 | Every task of the two roles names its lines; every line is replaced or explained | `sandbox-provisioning`'s `just test` | pass |
 | The templates write the original files | `sandbox-provisioning`'s `just test` | pass |
-| `users.yml` and `jupyterhub.yml` applied twice in the container, the second run changing nothing; the user removed again | `sandbox-provisioning`'s `just full-test` | pass; the hub answers on port 8000 |
+| `users.yml` and `jupyterhub.yml` applied twice in the container, the second run changing nothing; the user removed again | `sandbox-provisioning`'s `just full-test` | pass; the hub answers on port 8000. *(2026-11-14, stage 13: from stage 7 until then, the full test's checks of these two were skipped without failing, because the list of plays was cut at its first space; fixed, and the test now fails if a check is skipped. They pass.)* |
 | Extraction with history | root `just full-test` | `sandbox-ops`: the same 16 files, with 14 commits (2026-11-13; 92 files and 22 commits with the attic); `cloud-sandbox`, attic included: 84 files, 62 commits; `sandbox-provisioning`: 25 files, 19 commits |
 
 ### What a real relocation would change

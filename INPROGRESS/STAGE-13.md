@@ -94,3 +94,18 @@ loses the item; MAP.md says what was decided.
   (`hub.example.invalid`) and checks the hub as before.
 - `sandbox-provisioning`'s `just test`: 458 tests.
 
+## Found
+
+**The container test had not been checking `users.yml` and
+`jupyterhub.yml` since stage 7, and passed anyway.** `converge.sh` gave
+`verify.yml` the list of plays as `--extra-vars "verify_plays=site users
+jupyterhub"`; in that key=value form Ansible cuts the value at the first
+space, so the list was `site`, and the plays that check the test user and
+the hub matched no host and were skipped. Stage 7's checks were real when
+it ran them, it seems with one play at a time, where a single name is
+passed whole. The list is now passed as JSON, and the test fails if any
+play it asked to check is skipped. With that, the full container test
+checks all three again, and they pass: the test user and its groups, and
+the hub up on port 8000 with nginx enabled and not started (no
+certificate).
+
