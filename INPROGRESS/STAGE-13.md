@@ -1,8 +1,8 @@
 # Stage 13: JupyterHub, decided
 
 *Status:* planned 2026-11-14 on `feature/remaining-plans`, and executed
-the same day on "do 13", on `feature/stage-13-jupyterhub`. Committed
-locally; not merged. The decision is under
+the same day on "do 13", on `feature/stage-13-jupyterhub`, and merged
+into `develop` on 2026-11-15. The decision is under
 [Decisions taken](#decisions-taken), the result under
 [Outcome](#outcome). Third in the order
 of the remaining work ([PLAN.md](../PLAN.md)): it depends on nothing,

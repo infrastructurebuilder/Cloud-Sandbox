@@ -42,8 +42,8 @@ any work starts.
 | [10](STAGE-10.md) | `spack_environment` through the `csis_spack` collection | Merged into `develop` 2026-11-14 |
 | [11](STAGE-11.md) | Spack set up through the `csis_spack` collection at 0.3.0 (the collection's stage 3) | Merged into `develop` 2026-11-14 |
 | [12](STAGE-12.md) | The old Spack settings in the login user's scope | Merged into `develop` 2026-11-14 |
-| [13](STAGE-13.md) | JupyterHub, decided | Executed 2026-11-14 on `feature/stage-13-jupyterhub`; not merged |
-| [14](STAGE-14.md) | Clearing old model output on a timer | Planned 2026-11-14 |
+| [13](STAGE-13.md) | JupyterHub, decided | Merged into `develop` 2026-11-15 |
+| [14](ATTIC/STAGE-14.md) | Clearing old model output on a timer | Set aside 2026-11-15 by the operator; the plan is in `ATTIC/` |
 | [15](STAGE-15.md) | The live proof on AWS | Planned 2026-11-14 |
 | [16](STAGE-16.md) | A build cache for RHEL 10, pushed by the collection | Planned 2026-11-14 |
 | [17](STAGE-17.md) | The Lambda functions, owned | Planned 2026-11-14 |
