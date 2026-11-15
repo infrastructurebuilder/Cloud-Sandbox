@@ -12,25 +12,25 @@ the unit the operator named. Today it cannot be installed: it runs
 from a checkout by changing `sys.path`, it has two `setup.py` files
 that describe two different things, and it has no test that runs
 without a live sandbox (couplings C1 to C4 and defects F1 to F5 in
-[ANALYSIS.md](ANALYSIS.md)).
+[ANALYSIS.md](../ANALYSIS.md)).
 
 ## What exists
 
-- [cloudflow/](../cloudflow/): 195 tracked files. About 12,000 lines
+- [cloudflow/](../../cloudflow/): 195 tracked files. About 12,000 lines
   of Python in six sub-packages (`cluster`, `job`, `services`,
   `utils`, `workflows`, `plotting`), 3,000 lines of shell launchers
   and helper scripts, 44 model input templates (the largest files),
   22 notebook files, notes, two cron scripts, and seven script-style
   "tests" that need a running sandbox.
-- At the repository root: [setup.py](../setup.py),
-  [setup-plotting.sh](../setup-plotting.sh),
-  [CLOUDFLOW.md](../CLOUDFLOW.md), [PREFECTv3.md](../PREFECTv3.md)
+- At the repository root: [setup.py](../../setup.py),
+  [setup-plotting.sh](../../setup-plotting.sh),
+  [CLOUDFLOW.md](../../CLOUDFLOW.md), [PREFECTv3.md](../../PREFECTv3.md)
   and
-  [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](../LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md).
+  [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](../../LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md).
 - What the code imports from outside the standard library: `boto3`,
   `botocore`, `prefect`, `dask`, `distributed` everywhere; `numpy`,
   `matplotlib`, `netCDF4`, `pyproj`, `PIL` and others in `plotting`,
-  which [job_tasks.py](../cloudflow/workflows/job_tasks.py#L21)
+  which [job_tasks.py](../../cloudflow/workflows/job_tasks.py#L21)
   imports when it is loaded; `xarray`, `pandas`, `s3fs` in the Dask
   examples; the Jupyter libraries in `utils/notebook.py`.
 
@@ -87,7 +87,7 @@ without a live sandbox (couplings C1 to C4 and defects F1 to F5 in
 6. **`full-test`.** Builds the wheel, installs it into an empty
    environment away from the source tree, and checks there that the
    package data arrived and that the `cloudflow` command starts.
-7. **The cloudflow section of [MAP.md](../exportit/MAP.md):** the
+7. **The cloudflow section of [MAP.md](../../exportit/MAP.md):** the
    path table, the new and the superseded files, what the code would
    have to change at a real relocation (taken from the ratchet), what
    cloudflow expects from the other units, and the commands that
@@ -106,7 +106,7 @@ Asked one at a time on 2026-11-12, before execution.
    each correction is kept as a patch file beside the mapping file,
    and the copy check applies the patches before it compares.
 4. **Plotting:** *(reversed by the operator on 2026-11-13: plotting is
-   folded back into cloudflow; see [MAP.md](../exportit/MAP.md#plotting-folded-back).)*
+   folded back into cloudflow; see [MAP.md](../../exportit/MAP.md#plotting-folded-back).)*
    a second project, `exportit/cloudflow-plotting/`,
    which cloudflow depends on. The copied code imports it as
    `cloudflow.plotting`, so both projects install into one `cloudflow`
@@ -137,14 +137,14 @@ Asked one at a time on 2026-11-12, before execution.
 
 ## Outcome
 
-- Two projects: [exportit/cloudflow/](../exportit/cloudflow/) (188
+- Two projects: [exportit/cloudflow/](../../exportit/cloudflow/) (188
   files copied) and
-  [exportit/cloudflow-plotting/](../exportit/cloudflow-plotting/) (10
+  [exportit/cloudflow-plotting/](../../exportit/cloudflow-plotting/) (10
   files copied). Two empty files are left behind, with reasons, in
-  [cloudflow.map](../exportit/cloudflow.map).
+  [cloudflow.map](../../exportit/cloudflow.map).
 - Eight patches correct the 13 undefined names: seven files in
   cloudflow, one in cloudflow-plotting.
-- [exportit/tools/export.py](../exportit/tools/export.py) makes and
+- [exportit/tools/export.py](../../exportit/tools/export.py) makes and
   checks the copies, prints the `git filter-repo` directives, and
   rehearses the extraction on a throw-away clone.
 - `just test` and `just full-test` pass at the repository root. The
@@ -152,11 +152,11 @@ Asked one at a time on 2026-11-12, before execution.
   history, and the same 10 files with 14 commits.
 - Every module of the copied code imports, except four that are
   listed with their reasons in
-  [test_modules.py](../exportit/cloudflow/tests/test_modules.py).
+  [test_modules.py](../../exportit/cloudflow/tests/test_modules.py).
 - Found on the way and left alone, because they are defects of the
   originals: `workflow_main.py` calls three flows that do not exist,
   and 651 lint findings remain. They are in
-  [MAP.md](../exportit/MAP.md#defects-found-and-left-as-they-are).
+  [MAP.md](../../exportit/MAP.md#defects-found-and-left-as-they-are).
 
 ## Sizing and branch
 

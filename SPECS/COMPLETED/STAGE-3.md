@@ -7,25 +7,25 @@ result is under [Outcome](#outcome).
 
 ## Why
 
-[scripts/setup-instance.sh](../scripts/setup-instance.sh) builds the
+[scripts/setup-instance.sh](../../scripts/setup-instance.sh) builds the
 whole software stack in one pass of shell functions. It cannot be run
 twice, cannot be run in part without editing a copy of it (nine
 sibling scripts are such copies), does not stop when a step fails, and
 is fetched by cloning the monorepo (C5, C10, F6 to F10 in
-[ANALYSIS.md](ANALYSIS.md)). The operator asked for a way to do the
+[ANALYSIS.md](../ANALYSIS.md)). The operator asked for a way to do the
 same work as Ansible playbooks that are applied.
 
 ## What exists
 
 The table "setup-instance.sh, step by step" in
-[ANALYSIS.md](ANALYSIS.md#setup-instancesh-step-by-step) lists the
+[ANALYSIS.md](../ANALYSIS.md#setup-instancesh-step-by-step) lists the
 13 functions and the image step, where each one's result lands (root
 volume, EFS or a home directory) and whether it survives a second run.
 The versions are in
-[environment-vars.sh](../scripts/environment-vars.sh); the files that
-get installed are under [scripts/system/](../scripts/system/). The
+[environment-vars.sh](../../scripts/environment-vars.sh); the files that
+get installed are under [scripts/system/](../../scripts/system/). The
 steps that come before it (EFS client, mount, `/save`, the clone) are
-in [terraform/init_template.tpl](../terraform/init_template.tpl).
+in [terraform/init_template.tpl](../../terraform/init_template.tpl).
 
 ## The proposal
 
@@ -98,7 +98,7 @@ the node by its project tag; that is the route for later changes.
 3. `node-image.yml`.
 
    **YOUR DECISION (image creation):** run the existing
-   [create_image.py](../scripts/create_image.py) from a task, passing
+   [create_image.py](../../scripts/create_image.py) from a task, passing
    the region it currently ignores (default), or rewrite it with the
    `amazon.aws` modules.
 4. The `Justfile`: `test` runs `ansible-playbook --syntax-check`,
@@ -111,7 +111,7 @@ the node by its project tag; that is the route for later changes.
    procedure for the operator to run when they choose (default); or
    one live run on a real instance as part of the stage, which costs
    several hours of an EC2 instance.
-5. The provisioning section of [MAP.md](../exportit/MAP.md): function
+5. The provisioning section of [MAP.md](../../exportit/MAP.md): function
    to role, variable to variable, file to file, and the new first-boot
    template.
 
@@ -145,7 +145,7 @@ Asked when it surfaced, during execution:
   They are mapped, and three of them already call functions that do
   not exist.
 - JupyterHub and user management ([stage 7](STAGE-7.md)).
-- Changing [terraform/init_template.tpl](../terraform/init_template.tpl)
+- Changing [terraform/init_template.tpl](../../terraform/init_template.tpl)
   itself. The new template is written into the export;
   [stage 4](STAGE-4.md) owns the Terraform side.
 
@@ -158,10 +158,10 @@ Asked when it surfaced, during execution:
 
 ## Outcome
 
-- [exportit/sandbox-provisioning/](../exportit/sandbox-provisioning/):
+- [exportit/sandbox-provisioning/](../../exportit/sandbox-provisioning/):
   `site.yml` with twelve roles, `node-image.yml`, two inventories, the
   first-boot script, 9 source files carried under `legacy/` and as
-  role files, and [docs/LIVE-PROOF.md](../exportit/sandbox-provisioning/docs/LIVE-PROOF.md).
+  role files, and [docs/LIVE-PROOF.md](../../exportit/sandbox-provisioning/docs/LIVE-PROOF.md).
 - `just test` and `just full-test` pass at the repository root
   (full-test 19 minutes on 2026-11-12).
 - 310 tests compare the playbooks with the scripts: every task names
@@ -181,7 +181,7 @@ Asked when it surfaced, during execution:
   makes the script's second `mirror add` a no-op; the two
   `compiler find` steps undo each other on a repeated run; the module
   search path line never arrives on AlmaLinux 10. Details in
-  [MAP.md](../exportit/MAP.md#found-while-testing).
+  [MAP.md](../../exportit/MAP.md#found-while-testing).
 
 ## Sizing and branch
 

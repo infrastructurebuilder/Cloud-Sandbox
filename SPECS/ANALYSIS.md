@@ -1,7 +1,7 @@
 # Cloud-Sandbox: analysis for reconstruction
 
 *Written 2026-11-12 against commit `ca0604a` (the upstream `main` at
-pull request 166). This is the survey that [stage 1](STAGE-1.md)
+pull request 166). This is the survey that [stage 1](COMPLETED/STAGE-1.md)
 produced; the stages that act on it are listed in [TODO.md](TODO.md).*
 
 Nothing was executed to write this page: no script was run, no
@@ -57,14 +57,14 @@ integration, and no `Justfile`.
 
 | Path | Files | What it is | Proposed unit | Stage |
 | --- | ---: | --- | --- | --- |
-| [cloudflow/](../cloudflow/) | 195 | Python workflow engine, launchers, input templates, notebooks | `cloudflow` | [2](STAGE-2.md) |
-| [setup.py](../setup.py), [setup-plotting.sh](../setup-plotting.sh), [CLOUDFLOW.md](../CLOUDFLOW.md), [PREFECTv3.md](../PREFECTv3.md), [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](../LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md) | 5 | Packaging and notes that belong to cloudflow but sit at the root | `cloudflow` | [2](STAGE-2.md) |
-| [scripts/](../scripts/) (setup path) | part of 93 | Head-node provisioning: `setup-instance.sh`, its function library, version file, image creation, the `system/` files they install | `sandbox-provisioning` (Ansible) | [3](STAGE-3.md) |
-| [terraform/](../terraform/) | 22 | Network, EFS, IAM and head node; the first-boot template | `sandbox-terraform` | [4](STAGE-4.md) |
-| [models/](../models/), [patches/](../patches/) | 149 | Per-model fetch, build and setup recipes; module files | `sandbox-models` | [5](STAGE-5.md) |
-| [job.configs/](../job.configs/), [cluster.configs/](../cluster.configs/) | 130 | Job and cluster descriptions, many with one site's AWS identifiers | `sandbox-configs` | [6](STAGE-6.md) |
-| [scripts/](../scripts/) (the rest), [misc/](../misc/), [jupyterhub/](../jupyterhub/) | rest of 93, 23, 1 | User management, Spack mirror upkeep, data scrubbing, instance helpers, JupyterHub, Slurm leftovers, notes | `sandbox-ops` | [7](STAGE-7.md) |
-| [docs/](../docs/), [images/](../images/), root `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `TODO`, `LICENSE`, `.gitignore`, `.github/` | 175, 2, 7 | Sphinx sources and their built HTML; the umbrella documents | split across units; a thin umbrella remains | [8](STAGE-8.md) |
+| [cloudflow/](../cloudflow/) | 195 | Python workflow engine, launchers, input templates, notebooks | `cloudflow` | [2](COMPLETED/STAGE-2.md) |
+| [setup.py](../setup.py), [setup-plotting.sh](../setup-plotting.sh), [CLOUDFLOW.md](../CLOUDFLOW.md), [PREFECTv3.md](../PREFECTv3.md), [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](../LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md) | 5 | Packaging and notes that belong to cloudflow but sit at the root | `cloudflow` | [2](COMPLETED/STAGE-2.md) |
+| [scripts/](../scripts/) (setup path) | part of 93 | Head-node provisioning: `setup-instance.sh`, its function library, version file, image creation, the `system/` files they install | `sandbox-provisioning` (Ansible) | [3](COMPLETED/STAGE-3.md) |
+| [terraform/](../terraform/) | 22 | Network, EFS, IAM and head node; the first-boot template | `sandbox-terraform` | [4](COMPLETED/STAGE-4.md) |
+| [models/](../models/), [patches/](../patches/) | 149 | Per-model fetch, build and setup recipes; module files | `sandbox-models` | [5](COMPLETED/STAGE-5.md) |
+| [job.configs/](../job.configs/), [cluster.configs/](../cluster.configs/) | 130 | Job and cluster descriptions, many with one site's AWS identifiers | `sandbox-configs` | [6](COMPLETED/STAGE-6.md) |
+| [scripts/](../scripts/) (the rest), [misc/](../misc/), [jupyterhub/](../jupyterhub/) | rest of 93, 23, 1 | User management, Spack mirror upkeep, data scrubbing, instance helpers, JupyterHub, Slurm leftovers, notes | `sandbox-ops` | [7](COMPLETED/STAGE-7.md) |
+| [docs/](../docs/), [images/](../images/), root `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `TODO`, `LICENSE`, `.gitignore`, `.github/` | 175, 2, 7 | Sphinx sources and their built HTML; the umbrella documents | split across units; a thin umbrella remains | [8](COMPLETED/STAGE-8.md) |
 
 The unit names are proposals. They are the directory names under
 [exportit/](../exportit/) and the repository names used in
@@ -138,26 +138,26 @@ directory, a written statement of what it expects from the other
 units, and an entry in [exportit/MAP.md](../exportit/MAP.md) that says
 how the real relocation would be done.
 
-- **cloudflow** ([stage 2](STAGE-2.md)). An installable Python
+- **cloudflow** ([stage 2](COMPLETED/STAGE-2.md)). An installable Python
   distribution. Expects: a cluster description and a job description
   (files, by path), the filesystem contract of C3, AWS credentials,
   and the DynamoDB table of C8.
-- **sandbox-provisioning** ([stage 3](STAGE-3.md)). Ansible roles and
+- **sandbox-provisioning** ([stage 3](COMPLETED/STAGE-3.md)). Ansible roles and
   playbooks that do what `setup-instance.sh` does. Expects: a RHEL 10
   host with the EFS volume mounted. Provides: the software stack and
   the node image.
-- **sandbox-terraform** ([stage 4](STAGE-4.md)). Expects: an AWS
+- **sandbox-terraform** ([stage 4](COMPLETED/STAGE-4.md)). Expects: an AWS
   account. Provides: the host and the EFS volume, and the identifiers
   of C7.
-- **sandbox-models** ([stage 5](STAGE-5.md); became one unit per
+- **sandbox-models** ([stage 5](COMPLETED/STAGE-5.md); became one unit per
   model, `model-<name>`, and `model-common`). Expects: the compilers
   and modules that provisioning installs. Provides: model executables
   at the paths of C3.
-- **sandbox-configs** ([stage 6](STAGE-6.md)). Data only. Expects: the
+- **sandbox-configs** ([stage 6](COMPLETED/STAGE-6.md)). Data only. Expects: the
   schema that cloudflow reads and the identifiers of C7.
-- **sandbox-ops** ([stage 7](STAGE-7.md)). Operator utilities that are
+- **sandbox-ops** ([stage 7](COMPLETED/STAGE-7.md)). Operator utilities that are
   neither provisioning nor workflow.
-- **Documentation and the umbrella** ([stage 8](STAGE-8.md)). Each
+- **Documentation and the umbrella** ([stage 8](COMPLETED/STAGE-8.md)). Each
   unit takes its own pages; what remains of Cloud-Sandbox is a page
   that says which versions of the units make a sandbox.
 

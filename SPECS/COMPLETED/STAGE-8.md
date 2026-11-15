@@ -12,16 +12,16 @@ Cloud-Sandbox itself is afterwards.
 
 ## What exists
 
-- [docs/](../docs/): 175 tracked files. `docs/source/` is 35 Sphinx
+- [docs/](../../docs/): 175 tracked files. `docs/source/` is 35 Sphinx
   source files that document cloudflow's modules through `sys.path` entries
-  into `cloudflow/` (C9 in [ANALYSIS.md](ANALYSIS.md)). The rest is
+  into `cloudflow/` (C9 in [ANALYSIS.md](../ANALYSIS.md)). The rest is
   the HTML built from them, committed (F11), and an older copy under
   `docs/save/`.
-- Root documents: [README.md](../README.md),
-  [DEPLOYMENT.md](../DEPLOYMENT.md) (304 lines, covering Terraform and
+- Root documents: [README.md](../../README.md),
+  [DEPLOYMENT.md](../../DEPLOYMENT.md) (304 lines, covering Terraform and
   provisioning together) and
-  [CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md](../CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md).
-- [images/](../images/), the root `TODO`, `.github/ISSUE_TEMPLATE.md`,
+  [CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md](../../CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md).
+- [images/](../../images/), the root `TODO`, `.github/ISSUE_TEMPLATE.md`,
   `LICENSE` and `.gitignore`.
 
 ## Items
@@ -46,7 +46,7 @@ Cloud-Sandbox itself is afterwards.
    retired and one unit takes over the name.
 4. Assign every remaining tracked path, so that the root copy check
    reports no unmapped file in the repository.
-5. Close [MAP.md](../exportit/MAP.md): the order in which the real
+5. Close [MAP.md](../../exportit/MAP.md): the order in which the real
    relocations would be done, and what the original repository looks
    like after each.
 
@@ -77,21 +77,21 @@ About 45 files copied, about 8 written. Branch
 ## Outcome
 
 - Item 1: `docs/source/` and its build files in
-  [exportit/cloudflow/docs/sphinx/](../exportit/cloudflow/docs/sphinx/);
+  [exportit/cloudflow/docs/sphinx/](../../exportit/cloudflow/docs/sphinx/);
   one patch makes `conf.py` document the installed packages; `just docs`
   builds, and a slow test holds the build to the three pages whose
   modules are gone. 129 built files and `docs/save/` dropped.
-- Item 2: [sandbox-terraform/DEPLOYMENT.md](../exportit/sandbox-terraform/DEPLOYMENT.md)
-  and [sandbox-provisioning/DEPLOYMENT.md](../exportit/sandbox-provisioning/DEPLOYMENT.md),
+- Item 2: [sandbox-terraform/DEPLOYMENT.md](../../exportit/sandbox-terraform/DEPLOYMENT.md)
+  and [sandbox-provisioning/DEPLOYMENT.md](../../exportit/sandbox-provisioning/DEPLOYMENT.md),
   each naming the original's lines and its departures.
-- Item 3: [exportit/cloud-sandbox/](../exportit/cloud-sandbox/README.md),
+- Item 3: [exportit/cloud-sandbox/](../../exportit/cloud-sandbox/README.md),
   with `units.toml` (15 units, versions, apply steps, relocation order;
   14 since plotting was folded back into cloudflow on 2026-11-13),
   its own check, and a tools test that holds it to the repository.
 - Item 4: the umbrella's map says `covers ./`, a form the export tool
   learned for it; every one of the 814 tracked files outside `exportit/`
   is now taken or dropped with a reason.
-- Item 5: [MAP.md](../exportit/MAP.md#the-order-of-the-real-relocations)
+- Item 5: [MAP.md](../../exportit/MAP.md#the-order-of-the-real-relocations)
   closes with the relocation steps (nine, eight since 2026-11-13) and what the original holds
   after each.
 - Found: six broken links in the root README; DEPLOYMENT.md stale

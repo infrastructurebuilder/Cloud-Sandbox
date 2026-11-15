@@ -97,7 +97,7 @@ those differences are not carried.
 | 11 | `spack_environment` | `create_spack-environment`, `build_spack-environment` | concretized only: the build takes hours (it runs Spack through `infrastructurebuilder.csis_spack`) |
 | 12 | `hpc_tuning` | `configure_optimizations` | no: changes kernel settings |
 
-Two more roles, added in [stage 7](../../INPROGRESS/STAGE-7.md), replace
+Two more roles, added in [stage 7](../../SPECS/COMPLETED/STAGE-7.md), replace
 operator scripts that are run by hand rather than steps of
 `setup-instance.sh`. Each has a playbook of its own:
 

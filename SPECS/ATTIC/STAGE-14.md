@@ -1,7 +1,7 @@
 # Stage 14: clearing old model output on a timer
 
 *Status:* **set aside, 2026-11-15, by the operator: "We are not going to
-do this at this time."** Moved to `INPROGRESS/ATTIC/`, with nothing
+do this at this time."** Moved to `SPECS/ATTIC/`, with nothing
 executed. The two scrub scripts stay in `sandbox-ops/bin/`, run by hand,
 as they were. The plan is kept as written, below, in case it is taken
 up: it would need a stage number of its own again, and a place in

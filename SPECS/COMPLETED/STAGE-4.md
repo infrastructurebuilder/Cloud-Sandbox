@@ -7,11 +7,11 @@ result is under [Outcome](#outcome).
 
 ## Why
 
-[terraform/](../terraform/) creates the network, the EFS volume, the
+[terraform/](../../terraform/) creates the network, the EFS volume, the
 IAM role and the head node. It is tied to the rest of the repository
 by one thing: the head node's first boot clones the monorepo from
 `ioos/Cloud-Sandbox` and runs a script inside it (C5 in
-[ANALYSIS.md](ANALYSIS.md)). It also writes the identifiers that
+[ANALYSIS.md](../ANALYSIS.md)). It also writes the identifiers that
 cluster descriptions need (C7) into a text file that a person copies
 by hand.
 
@@ -21,8 +21,8 @@ by hand.
 `variables.tf`, `outputs.tf`), two first-boot templates (RHEL 10 and
 RHEL 8), a remote-state module, a pipeline sketch, IAM policy files,
 one site's settings in
-[mysettings.tfvars](../terraform/mysettings.tfvars) and
-[config.s3.tfbackend](../terraform/config.s3.tfbackend), saved older
+[mysettings.tfvars](../../terraform/mysettings.tfvars) and
+[config.s3.tfbackend](../../terraform/config.s3.tfbackend), saved older
 copies, and notes.
 
 ## Items
@@ -33,7 +33,7 @@ copies, and notes.
    `Justfile` (`test` = `fmt -check` and `validate`, with no AWS
    call).
 3. Describe, in the map, the first-boot template that would replace
-   [init_template.tpl](../terraform/init_template.tpl): the
+   [init_template.tpl](../../terraform/init_template.tpl): the
    `ansible-pull` form from [stage 3](STAGE-3.md), with the
    provisioning repository and version as Terraform variables instead
    of a literal URL.
@@ -79,7 +79,7 @@ section is complete.
 
 ## Outcome
 
-- [exportit/sandbox-terraform/](../exportit/sandbox-terraform/): all
+- [exportit/sandbox-terraform/](../../exportit/sandbox-terraform/): all
   22 files of `terraform/`, unchanged, at the unit's root, with a
   README, `Justfile` and tests.
 - The first-boot template written in stage 3 moved here from
@@ -94,7 +94,7 @@ section is complete.
   fragments still fail. Extraction: 22 files, 44 commits.
 - Found: nothing creates the DynamoDB table cloudflow needs or deploys
   the Lambda functions; the interface table is in
-  [MAP.md](../exportit/MAP.md#what-it-provides-the-interface).
+  [MAP.md](../../exportit/MAP.md#what-it-provides-the-interface).
   Afterwards the operator decided the table stays made by hand and is
   supplied as configuration; MAP.md records it.
 - Netrc workaround removed from the provisioning `Justfile` first, at
