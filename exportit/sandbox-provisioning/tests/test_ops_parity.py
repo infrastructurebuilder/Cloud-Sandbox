@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from support import LEGACY, UNIT
+from support import JUPYTERHUB_ORIGINALS, LEGACY, UNIT
 
 ORIGINAL_SPACK = "/save/environments/spack.v0.22.5"
 SCRATCH_USER = "@USER@"
@@ -39,14 +39,15 @@ def render(out: Path, extra: dict[str, object]) -> Path:
 
 @pytest.fixture(scope="module")
 def defaults(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    return render(tmp_path_factory.mktemp("defaults"), {})
+    return render(tmp_path_factory.mktemp("defaults"), JUPYTERHUB_ORIGINALS)
 
 
 @pytest.fixture(scope="module")
 def as_originals(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return render(
         tmp_path_factory.mktemp("originals"),
-        {
+        JUPYTERHUB_ORIGINALS
+        | {
             "jupyterhub_spawn_users": ["jupyter", "jonmjoyce"],
             "sandbox_users_lustre_mounters": ["patrick"],
             "spack_dir": ORIGINAL_SPACK,
@@ -64,7 +65,9 @@ def active(text: str) -> list[str]:
 
 
 @pytest.mark.parametrize("name", ["jupyterhub_config.py", "jupyterhub.conf"])
-def test_with_its_defaults_a_jupyterhub_template_writes_the_original(defaults: Path, name: str) -> None:
+def test_with_its_defaults_and_the_originals_site_values_a_template_writes_the_original(
+    defaults: Path, name: str
+) -> None:
     assert (defaults / name).read_text() == (LEGACY / "system" / name).read_text()
 
 
@@ -135,3 +138,42 @@ def test_the_test_users_are_the_sample_list() -> None:
     assert str(user["uid"]) == row["uid"]
     assert [group["name"] for group in user["groups"]] == row["groups"].split(";")
     assert [str(group["gid"]) for group in user["groups"]] == row["gids"].split(";")
+
+
+def check_jupyterhub(extra: dict[str, object]) -> subprocess.CompletedProcess[str]:
+    command = [
+        str(Path(sys.executable).parent / "ansible-playbook"),
+        "tests/jupyterhub-check.yml",
+        "-e",
+        json.dumps(extra),
+    ]
+    return subprocess.run(command, cwd=UNIT, capture_output=True, text=True, check=False)
+
+
+def test_the_hub_refuses_to_install_without_the_sites_settings() -> None:
+    done = check_jupyterhub({})
+    assert done.returncode != 0
+    for name in JUPYTERHUB_ORIGINALS:
+        assert name in done.stdout
+
+
+def test_the_hub_names_only_what_is_missing_or_empty() -> None:
+    given = JUPYTERHUB_ORIGINALS | {"jupyterhub_ssl_certificate": "  "}
+    del given["jupyterhub_server_name"]
+    done = check_jupyterhub(given)
+    assert done.returncode != 0
+    assert "jupyterhub_server_name, jupyterhub_ssl_certificate." in " ".join(done.stdout.split())
+
+
+def test_the_hub_installs_with_the_sites_settings() -> None:
+    done = check_jupyterhub(JUPYTERHUB_ORIGINALS)
+    assert done.returncode == 0, done.stdout + done.stderr
+
+
+def test_no_site_setting_is_left_in_the_hubs_defaults() -> None:
+    defaults = yaml.safe_load((UNIT / "roles" / "jupyterhub" / "defaults" / "main.yml").read_text())
+    assert not set(JUPYTERHUB_ORIGINALS) & set(defaults)
+    assert set(defaults["jupyterhub_required_variables"]) == set(JUPYTERHUB_ORIGINALS)
+    text = (UNIT / "roles" / "jupyterhub" / "defaults" / "main.yml").read_text()
+    for value in ("rpsgroup", "star_ioos_us", "sandbox-dev.ioos.us"):
+        assert all(value not in line or line.lstrip().startswith("#") for line in text.splitlines())

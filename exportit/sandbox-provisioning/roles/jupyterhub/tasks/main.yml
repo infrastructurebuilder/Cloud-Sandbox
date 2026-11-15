@@ -9,6 +9,10 @@
 # Anaconda 2022.05), is kept in legacy/ and not carried; see
 # tests/not_carried.yml.
 
+# New: (stage 13) the site's settings are checked before anything is done.
+- name: Check the site's settings
+  ansible.builtin.include_tasks: check.yml
+
 # Replaces install_conda_jupyterhub.sh L4
 - name: Install nginx
   ansible.builtin.dnf:

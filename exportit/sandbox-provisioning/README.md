@@ -114,6 +114,33 @@ repository. The hub's Google OAuth client id and secret are variables too,
 empty by default, as they are in the original configuration.
 [docs/JUPYTERHUB.md](docs/JUPYTERHUB.md) is the original `jupyterhub/README.md`.
 
+### JupyterHub, if a site wants it
+
+JupyterHub is an option, not part of every build (stage 13, the
+operator's decision): `site.yml` does not install it, and `jupyterhub.yml`
+does, for a site that asks. Nothing installed it before stage 7, and its
+settings in the original files are one site's, so the role has no
+defaults for what only a site can say, and refuses to install anything
+until it is given:
+
+| Variable | What it is |
+| --- | --- |
+| `jupyterhub_server_name` | The name nginx answers to, the hub's public host name |
+| `jupyterhub_ssl_certificate`, `jupyterhub_ssl_certificate_key` | Paths on the head node of the site's TLS certificate and key. The role does not put them there; nginx is enabled either way and started once both exist |
+| `jupyterhub_oauth_callback_url` | The callback registered with the site's Google OAuth application, `https://<server name>/hub/oauth_callback` |
+| `jupyterhub_oauth_client_id`, `jupyterhub_oauth_client_secret` | That application's id and secret; empty by default, and to be kept with the site's secrets, never in a repository |
+| `jupyterhub_admin_users_literal` | The hub's administrators, as a Python set literal: `"{'jupyter', 'someone'}"` |
+| `jupyterhub_username_map_literal` | Google addresses to local user names, as a Python dict literal |
+| `jupyterhub_spawn_users` | Who the hub may start servers for; `[jupyter]` by default. The users themselves come from `users.yml` |
+
+The head node's security group, which `sandbox-terraform` makes, opens
+only SSH and the EFS volume's NFS. To reach the hub, the site opens 443 to
+the addresses that should, itself; this repository does not.
+
+```sh
+ansible-playbook jupyterhub.yml --extra-vars @my-site-jupyterhub.yml
+```
+
 What the two roles correct, on purpose, is in the comments above each
 task: among them, the hub's configuration and run script now go where the
 service reads them, conda is given to its owner (the script's

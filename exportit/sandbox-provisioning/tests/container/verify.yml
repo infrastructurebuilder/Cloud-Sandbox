@@ -433,6 +433,7 @@
   vars_files:
     - ../../group_vars/all.yml
     - ../../roles/jupyterhub/defaults/main.yml
+    - vars.yml
 
   tasks:
     - name: Ask the hub whether it is up

@@ -1,8 +1,10 @@
 # Stage 13: JupyterHub, decided
 
-*Status:* planned 2026-11-14 on `feature/remaining-plans`; nothing
-executed. It is a decision first: at "do 13" the **YOUR DECISION** below
-is asked, and only then is the work it leads to done. Third in the order
+*Status:* planned 2026-11-14 on `feature/remaining-plans`, and executed
+the same day on "do 13", on `feature/stage-13-jupyterhub`. Committed
+locally; not merged. The decision is under
+[Decisions taken](#decisions-taken), the result under
+[Outcome](#outcome). Third in the order
 of the remaining work ([PLAN.md](../PLAN.md)): it depends on nothing,
 and it comes before the live proof (stage 15) so that the proof covers
 what is decided.
@@ -56,7 +58,56 @@ reach the hub's port or nginx's from outside.
 3. With "every build": the security group's variable, its test in
    `sandbox-terraform`, and the hub's port in the live proof's checks.
 
+## Decisions taken
+
+Asked on 2026-11-14: **keep it an option**, the default. `jupyterhub.yml`
+stays apart from `site.yml`; the live proof (stage 15) does not apply it.
+
 ## Acceptance
 
 `sandbox-provisioning`'s `just test` and `just full-test` pass; REMINDERS.md
 loses the item; MAP.md says what was decided.
+
+## Outcome
+
+- **No site's settings in the role's defaults.** The server name, the
+  OAuth callback, the certificate and key paths, and the two Python
+  literals (the administrators and the address-to-user map, which in the
+  original file are placeholders, `user1` and `user1@gmail.com`) have no
+  default. The defaults say, in comments, what the original files hold.
+  `jupyterhub_spawn_users` keeps its default, `[jupyter]`, the hub's own
+  user: it names no person.
+  - Six variables are required, not the plan's four: the plan named the
+    spawn users, which have a sound default, and left out the two
+    placeholder literals, which do not.
+- **The role checks first** (`tasks/check.yml`, included at the top of
+  `main.yml`) and refuses, naming every missing or empty one, before
+  anything is installed.
+- **README.md** says what a site supplies, and that it must open 443 in
+  the head node's security group itself.
+- **Tests:** the parity tests render the templates with the originals'
+  values, now given explicitly (`support.JUPYTERHUB_ORIGINALS`), and still
+  hold them to the original files byte for byte; the check is applied
+  alone and refuses with nothing given, names exactly what is missing or
+  blank, and passes with everything; a test holds the defaults free of
+  the one site's values. The container gives test values
+  (`hub.example.invalid`) and checks the hub as before.
+- `sandbox-provisioning`'s `just test`: 458 tests. The root `just test`
+  and `just full-test` pass (2026-11-14): every unit, all 15 extraction
+  proofs, and the container test with every play checked.
+
+## Found
+
+**The container test had not been checking `users.yml` and
+`jupyterhub.yml` since stage 7, and passed anyway.** `converge.sh` gave
+`verify.yml` the list of plays as `--extra-vars "verify_plays=site users
+jupyterhub"`; in that key=value form Ansible cuts the value at the first
+space, so the list was `site`, and the plays that check the test user and
+the hub matched no host and were skipped. Stage 7's checks were real when
+it ran them, it seems with one play at a time, where a single name is
+passed whole. The list is now passed as JSON, and the test fails if any
+play it asked to check is skipped. With that, the full container test
+checks all three again, and they pass: the test user and its groups, and
+the hub up on port 8000 with nginx enabled and not started (no
+certificate).
+
