@@ -12,13 +12,6 @@ aside and why, and where the details are.
   decision 5. Whether cloudflow, `sandbox-ops` or someone else should own
   them is not decided. See [MAP.md](MAP.md#cloudflow) and
   [STAGE-2.md](../INPROGRESS/STAGE-2.md#decisions-taken).
-- **Whether a site wants JupyterHub** (put aside 2026-11-13; planned as
-  [stage 13](../INPROGRESS/STAGE-13.md)).
-  `jupyterhub.yml` in `sandbox-provisioning` installs it, and works in
-  the container test, but it is not part of `site.yml`; nothing installed
-  JupyterHub before stage 7. Decide whether it stays an option, becomes
-  part of the standard build, or goes. See
-  [MAP.md](MAP.md#sandbox-ops).
 - **The live proof on AWS** (planned as
   [stage 15](../INPROGRESS/STAGE-15.md); put aside 2026-11-13; it will come
   shortly). Every unit is tested locally, and `site.yml`, `users.yml` and

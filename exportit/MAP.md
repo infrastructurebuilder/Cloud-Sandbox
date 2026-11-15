@@ -1185,7 +1185,12 @@ above its task:
   (a download address with no host, files copied where nothing reads
   them). The role is the first install that works, in the container.
   Whether a site wants it is its own decision; `jupyterhub.yml` is not
-  part of `site.yml`.
+  part of `site.yml`. **Decided (operator, 2026-11-14, stage 13):** it
+  stays an option. Since stage 13 the role has no defaults for what only
+  a site can say (server name, OAuth callback, certificate and key, the
+  administrators and the address map) and refuses to install anything
+  until they are given; the README says what a site supplies, and that
+  opening 443 is the site's.
 - **One tool in use does not parse:** `scrub_liveocean.sh` never closes
   the `if` at L88. It is recorded, and the test fails if it is fixed or
   if another script breaks.

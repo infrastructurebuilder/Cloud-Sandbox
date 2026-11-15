@@ -53,6 +53,17 @@ OPS_SCRIPTS = [
     "spack-pubkey.sh",
 ]
 
+# What only a site can say has no default since stage 13; these are the
+# original files' values, so that the templates can be held to the files.
+JUPYTERHUB_ORIGINALS: dict[str, object] = {
+    "jupyterhub_server_name": "sandbox-dev.ioos.us",
+    "jupyterhub_oauth_callback_url": "https://jupyterhub.rpsgroup.com/hub/oauth_callback",
+    "jupyterhub_ssl_certificate": "/etc/ssl/star_ioos_us.crt",
+    "jupyterhub_ssl_certificate_key": "/etc/ssl/star_ioos_us.key",
+    "jupyterhub_admin_users_literal": "{'jupyter', 'user1'}",
+    "jupyterhub_username_map_literal": '{ "user1@gmail.com": "user1", "user2@gmail.com": "user2" }',
+}
+
 # The name each exported variable of environment-vars.sh has in group_vars/all.yml.
 VARIABLES = {
     "PREFECT_VER": "prefect_version",

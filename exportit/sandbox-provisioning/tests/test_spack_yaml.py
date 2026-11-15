@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from support import UNIT, rendered
+from support import JUPYTERHUB_ORIGINALS, UNIT, rendered
 
 
 @pytest.fixture(scope="module")
@@ -24,7 +24,8 @@ def manifest(tmp_path_factory: pytest.TempPathFactory) -> str:
         str(Path(sys.executable).parent / "ansible-playbook"),
         "tests/render-templates.yml",
         "-e",
-        json.dumps({"render_out": str(out)}),
+        # The hub's templates are rendered too, and need the site's settings.
+        json.dumps({"render_out": str(out)} | JUPYTERHUB_ORIGINALS),
     ]
     done = subprocess.run(command, cwd=UNIT, capture_output=True, text=True, check=False)
     assert done.returncode == 0, done.stdout + done.stderr
