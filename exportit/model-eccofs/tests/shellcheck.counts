@@ -1,8 +1,0 @@
-# Findings of shellcheck per script, written by tests/check-scripts.sh --record.
-# Recorded with shellcheck version 0.11.0
-5	build_eccofs.sh
-1	fathoms_sbatch
-3	get_eccofs_fixfiles_s3.sh
-0	get_forcing_data_s3.sh
-7	restart_date.sh
-15	setup_eccofs.sh

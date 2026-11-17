@@ -2,3 +2,59 @@
 	path = exportit/model-common
 	url = ../csis-model-common.git
 	branch = develop
+[submodule "exportit/model-adcirc-cora"]
+	path = exportit/model-adcirc-cora
+	url = ../csis-model-adcirc-cora.git
+	branch = develop
+[submodule "exportit/model-eccofs"]
+	path = exportit/model-eccofs
+	url = ../csis-model-eccofs.git
+	branch = develop
+[submodule "exportit/model-liveocean"]
+	path = exportit/model-liveocean
+	url = ../csis-model-liveocean.git
+	branch = develop
+[submodule "exportit/model-necofs"]
+	path = exportit/model-necofs
+	url = ../csis-model-necofs.git
+	branch = develop
+[submodule "exportit/model-nosofs"]
+	path = exportit/model-nosofs
+	url = ../csis-model-nosofs.git
+	branch = develop
+[submodule "exportit/model-secofs"]
+	path = exportit/model-secofs
+	url = ../csis-model-secofs.git
+	branch = develop
+[submodule "exportit/model-ucla-roms"]
+	path = exportit/model-ucla-roms
+	url = ../csis-model-ucla-roms.git
+	branch = develop
+[submodule "exportit/model-ufscoastal"]
+	path = exportit/model-ufscoastal
+	url = ../csis-model-ufscoastal.git
+	branch = develop
+[submodule "exportit/sandbox-ops"]
+	path = exportit/sandbox-ops
+	url = ../csis-sandbox-ops.git
+	branch = develop
+[submodule "exportit/sandbox-configs"]
+	path = exportit/sandbox-configs
+	url = ../csis-sandbox-configs.git
+	branch = develop
+[submodule "exportit/sandbox-terraform"]
+	path = exportit/sandbox-terraform
+	url = ../csis-sandbox-terraform.git
+	branch = develop
+[submodule "exportit/cloudflow"]
+	path = exportit/cloudflow
+	url = ../cloudflow.git
+	branch = develop
+[submodule "exportit/cloud-sandbox"]
+	path = exportit/cloud-sandbox
+	url = ../csis-cloud-sandbox.git
+	branch = develop
+[submodule "exportit/sandbox-provisioning"]
+	path = exportit/sandbox-provisioning
+	url = ../csis-sandbox-provisioning.git
+	branch = develop

@@ -5,11 +5,12 @@
 *Status:* planned 2026-11-17 at the operator's request, and begun the
 same day on "do moving day". The plan is
 [exportit/MOVINGDAY.md](exportit/MOVINGDAY.md), where the operator asked
-for it; its six first decisions are taken and recorded there. **M0 is
-done** on `feature/movingday-m0`: this repository made ready. **M1, the
-pilot, is done** on `feature/movingday-m1`: `csis-model-common` exists,
-private, and `exportit/model-common` is a submodule. **Next: M2, the
-other fourteen**, asked first. A last phase, M4, with four decisions of
+for it; its six first decisions are taken and recorded there. **M0 to
+M3 are done**, on `feature/movingday-m0`, `-m1` and `-m2`: all fifteen
+units are private repositories on `infrastructurebuilder` and
+submodules under `exportit/`, and the records say so. **Left: M4**, Spec
+Kit, after the collection's adoption is merged. None of the branches is
+merged into `develop`, and Cloud-Sandbox itself is not pushed. A last phase, M4, with four decisions of
 its own, initialises the new repositories with Spec Kit and a
 constitution whose shared part is the same in each, on the collection's
 model.
@@ -49,10 +50,10 @@ are not in it.
 | 7 | [collection 5](../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-5.md) | Ansible Galaxy, or the git tag (a decision, then its work) | nothing; before 22, so the source is named once | medium if published |
 | 8 | [17](SPECS/STAGE-17.md) | The Lambda functions: an owner, a module, tests (a decision, then its work) | nothing; before 22, step 1 | medium to large |
 | 9 | [18](SPECS/STAGE-18.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 15: a head node to build on | large |
-| 10 | [19](SPECS/STAGE-19.md) | Relocate all, some, or none (a decision) | 1 to 9, as "a good commit tree" | a decision |
+| 10 | [19](SPECS/STAGE-19.md) | Relocate all, some, or none (a decision). **Decided 2026-11-17 by moving day: all** | 1 to 9, as "a good commit tree" (not all met: the operator's choice) | done |
 | 11 | [20](SPECS/STAGE-20.md) | `sandbox-configs` split by owner | 19 relocates it | medium |
 | 12 | [21](SPECS/STAGE-21.md) | The first boot runs the playbooks (`main.tf`'s two values) | 19 relocates both units; put into use at 22, step 6 | small |
-| 13 | [22](SPECS/STAGE-22.md) | The real relocations, eight steps in MAP.md's order | 19, 20, 21 | large |
+| 13 | [22](SPECS/STAGE-22.md) | The real relocations, eight steps in MAP.md's order. **The repositories made by moving day**; left: deleting the original paths | 19, 20, 21 | medium |
 
 Standing beside all of them: the parity watch on `main` (the next
 section), which, while it lasts, comes before any of these whenever

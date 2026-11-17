@@ -15,10 +15,15 @@ directory was `INPROGRESS/`.)
 
 ## Standing decisions
 
-- **Nothing leaves this repository.** A unit is relocated by copying
-  it into [exportit/](../exportit/) and describing the real relocation
-  in [exportit/MAP.md](../exportit/MAP.md). The original paths stay
-  untouched.
+- **Each unit is a private repository, kept here as a submodule**
+  (since moving day, 2026-11-17, replacing "nothing leaves this
+  repository", which stood from 2026-11-12). Every unit under
+  [exportit/](../exportit/) is a repository of its own on
+  `infrastructurebuilder`, at the path its copy had. The original paths
+  stay untouched, and each unit is still held to them by its mapping
+  file. A change to a unit is a commit in its repository; this
+  repository then records the new commit. See
+  [exportit/MOVINGDAY.md](../exportit/MOVINGDAY.md).
 - **Never push to `ioos/Cloud-Sandbox`**, and never open a pull
   request against it.
 - **One feature branch per stage**, squash-merged into `develop`. The
@@ -53,23 +58,23 @@ directory was `INPROGRESS/`.)
 | [16](STAGE-16.md) | A build cache for RHEL 10, pushed by the collection | Planned 2026-11-14 |
 | [17](STAGE-17.md) | The Lambda functions, owned | Planned 2026-11-14 |
 | [18](STAGE-18.md) | spack-stack for UFS Coastal | Planned 2026-11-14 |
-| [19](STAGE-19.md) | Relocate, or not | Planned 2026-11-14 |
-| [20](STAGE-20.md) | `sandbox-configs` split by owner | Planned 2026-11-14; only if 19 relocates it |
-| [21](STAGE-21.md) | The first boot runs the playbooks | Planned 2026-11-14; only if 19 relocates |
-| [22](STAGE-22.md) | The real relocations | Planned 2026-11-14; only if 19 relocates |
+| [19](STAGE-19.md) | Relocate, or not | **Decided 2026-11-17 by moving day: relocate all**, ahead of its turn |
+| [20](STAGE-20.md) | `sandbox-configs` split by owner | Planned 2026-11-14; still possible, after `sandbox-configs` moved whole |
+| [21](STAGE-21.md) | The first boot runs the playbooks | Planned 2026-11-14 |
+| [22](STAGE-22.md) | The real relocations | The repositories made by moving day (2026-11-17); left: deleting the original paths |
 
 The order of the work is in [PLAN.md](../PLAN.md), with the collection's
 stages 4 and 5 among these.
 
-Beside the stages: [moving day](../exportit/MOVINGDAY.md), planned
-2026-11-17 at the operator's request. It gives each unit a private
-repository and keeps it here as a submodule, which decides stage 19
-ahead of its turn and leaves stage 22 only the deletion of the original
-paths. Until it is executed, the standing decision "nothing leaves this
-repository" above still describes what is true.
+Beside the stages: [moving day](../exportit/MOVINGDAY.md), planned and
+carried out on 2026-11-17 at the operator's request. It gave each unit a
+private repository and keeps it here as a submodule, which decided stage
+19 ahead of its turn and left stage 22 only the deletion of the original
+paths.
 
 ## Landed
 
-All eight stages, squash-merged into `develop` on 2026-11-12, one commit
-each; their feature branches are kept. Nothing has been relocated: see
+Stages 1 to 13, squash-merged into `develop`, one commit each; their
+feature branches are kept. Every unit has had a repository of its own
+since 2026-11-17, and no original path has been deleted: see
 [exportit/MAP.md](../exportit/MAP.md#the-order-of-the-real-relocations).

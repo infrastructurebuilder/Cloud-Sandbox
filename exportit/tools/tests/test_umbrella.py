@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import configparser
 import re
 import tomllib
 from pathlib import Path
@@ -22,6 +23,32 @@ def test_the_manifest_names_every_mapped_unit() -> None:
     mapped = {path.stem for path in EXPORT.glob("*.map")} - NOT_UNITS
     copied = {name for name, unit in manifest().items() if not unit.get("external")}
     assert copied == mapped
+
+
+def submodules() -> dict[str, str]:
+    """The units kept here as submodules: directory under exportit/ -> the URL .gitmodules gives."""
+    parser = configparser.ConfigParser()
+    parser.read(ROOT / ".gitmodules")
+    found = {parser[section]["path"]: parser[section]["url"] for section in parser.sections()}
+    return {path.removeprefix("exportit/"): url for path, url in found.items()}
+
+
+def test_a_submodule_is_the_repository_the_manifest_names() -> None:
+    """A submodule's URL is relative, following this repository's remote; its name is the manifest's."""
+    units = manifest()
+    differ: list[str] = []
+    for name, url in submodules().items():
+        if name == UMBRELLA:
+            continue
+        repository = str(units[name]["repository"]).rsplit("/", 1)[1]
+        if url != f"../{repository}.git":
+            differ.append(f"{name}: .gitmodules says {url}, units.toml says {repository}")
+    assert not differ, differ
+
+
+def test_every_submodule_is_a_mapped_unit() -> None:
+    mapped = {path.stem for path in EXPORT.glob("*.map")}
+    assert set(submodules()) <= mapped
 
 
 def test_an_external_unit_is_not_copied_here() -> None:

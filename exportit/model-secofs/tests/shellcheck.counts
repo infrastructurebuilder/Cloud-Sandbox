@@ -1,9 +1,0 @@
-# Findings of shellcheck per script, written by tests/check-scripts.sh --record.
-# Recorded with shellcheck version 0.11.0
-13	build_schism.sh
-6	combine_hotstarts.sh
-7	fetch_vims_data.sh
-6	get_schism.sh
-3	get_testcase_inputs.sh
-1	sbatch.hercules
-3	setup_schism.sh

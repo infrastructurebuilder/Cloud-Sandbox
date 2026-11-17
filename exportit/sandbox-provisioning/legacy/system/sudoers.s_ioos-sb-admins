@@ -1,2 +1,0 @@
-# User rules for ec2-user
-#patrick ALL=(ALL) NOPASSWD:ALL

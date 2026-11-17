@@ -20,11 +20,33 @@ aside and why, and where the details are.
   the head node's first boot pulling `sandbox-provisioning`, the
   compute-node image, and one cloudflow run. Check that the AWS SSO
   session is fresh before starting.
-- **Whether to relocate at all** (2026-11-13; planned as
-  [stage 19](../SPECS/STAGE-19.md)). The units may never leave
-  Cloud-Sandbox. That is decided once the commit tree is in good order;
-  until then [MAP.md](MAP.md#the-order-of-the-real-relocations) says how
-  it would be done, not that it will be.
+- **Deleting the originals** (2026-11-17, from moving day). Every unit
+  is a private repository and a submodule here, but its original paths
+  (`cloudflow/`, `scripts/`, `terraform/`, `models/` and the rest) are
+  still in Cloud-Sandbox. That is what is left of
+  [stage 22](../SPECS/STAGE-22.md), in
+  [MAP.md's order](MAP.md#the-order-of-the-real-relocations). Until it is
+  done, a copied file is changed by a patch here, never in the unit.
+- **Links that leave a unit** (2026-11-17, moving day's decision 5).
+  27 links in the units' own pages lead out of the unit, 25 of them to
+  [MAP.md](MAP.md). They resolve where the units are checked out under
+  `exportit/`; in a unit's own repository on GitHub they lead nowhere.
+  Left on purpose; rewrite them when a unit is first used apart from
+  Cloud-Sandbox.
+- **`sandbox-configs` moved whole** (2026-11-17, moving day's decision
+  4). [Stage 20](../SPECS/STAGE-20.md)'s split, templates and examples to
+  cloudflow, is still possible; the files that move will not bring their
+  history from `csis-sandbox-configs` into `cloudflow`.
+- **Releasing from a unit's own repository** (2026-11-17). Each unit's
+  `release` target still says "nothing to release from exportit/". How a
+  unit is released, now that it has a repository and a first tag, is not
+  decided.
+- **The working directory of moving day** (2026-11-17).
+  `/Volumes/MiniSSD/git/Work/Phase3/movingday-work`, beside this
+  repository, holds the fifteen clones the repositories were pushed
+  from, their test logs, `sandbox-provisioning`'s first extraction, and
+  what was moved aside from five old directories (environments and
+  caches). Nothing in it is needed; it goes when the operator says so.
 - **The stage 12 tasks of the `spack` role can go** (2026-11-14). Since
   [stage 12](../SPECS/COMPLETED/STAGE-12.md) the role removes the script's two
   settings (the install-tree padding and the Tcl modules) from the login
