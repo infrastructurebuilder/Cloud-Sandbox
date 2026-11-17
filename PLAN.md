@@ -6,9 +6,10 @@
 same day on "do moving day". The plan is
 [exportit/MOVINGDAY.md](exportit/MOVINGDAY.md), where the operator asked
 for it; its six first decisions are taken and recorded there. **M0 is
-done** on `feature/movingday-m0`: this repository made ready, nothing
-left it. **Next: M1, the pilot** (`csis-model-common`), asked first. No
-repository has been created. A last phase, M4, with four decisions of
+done** on `feature/movingday-m0`: this repository made ready. **M1, the
+pilot, is done** on `feature/movingday-m1`: `csis-model-common` exists,
+private, and `exportit/model-common` is a submodule. **Next: M2, the
+other fourteen**, asked first. A last phase, M4, with four decisions of
 its own, initialises the new repositories with Spec Kit and a
 constitution whose shared part is the same in each, on the collection's
 model.

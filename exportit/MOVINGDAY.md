@@ -2,11 +2,13 @@
 
 *Status:* planned 2026-11-17 at the operator's request. **Begun the same
 day on "do moving day":** the six decisions are under
-[Decisions taken](#decisions-taken), and **M0 is done** on
-`feature/movingday-m0`, where this repository was made ready and nothing
-left it. **Next is M1, the pilot**, which creates the first repository,
-`csis-model-common`, and is asked first. No repository has been created
-and nothing has been pushed.
+[Decisions taken](#decisions-taken); **M0 is done** on
+`feature/movingday-m0`, where this repository was made ready; and **M1,
+the pilot, is done** on `feature/movingday-m1`: `csis-model-common`
+exists, private, and `exportit/model-common` is a submodule. **Next is
+M2, the other fourteen**, asked first. One repository has been created
+and pushed to; nothing of Cloud-Sandbox itself has been pushed, and
+none of these branches is merged into `develop`.
 
 ## What was asked
 
@@ -313,6 +315,33 @@ M0 changes nothing outside this repository, and `just test` and
 The method below, once, for the smallest unit (11 files). Then a stop:
 you look at the repository on GitHub and at the submodule here before
 the other fourteen follow.
+
+**Done 2026-11-17, on `feature/movingday-m1`**, on the operator's "do the
+pilot":
+
+- The repository is
+  [infrastructurebuilder/csis-model-common](https://github.com/infrastructurebuilder/csis-model-common):
+  private, not a fork, holding `main`, `develop` and the tag `0.0.1`, all
+  at one commit, and nothing else. GitHub made `develop` its default
+  branch, as the collection's is.
+- Its history is three commits of the originals (2025-02-28 to
+  2025-08-20) and one that adds what exists only in the unit. It has no
+  patches.
+- Every gate held: no remote after the rewrite; the extracted tree equal
+  to the copy, file for file; the unit's own `just test` and
+  `just full-test` passing in its clone, alone, with nothing left
+  untracked; and, after the submodule was added, the same tree at
+  `exportit/model-common` as Cloud-Sandbox held there one commit before.
+- [.gitmodules](../.gitmodules) names it by a relative URL,
+  `../csis-model-common.git`, tracking `develop`;
+  [cloud-sandbox.map](cloud-sandbox.map) drops `.gitmodules` (M0's
+  item 2, done here).
+- Nothing was left behind in the old directory, so nothing was moved
+  aside. The clone the repository was pushed from is in
+  `movingday-work/model-common`, beside this repository, until the
+  operator says it can go.
+- The root `just test` passes with fourteen units as directories and one
+  as a submodule: the mixed state M2 goes through fourteen times.
 
 ### M2: the other fourteen
 
