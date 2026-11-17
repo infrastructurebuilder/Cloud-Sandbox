@@ -50,3 +50,7 @@
 	path = exportit/cloudflow
 	url = ../cloudflow.git
 	branch = develop
+[submodule "exportit/cloud-sandbox"]
+	path = exportit/cloud-sandbox
+	url = ../csis-cloud-sandbox.git
+	branch = develop
