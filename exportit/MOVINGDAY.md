@@ -8,8 +8,9 @@ up to date**. All fifteen units are private repositories on
 `infrastructurebuilder` and submodules here. **Left: M4**, Spec Kit,
 which waits for the collection's Spec Kit adoption to be merged and for
 its four decisions. The work is on `feature/movingday-plan`, `-m0`,
-`-m1` and `-m2`, each cut from the one before; none is merged into
-`develop`, and nothing of Cloud-Sandbox itself has been pushed.
+`-m1` and `-m2`, each cut from the one before; all four were squash-merged into
+`develop` on 2026-11-17, one commit each, and kept; nothing of
+Cloud-Sandbox itself has been pushed.
 
 ## What was asked
 
