@@ -35,7 +35,7 @@ The operator, 2026-11-17:
   the patches". Deleting the originals is stage 22's last step for each
   unit, and is not part of this plan.
 - Before any unit moves, **the export tool has to learn about
-  submodules**, or the acceptance bar fails for every moved unit.
+  submodules**, or the acceptance tests fail for every moved unit.
   That is phase M0.
 - **Spec Kit** in the new repositories, with a constitution whose shared
   part is the same everywhere, is a last phase, M4, after the move.
@@ -519,7 +519,7 @@ what Cloud-Sandbox held there one commit ago. The URL is relative
 (`../<repo>.git`), so it follows whatever Cloud-Sandbox's own `origin`
 is, over SSH or HTTPS.
 
-**The acceptance bar, then the commit.** The root `just test` takes a
+**The acceptance tests, then the commit.** The root `just test` takes a
 few minutes.
 
 ```sh
