@@ -81,3 +81,4 @@ new uv.lock
 new Justfile
 new .python-version
 new tests/
+new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)

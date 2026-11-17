@@ -19,3 +19,4 @@ new uv.lock
 new .python-version
 new schema/                # written by exportit/tools/configs_schema.py from cloudflow's code
 new tests/
+new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)

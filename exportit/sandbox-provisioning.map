@@ -86,3 +86,4 @@ new roles/jupyterhub/defaults/
 new roles/jupyterhub/tasks/
 new roles/jupyterhub/templates/
 new roles/jupyterhub/handlers/
+new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)

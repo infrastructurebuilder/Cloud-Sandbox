@@ -231,3 +231,103 @@ def test_covering_the_root_makes_every_file_count(repo: Path, capsys: pytest.Cap
     assert "not assigned to any unit: other/left.txt" in capsys.readouterr().err
     (repo / "exportit/plot.map").write_text(PLOT_MAP + "covers ./\ndrop other/left.txt\n")
     assert run(repo, "check") == 0
+
+
+# A unit kept as a submodule (exportit/MOVINGDAY.md): its files are in a
+# repository of its own, checked out where the copy was.
+
+
+@pytest.fixture
+def moved(repo: Path, tmp_path: Path) -> Path:
+    """The repository of ``repo``, with the unit ``lib`` moved out and kept as a submodule."""
+    run(repo, "copy")
+    run_git(repo, "add", "-A")
+    run_git(repo, "commit", "--quiet", "-m", "the copies")
+    unit = repo / "exportit/lib"
+    home = tmp_path / "lib-home"
+    unit.rename(home)
+    run_git(home, "init", "--quiet")
+    run_git(home, "add", "-A")
+    run_git(home, "commit", "--quiet", "-m", "the unit, in a repository of its own")
+    run_git(repo, "rm", "-r", "--quiet", "--cached", "exportit/lib")
+    # git refuses a submodule from a local path unless told that this one is meant.
+    local = ["-c", "protocol.file.allow=always"]
+    run_git(repo, *local, "submodule", "add", "--quiet", str(home), "exportit/lib")
+    run_git(repo, "commit", "--quiet", "-m", "lib is a submodule")
+    return repo
+
+
+def test_a_unit_kept_as_a_submodule_is_checked_like_a_directory(moved: Path) -> None:
+    assert export.is_submodule(moved, "lib")
+    assert not export.is_submodule(moved, "plot")
+    assert run(moved, "check") == 0
+
+
+def test_the_submodule_does_not_have_to_be_dropped_by_a_map(moved: Path) -> None:
+    # Everything under exportit/ is left out of what the maps must cover.
+    (moved / "exportit/plot.map").write_text(PLOT_MAP + "covers pkg/\n")
+    assert run(moved, "check") == 0
+
+
+def test_gitmodules_is_a_tracked_file_that_covering_the_root_must_assign(
+    moved: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (moved / "exportit/plot.map").write_text(PLOT_MAP + "covers ./\ndrop other/left.txt\n")
+    assert run(moved, "check") == 1
+    assert "not assigned to any unit: .gitmodules" in capsys.readouterr().err
+    (moved / "exportit/plot.map").write_text(PLOT_MAP + "covers ./\ndrop other/left.txt\ndrop .gitmodules\n")
+    assert run(moved, "check") == 0
+
+
+def test_an_edited_copy_in_a_submodule_fails(moved: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    (moved / "exportit/lib/docs/top.txt").write_text("edited in the unit's repository\n")
+    assert run(moved, "check") == 1
+    assert "docs/top.txt: content differs" in capsys.readouterr().err
+
+
+def test_a_file_added_in_a_submodule_must_be_declared_new(
+    moved: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (moved / "exportit/lib/stray.txt").write_text("who put this here\n")
+    assert run(moved, "check") == 1
+    assert "stray.txt: neither copied nor declared new" in capsys.readouterr().err
+    (moved / "exportit/lib.map").write_text(LIB_MAP + "new stray.txt\n")
+    assert run(moved, "check") == 0
+
+
+def test_a_declared_new_file_must_exist_in_a_submodule(
+    moved: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (moved / "exportit/lib/README.md").unlink()
+    assert run(moved, "check") == 1
+    assert "declared new but absent: README.md" in capsys.readouterr().err
+
+
+def test_a_changed_source_is_copied_into_the_submodule(
+    moved: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (moved / "pkg/a.py").write_text("print('changed')\n")
+    assert run(moved, "check") == 1
+    assert "src/pkg/a.py: content differs" in capsys.readouterr().err
+    assert run(moved, "copy", "lib") == 0
+    assert (moved / "exportit/lib/src/pkg/a.py").read_text() == "print('changed')\n"
+    assert run(moved, "check") == 0
+
+
+def test_a_file_ignored_inside_a_submodule_is_reported(
+    moved: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    run_git(moved / "exportit/lib", "rm", "--quiet", "--cached", "docs/top.txt")
+    (moved / "exportit/lib/.gitignore").write_text("top.txt\n")
+    (moved / "exportit/lib.map").write_text(LIB_MAP + "new .gitignore\n")
+    assert run(moved, "check") == 1
+    assert "docs/top.txt: ignored by .gitignore" in capsys.readouterr().err
+
+
+def test_a_submodule_that_is_not_checked_out_is_one_clear_problem(
+    moved: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    run_git(moved, "submodule", "deinit", "--quiet", "--force", "exportit/lib")
+    assert run(moved, "check") == 1
+    problems = [line for line in capsys.readouterr().err.splitlines() if line.startswith("PROBLEM")]
+    assert problems == ["PROBLEM lib: a submodule that is not checked out; run 'git submodule update --init'"]

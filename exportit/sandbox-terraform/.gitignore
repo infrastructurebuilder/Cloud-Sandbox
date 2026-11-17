@@ -1,0 +1,16 @@
+# What this repository's own build and tests leave behind. Nothing else is
+# ignored: a file that turns up here unasked should be seen.
+.DS_Store
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+dist/
+# OpenTofu itself (tools/install-tofu.sh), its providers and its lock.
+.tofu/
+.terraform/
+.terraform-plugins/
+.terraform.lock.hcl
+# State is never committed: it can hold secrets.
+*.tfstate
+*.tfstate.*

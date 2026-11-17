@@ -1,12 +1,12 @@
 # Moving day: each unit into a private repository, kept here as a submodule
 
-*Status:* planned 2026-11-17 on `feature/movingday-plan`, at the
-operator's request; the first tags corrected by the operator the same
-day (0.0.1 for the `model-*` and `sandbox-*` repositories), and phase
-M4 (Spec Kit) added on their question. Nothing is executed: no repository has been created,
-nothing has been pushed, and no directory has been changed. It is
-executed on "do moving day", one phase at a time, after each **YOUR
-DECISION** below has been asked, one at a time.
+*Status:* planned 2026-11-17 at the operator's request. **Begun the same
+day on "do moving day":** the six decisions are under
+[Decisions taken](#decisions-taken), and **M0 is done** on
+`feature/movingday-m0`, where this repository was made ready and nothing
+left it. **Next is M1, the pilot**, which creates the first repository,
+`csis-model-common`, and is asked first. No repository has been created
+and nothing has been pushed.
 
 ## What was asked
 
@@ -69,44 +69,42 @@ Order is the order of the work: the smallest first, as a pilot, then
 names another by repository yet, the order is for convenience, not
 forced.
 
-| # | Unit and path | Repository (default name) | Files | First tag |
+| # | Unit and path | Repository | Files | First tag |
 | ---: | --- | --- | ---: | --- |
-| 1 | [model-common](model-common/) | `model-common` | 11 | 0.0.1 |
+| 1 | [model-common](model-common/) | `csis-model-common` | 11 | 0.0.1 |
 | 2 | [cloudflow](cloudflow/) | `cloudflow` | 255 | 1.6.0b0 |
-| 3 | [model-adcirc-cora](model-adcirc-cora/) | `model-adcirc-cora` | 63 | 0.0.1 |
-| 4 | [model-eccofs](model-eccofs/) | `model-eccofs` | 18 | 0.0.1 |
-| 5 | [model-liveocean](model-liveocean/) | `model-liveocean` | 15 | 0.0.1 |
-| 6 | [model-necofs](model-necofs/) | `model-necofs` | 22 | 0.0.1 |
-| 7 | [model-nosofs](model-nosofs/) | `model-nosofs` | 14 | 0.0.1 |
-| 8 | [model-secofs](model-secofs/) | `model-secofs` | 21 | 0.0.1 |
-| 9 | [model-ucla-roms](model-ucla-roms/) | `model-ucla-roms` | 9 | 0.0.1 |
-| 10 | [model-ufscoastal](model-ufscoastal/) | `model-ufscoastal` | 22 | 0.0.1 |
-| 11 | [sandbox-configs](sandbox-configs/) | `sandbox-configs` | 141 | 0.0.1 |
-| 12 | [sandbox-provisioning](sandbox-provisioning/) | `sandbox-provisioning` | 101 | 0.0.1 |
-| 13 | [sandbox-terraform](sandbox-terraform/) | `sandbox-terraform` | 37 | 0.0.1 |
-| 14 | [sandbox-ops](sandbox-ops/) | `sandbox-ops` | 23 | 0.0.1 |
-| 15 | [cloud-sandbox](cloud-sandbox/) (the umbrella) | **`cloud-sandbox-umbrella`** | 91 | 0.1.0 |
+| 3 | [model-adcirc-cora](model-adcirc-cora/) | `csis-model-adcirc-cora` | 63 | 0.0.1 |
+| 4 | [model-eccofs](model-eccofs/) | `csis-model-eccofs` | 18 | 0.0.1 |
+| 5 | [model-liveocean](model-liveocean/) | `csis-model-liveocean` | 15 | 0.0.1 |
+| 6 | [model-necofs](model-necofs/) | `csis-model-necofs` | 22 | 0.0.1 |
+| 7 | [model-nosofs](model-nosofs/) | `csis-model-nosofs` | 14 | 0.0.1 |
+| 8 | [model-secofs](model-secofs/) | `csis-model-secofs` | 21 | 0.0.1 |
+| 9 | [model-ucla-roms](model-ucla-roms/) | `csis-model-ucla-roms` | 9 | 0.0.1 |
+| 10 | [model-ufscoastal](model-ufscoastal/) | `csis-model-ufscoastal` | 22 | 0.0.1 |
+| 11 | [sandbox-configs](sandbox-configs/) | `csis-sandbox-configs` | 141 | 0.0.1 |
+| 12 | [sandbox-provisioning](sandbox-provisioning/) | `csis-sandbox-provisioning` | 101 | 0.0.1 |
+| 13 | [sandbox-terraform](sandbox-terraform/) | `csis-sandbox-terraform` | 37 | 0.0.1 |
+| 14 | [sandbox-ops](sandbox-ops/) | `csis-sandbox-ops` | 23 | 0.0.1 |
+| 15 | [cloud-sandbox](cloud-sandbox/) (the umbrella) | `csis-cloud-sandbox` | 91 | 0.0.1 |
 
-"Files" is the number tracked in the copy today.
+"Files" is the number tracked in the copy when the plan was written; each
+has one more since M0, its `.gitignore`.
 
-**The first tags were set by the operator on 2026-11-17: 0.0.1 for every
-`model-*` and `sandbox-*` repository**, thirteen of them. Until then
-[units.toml](cloud-sandbox/units.toml) said 0.1.0 for all thirteen, and
-so do the `pyproject.toml` of `sandbox-provisioning`, `sandbox-terraform`
-and `sandbox-configs`; M0's item 6 brings them to 0.0.1, so that a tag
-names the version its repository declares. `cloudflow` keeps 1.6.0b0,
-the version its `pyproject.toml` has carried since stage 2. The umbrella
-has no version in `units.toml`, and the instruction does not name it
-(`cloud-sandbox` is neither `model-*` nor `sandbox-*`): 0.1.0 is
-proposed, and asked with decision 1, where its name is.
+**The names** are the operator's (decision 1, 2026-11-17): every
+repository is the unit's name with `csis-` before it, except `cloudflow`,
+which keeps its own. The umbrella is `csis-cloud-sandbox`; without the
+prefix it could not have been made at all, because GitHub's repository
+names do not distinguish upper and lower case and
+`infrastructurebuilder/Cloud-Sandbox` is this repository. The paths here
+do not change: `exportit/model-common` holds `csis-model-common`.
 
-**The umbrella cannot be called `cloud-sandbox`.** GitHub's repository
-names do not distinguish upper and lower case, and
-`infrastructurebuilder/Cloud-Sandbox` is this repository. Its path here
-stays `exportit/cloud-sandbox`; only the repository's name differs
-(decision 1). No other name is taken: on 2026-11-17 the organisation
-held `Cloud-Sandbox` and `ansible-collection-csis-spack`, and nothing
-else that these names would collide with.
+**The first tags** are the operator's too: 0.0.1 for every `model-*` and
+`sandbox-*` repository (2026-11-17, correcting this plan's 0.1.0) and
+for the umbrella (decision 1b). `cloudflow` keeps 1.6.0b0, the version
+its `pyproject.toml` has carried since stage 2. M0's item 6 brought
+[units.toml](cloud-sandbox/units.toml) and the three `pyproject.toml`
+that said 0.1.0 to 0.0.1, so that a tag names the version its
+repository declares.
 
 ## What stays in this repository
 
@@ -117,6 +115,24 @@ else that these names would collide with.
 | [tools/](tools/): `export.py`, `configs_schema.py` and their tests | Not one unit uses them: no unit's `Justfile` or test reaches outside its own directory (checked 2026-11-17). `export.py` reads the mapping files and the originals, which stay here. The other tests (`test_umbrella.py`, `test_model_units.py`, `test_configs_schema.py`) hold the units *to each other*, which can only be done where all of them are checked out side by side, and that place is this repository. Its own test already says so: "the export tool itself is how the copies are made; it is not relocated". Stage 20 would move the schema writer into cloudflow; that is its business, not moving day's |
 | [MAP.md](MAP.md), [REMINDERS.md](REMINDERS.md), this page, [.gitignore](.gitignore) | The records of this work |
 | The originals, `SPECS/`, `PLAN.md`, the root `Justfile` | Not part of any unit's copy |
+
+## Decisions taken
+
+Asked on 2026-11-17 at "do moving day", one at a time. The questions as
+they were put are under [Decisions](#decisions), below.
+
+| # | Decision | The operator's answer |
+| ---: | --- | --- |
+| 1 | The repositories' names | "everything gets the csis- prefix except for cloudflow": `cloudflow`, and `csis-<unit>` for the other fourteen, the umbrella being `csis-cloud-sandbox`. Not one of the options offered |
+| 1b | The umbrella's first tag | 0.0.1 |
+| 2 | History | With history (the default) |
+| 3 | Branches in the new repositories | git-flow, as here (the default) |
+| 4 | `sandbox-configs` | It moves whole (the default); stage 20's split stays possible later |
+| 5 | Links that leave a unit | Left as they are (the default) |
+| 6 | Who creates the repositories | I do, with `gh`, asking once before the pilot and once before the other fourteen (the default) |
+| | First tags | 0.0.1 for every `model-*` and `sandbox-*` repository (given before the plan was run) |
+
+Decisions 7 to 10 are not asked yet: they belong to M4.
 
 ## Decisions
 
@@ -229,9 +245,12 @@ Nothing is merged into `develop` or pushed in Cloud-Sandbox without it.
    throw-away repository with one unit as a directory and one as a
    submodule, checked, with a file added, changed and removed in each.
 
-2. **[cloud-sandbox.map](cloud-sandbox.map) drops `.gitmodules`.** It
+2. **[cloud-sandbox.map](cloud-sandbox.map) drops `.gitmodules`**: it
    `covers ./`, so the new file at the root would otherwise be "not
-   assigned to any unit".
+   assigned to any unit". **Moved to M1** when M0 was done: a `drop`
+   that matches no tracked file is itself a problem to the check, and
+   `.gitmodules` does not exist until the first submodule is added. The
+   line goes in with the pilot, in the same commit.
 
 3. **Each unit gets its own `.gitignore`**, declared `new` in its map.
    Today [exportit/.gitignore](.gitignore) and the root's cover them
@@ -267,6 +286,27 @@ Nothing is merged into `develop` or pushed in Cloud-Sandbox without it.
 
 M0 changes nothing outside this repository, and `just test` and
 `just full-test` pass with all fifteen units still plain directories.
+
+**Done 2026-11-17, on `feature/movingday-m0`:**
+
+- `export.py` asks a unit's own repository for its files when the unit
+  is a submodule, and reports a submodule that is not checked out as one
+  problem. Nine new tests build a throw-away repository with one unit a
+  submodule and one a directory (54 tests in all).
+- Every unit has its own `.gitignore`, declared `new` in its map: what
+  its build leaves behind, and nothing else, so that a stray file is
+  still seen. Not one tracked file matches its unit's.
+- The root `Justfile`: `init` checks the submodules out first;
+  `submodules-check` is part of `test`; `submodules-pushed` is there for
+  before a push. Both were tried against a scratch repository in each
+  state (checked out, a commit not yet recorded, recorded but unpushed,
+  pushed, not checked out) and said what they should.
+- `push.recurseSubmodules` is `check` in this clone. It is a setting of
+  the clone, not of the repository: a fresh clone has to set it again,
+  and `just submodules-pushed` does not depend on it.
+- The thirteen versions are 0.0.1: `units.toml`, three `pyproject.toml`
+  and their `uv.lock`, and the sample version in `sandbox-terraform`'s
+  template test.
 
 ### M1: the pilot, `model-common`
 
@@ -397,7 +437,8 @@ patches) and `cloudflow` (114 commits, 9 patches): both ended with the
 The boxes are what is run, on your local machine, for each unit; at
 "do moving day" I run them and read each result before the next, and
 stop at every gate. `UNIT` is the directory's name and `REPO` the
-repository's (the same, except for the umbrella). Every box sets its
+repository's (`csis-` and the unit's name, except `cloudflow`; boxes 5
+and 6 are at v2 since decision 1 changed the names). Every box sets its
 own variables. The working directory for the extractions is beside the
 repositories, not in `/tmp`, which the system prunes.
 
@@ -475,9 +516,9 @@ unit again.
 machine; it is asked first (decision 6).
 
 ```sh
-# moving day, one unit -- box 5 of 7 -- v1
+# moving day, one unit -- box 5 of 7 -- v2
 UNIT=model-common
-REPO=model-common
+REPO=csis-model-common
 VERSION=0.0.1
 WORK=/Volumes/MiniSSD/git/Work/Phase3/movingday-work
 GH_PAGER=cat gh repo create "infrastructurebuilder/$REPO" --private --description "Cloud Sandbox unit: $UNIT"
@@ -502,9 +543,9 @@ removed from Cloud-Sandbox's index; what is left in the directory
 (environments, caches) is moved aside, not deleted.
 
 ```sh
-# moving day, one unit -- box 6 of 7 -- v1
+# moving day, one unit -- box 6 of 7 -- v2
 UNIT=model-common
-REPO=model-common
+REPO=csis-model-common
 SANDBOX=/Volumes/MiniSSD/git/Work/Phase3/Cloud-Sandbox
 WORK=/Volumes/MiniSSD/git/Work/Phase3/movingday-work
 cd "$SANDBOX"

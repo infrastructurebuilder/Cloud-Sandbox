@@ -20,7 +20,7 @@
 
 [[unit]]
 name = "sandbox-terraform"
-version = "0.1.0"
+version = "0.0.1"
 kind = "terraform"
 step = 1
 relocate = 6
@@ -39,7 +39,7 @@ what = "the Ansible collection infrastructurebuilder.csis_spack: the modules tha
 
 [[unit]]
 name = "sandbox-provisioning"
-version = "0.1.0"
+version = "0.0.1"
 kind = "ansible"
 step = 2
 relocate = 5
@@ -57,7 +57,7 @@ what = "the workflow engine that starts compute nodes and runs the models, and t
 
 [[unit]]
 name = "model-common"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 2
@@ -66,7 +66,7 @@ what = "the module files and notes the model recipes share"
 
 [[unit]]
 name = "model-adcirc-cora"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -75,7 +75,7 @@ what = "ADCIRC for the CORA reanalysis"
 
 [[unit]]
 name = "model-eccofs"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -84,7 +84,7 @@ what = "ECCOFS (ROMS), from the NOSOFS code package"
 
 [[unit]]
 name = "model-liveocean"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -93,7 +93,7 @@ what = "LiveOcean (ROMS)"
 
 [[unit]]
 name = "model-necofs"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -102,7 +102,7 @@ what = "NECOFS (FVCOM)"
 
 [[unit]]
 name = "model-nosofs"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -111,7 +111,7 @@ what = "the NOS operational forecast systems (ROMS and FVCOM)"
 
 [[unit]]
 name = "model-secofs"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -120,7 +120,7 @@ what = "SECOFS (SCHISM)"
 
 [[unit]]
 name = "model-ucla-roms"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -129,7 +129,7 @@ what = "UCLA ROMS"
 
 [[unit]]
 name = "model-ufscoastal"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 4
 relocate = 3
@@ -138,7 +138,7 @@ what = "UFS Coastal"
 
 [[unit]]
 name = "sandbox-configs"
-version = "0.1.0"
+version = "0.0.1"
 kind = "data"
 step = 5
 relocate = 4
@@ -147,7 +147,7 @@ what = "the job and cluster descriptions cloudflow runs with, and their schema"
 
 [[unit]]
 name = "sandbox-ops"
-version = "0.1.0"
+version = "0.0.1"
 kind = "scripts"
 step = 6
 relocate = 7

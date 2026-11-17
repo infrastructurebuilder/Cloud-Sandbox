@@ -121,3 +121,4 @@ new Justfile
 new tests/
 new attic/CATALOGUE.tsv
 new attic/README.md
+new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)

@@ -35,3 +35,4 @@ new LICENSE      # a copy of the repository's LICENSE
 new Justfile
 new CATALOGUE.tsv
 new tests/
+new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)

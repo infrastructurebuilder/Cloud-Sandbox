@@ -2,15 +2,19 @@
 
 ## Moving day: the units into private repositories, as submodules (2026-11-17)
 
-*Status:* planned 2026-11-17 on `feature/movingday-plan`, at the
-operator's request; nothing executed, no repository created. The plan
-is [exportit/MOVINGDAY.md](exportit/MOVINGDAY.md), where the operator
-asked for it. It is executed on "do moving day", one phase at a time,
-after its first six decisions have been asked. The first tags are
-decided (2026-11-17): 0.0.1 for every `model-*` and `sandbox-*`
-repository. A last phase, with four decisions of its own, initialises
-the new repositories with Spec Kit and a constitution whose shared part
-is the same in each, on the collection's model.
+*Status:* planned 2026-11-17 at the operator's request, and begun the
+same day on "do moving day". The plan is
+[exportit/MOVINGDAY.md](exportit/MOVINGDAY.md), where the operator asked
+for it; its six first decisions are taken and recorded there. **M0 is
+done** on `feature/movingday-m0`: this repository made ready, nothing
+left it. **Next: M1, the pilot** (`csis-model-common`), asked first. No
+repository has been created. A last phase, M4, with four decisions of
+its own, initialises the new repositories with Spec Kit and a
+constitution whose shared part is the same in each, on the collection's
+model.
+
+Repositories are named `csis-<unit>`, except `cloudflow`; first tags are
+0.0.1, except cloudflow's 1.6.0b0.
 
 Each of the fifteen mapped units gets a private repository on
 `infrastructurebuilder` and comes back as a git submodule at the same

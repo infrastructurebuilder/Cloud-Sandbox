@@ -17,7 +17,7 @@ NEW_TEMPLATE = "init_template.ansible.tpl"
 # The two values the new template needs that main.tf does not pass yet.
 NEW_VALUES = {
     "provisioning_repo": "https://example.invalid/sandbox-provisioning.git",
-    "provisioning_version": "v0.1.0",
+    "provisioning_version": "0.0.1",
 }
 
 
