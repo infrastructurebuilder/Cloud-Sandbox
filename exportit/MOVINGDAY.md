@@ -2,8 +2,8 @@
 
 *Status:* planned 2026-11-17 on `feature/movingday-plan`, at the
 operator's request; the first tags corrected by the operator the same
-day (0.0.1 for the `model-*` and `sandbox-*` repositories). Nothing is
-executed: no repository has been created,
+day (0.0.1 for the `model-*` and `sandbox-*` repositories), and phase
+M4 (Spec Kit) added on their question. Nothing is executed: no repository has been created,
 nothing has been pushed, and no directory has been changed. It is
 executed on "do moving day", one phase at a time, after each **YOUR
 DECISION** below has been asked, one at a time.
@@ -37,6 +37,9 @@ The operator, 2026-11-17:
 - Before any unit moves, **the export tool has to learn about
   submodules**, or the acceptance bar fails for every moved unit.
   That is phase M0.
+- **Spec Kit** in the new repositories, with a constitution whose shared
+  part is the same everywhere, is a last phase, M4, after the move.
+  It was added at the operator's question on 2026-11-17.
 
 ## What this changes in the standing plan
 
@@ -117,7 +120,8 @@ else that these names would collide with.
 
 ## Decisions
 
-Asked one at a time at "do moving day", the default first.
+Asked one at a time, the default first: 1 to 6 at "do moving day", 7 to
+10 before M4.
 
 1. **YOUR DECISION (the repositories' names):** the unit's own name, and
    `cloud-sandbox-umbrella` for the umbrella (default); or every name
@@ -168,6 +172,36 @@ Asked one at a time at "do moving day", the default first.
    or you create the fifteen empty repositories and I push to them.
    Either way: never a fork, never under `ioos`, and the push goes only
    to a remote whose URL names `infrastructurebuilder`.
+
+Asked later, when M4 begins, because M0 to M3 do not depend on them:
+
+7. **YOUR DECISION (which repositories get Spec Kit):** the six where
+   future work will be designed: `cloudflow`, `sandbox-provisioning`,
+   `sandbox-terraform`, `sandbox-ops`, `sandbox-configs` and the umbrella
+   (default); or all fifteen; or the ones you name. The nine `model-*`
+   repositories hold 9 to 63 files of build recipes each, and Spec Kit
+   adds about thirty of its own; with the default each gets it when it
+   first has work that wants a spec.
+
+8. **YOUR DECISION (where the shared part of the constitution is
+   kept):** one source in this repository, under [tools/](tools/),
+   written into each repository by a `Justfile` target and held there by
+   a test that fails when a copy has drifted (default: it is where the
+   units are already held to each other); or each repository's
+   constitution amended on its own, with `/speckit-constitution`, and
+   kept alike by hand.
+
+9. **YOUR DECISION (the shared part's text):** taken from the
+   collection's constitution, the sections that are not about Spack
+   (default; M4's item 2 lists them), with the two additions that item
+   names; or written afresh.
+
+10. **YOUR DECISION (this repository itself):** Cloud-Sandbox keeps
+    `SPECS/` and `PLAN.md`, and work that spans units goes on as stages
+    here, until the open stages are done (default: existing decisions
+    stand); or Cloud-Sandbox adopts Spec Kit too, as the collection did,
+    with `SPECS/` and `PLAN.md` retired to an attic and the open stages
+    carried into specs.
 
 Already decided:
 
@@ -268,6 +302,90 @@ fourteen URLs into its `units.toml`.
 5. The units' `release` targets still say "nothing to release from
    exportit/". How a unit is released from its own repository is not
    decided here; a reminder is left.
+
+### M4: Spec Kit in the units' repositories
+
+Added 2026-11-17, on the operator's question whether each repository
+should be initialised with Spec Kit and a consistent constitution, for
+the work that follows. It comes after M3, as a phase of its own: M1 and
+M2 prove that each new repository is the copy, file for file, and
+scaffolding added in the same step would blur that proof.
+
+**The model is the collection.** `ansible-collection-csis-spack`
+adopted Spec Kit 1.2.3 on 2026-11-17, on its branch `feature/speckit`:
+`.specify/` (the constitution, the templates, the scripts), the
+`speckit-*` skills under `.claude/skills/`, a `CLAUDE.md` that points at
+the constitution, and `specs/`. Its constitution, 1.0.0, has already
+settled how Spec Kit lives with the operator's standing rules, and M4
+copies those answers and does not make new ones. When this was written
+that adoption was not yet committed there; **M4 does not begin until it
+is merged in the collection**, so that what is copied is what the
+operator accepted.
+
+1. **Initialise each chosen repository** (decision 7) with the same
+   Spec Kit version and the same options as the collection's
+   `.specify/init-options.json`, on a branch `feature/speckit` in that
+   repository.
+
+2. **The constitution, in two parts.**
+   - **The shared part**, the same words in every repository
+     (decisions 8 and 9). From the collection's: *Acceptance tests run
+     through the Justfile* (`just test` after every change, `just
+     full-test` before a spec is done); *The operator decides* (asked
+     first, recorded in the spec; commit locally; merge, push, release
+     only on the operator's word; no secret in the repository); the
+     development workflow (a spec for every change larger than a small
+     fix; **no `PLAN.md`**, the rule that plans go there being met by a
+     spec; **one git-flow branch per spec, `feature/<short-name>`,
+     squash-merged and kept, and Spec Kit's own numbered branches not
+     used**); the attic rule, where a repository has one; and
+     governance.
+   - **Two additions the collection did not need:**
+     - *A copied file is not changed here.* While its original is in
+       Cloud-Sandbox, a file that the unit's map copies is changed by a
+       patch in Cloud-Sandbox, and the unit receives it. A spec that
+       needs such a change says so, and the patch is part of its tasks.
+       Only what the map calls `new` is the repository's own to change.
+       The principle is dropped, by amendment, when stage 22 deletes the
+       unit's originals.
+     - *Nothing goes toward `ioos`:* no push, no pull request, no
+       remote, no fork.
+   - **The repository's own part:** two or three principles for what
+     that unit is, as the collection's first three are about Spack. I
+     draft each from what [MAP.md](MAP.md) records about the unit (for
+     `sandbox-provisioning`, for instance: a repeat run changes nothing;
+     every role is held to the script it translates), and each is put to
+     you before it is written.
+
+3. **The mapping files.** Each chosen unit's map gains `new` lines for
+   `.specify/`, `.claude/`, `CLAUDE.md` and `specs/`, or
+   `just export-check` reports them as "neither copied nor declared
+   new". `specs/` is declared when its first spec exists: git keeps no
+   empty directory, and the check fails for a `new` path that is absent.
+
+4. **What a unit ships must not carry the scaffolding.** `cloudflow`'s
+   wheel takes only `src/cloudflow`, but its source distribution takes
+   every tracked file unless told otherwise; its `pyproject.toml` gains
+   the exclusions, as the collection's `galaxy.yml` did. Each other
+   unit is looked at for the same.
+
+5. **The single source and its check** (with decision 8's default): the
+   shared text under `tools/`, a root target that writes it into every
+   initialised unit, and a test that compares. Amending the shared part
+   is then one change here, written out to the repositories, each
+   through its own branch.
+
+6. **Work that spans units** stays in this repository (decision 10): it
+   is the only place where the units are checked out side by side. The
+   umbrella's repository replaces it only at stage 22's last step.
+
+7. **Each repository's change** is committed on its `feature/speckit`,
+   finished and pushed on the operator's word; the submodule here moves
+   to it; the root `just test` and `just full-test` pass.
+
+What it does not solve: until a unit's originals are deleted, spec-driven
+work in that unit is limited to its own new files (its tests, its build,
+the Ansible roles), by the first addition above.
 
 ## The method, for one unit
 
@@ -455,6 +573,8 @@ repository, the `git archive` of the unit into it, one commit; the
 - Any use of the new repositories by one another: no unit installs
   another from its repository yet, and `sandbox-provisioning` goes on
   installing the collection from its public repository at a tag.
+- Carrying the open stages of `SPECS/` into specs, unless decision 10
+  says so.
 - Releases, continuous integration, and access settings in the new
   repositories. The organisation is on GitHub's free plan; as far as I
   know, branch protection is not available there for private
@@ -474,6 +594,10 @@ repository, the `git archive` of the unit into it, one commit; the
   originals untouched.
 - The root `just test` and `just full-test` pass, the fifteen extraction
   proofs among them.
+- After M4: each chosen repository initialised with Spec Kit; the shared
+  part of every constitution identical to its source, held by a test;
+  each repository's own principles accepted by the operator; the maps
+  declaring what was added.
 - Nothing pushed to Cloud-Sandbox's `origin` and nothing merged into
   `develop` except on the operator's word; nothing anywhere toward
   `ioos`.
