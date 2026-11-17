@@ -38,3 +38,15 @@
 	path = exportit/sandbox-ops
 	url = ../csis-sandbox-ops.git
 	branch = develop
+[submodule "exportit/sandbox-configs"]
+	path = exportit/sandbox-configs
+	url = ../csis-sandbox-configs.git
+	branch = develop
+[submodule "exportit/sandbox-terraform"]
+	path = exportit/sandbox-terraform
+	url = ../csis-sandbox-terraform.git
+	branch = develop
+[submodule "exportit/cloudflow"]
+	path = exportit/cloudflow
+	url = ../cloudflow.git
+	branch = develop
