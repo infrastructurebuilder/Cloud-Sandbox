@@ -54,3 +54,7 @@
 	path = exportit/cloud-sandbox
 	url = ../csis-cloud-sandbox.git
 	branch = develop
+[submodule "exportit/sandbox-provisioning"]
+	path = exportit/sandbox-provisioning
+	url = ../csis-sandbox-provisioning.git
+	branch = develop
