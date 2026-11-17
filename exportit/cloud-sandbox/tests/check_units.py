@@ -1,4 +1,4 @@
-"""Check that units.toml is consistent: names, versions, and the two orders.
+"""Check that units.toml is consistent: names, repositories, versions, and the two orders.
 
 Run with any Python 3.11 or later; it needs nothing but the standard library.
 """
@@ -11,12 +11,14 @@ import tomllib
 from pathlib import Path
 
 UMBRELLA = Path(__file__).resolve().parents[1]
-FIELDS = {"name", "version", "kind", "step", "relocate", "needs", "what"}
+FIELDS = {"name", "repository", "version", "kind", "step", "relocate", "needs", "what"}
 # A unit that already lives in a repository of its own, and is not copied
 # into exportit/, says so with external = true and has relocate = 0.
 OPTIONAL = {"external"}
 KINDS = {"python", "ansible", "terraform", "scripts", "data"}
 VERSION = re.compile(r"^\d+\.\d+\.\d+([ab]\d+)?$")
+# Every unit's repository is on infrastructurebuilder, and nowhere else.
+REPOSITORY = re.compile(r"^https://github\.com/infrastructurebuilder/[A-Za-z0-9._-]+$")
 
 
 def problems() -> list[str]:
@@ -27,6 +29,9 @@ def problems() -> list[str]:
     if len(names) != len(set(names)):
         found.append(f"a name is used twice: {sorted(n for n in names if names.count(n) > 1)}")
     by_name = {unit["name"]: unit for unit in units}
+    repositories = [unit.get("repository") for unit in units]
+    if len(repositories) != len(set(repositories)):
+        found.append("two units name the same repository")
     for unit in units:
         name = unit.get("name", "?")
         if set(unit) - OPTIONAL != FIELDS:
@@ -39,6 +44,8 @@ def problems() -> list[str]:
             found.append(f"{name}: external must be true, or left out")
         elif unit["relocate"] < 1:
             found.append(f"{name}: relocate must be 1 or more; only an external unit has 0")
+        if not REPOSITORY.match(unit["repository"]):
+            found.append(f"{name}: {unit['repository']!r} is not a repository on infrastructurebuilder")
         if not VERSION.match(unit["version"]):
             found.append(f"{name}: {unit['version']!r} is not a version")
         if unit["kind"] not in KINDS:

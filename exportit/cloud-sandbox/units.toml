@@ -2,10 +2,13 @@
 # into one. This file is the umbrella's reason to exist (stage 8, decision 3):
 # a sandbox is these versions, applied in this order.
 #
-#   name      the unit, and the name of its repository
+#   name      the unit
+#   repository  where the unit lives. Every repository is on
+#             infrastructurebuilder; a unit's is named csis-<name>, except
+#             cloudflow's and the collection's, which carry their own names.
 #   version   the version that goes into a sandbox. Where the unit has a
 #             pyproject.toml it is that file's version; for the others it is
-#             the first tag to cut when the unit is relocated.
+#             the first tag, cut when the unit was given its repository.
 #   kind      what it is: python, ansible, terraform, scripts, data
 #   step      when it is applied while building a sandbox (README.md)
 #   relocate  the order of the real relocations: a unit goes after every unit
@@ -14,12 +17,16 @@
 #   external  true for a unit that already lives in a repository of its own
 #             and is not copied into exportit/; its relocate is 0
 #
-# Nothing has left Cloud-Sandbox. The one external unit was begun in its own
-# repository and was never part of it.
+# Since moving day (2026-11-17) every unit is a private repository of its own,
+# and Cloud-Sandbox holds each as a git submodule under exportit/, beside the
+# originals they were copied from, which are still there. The one external
+# unit was begun in its own repository and was never part of Cloud-Sandbox.
+# The umbrella itself, this directory, is csis-cloud-sandbox.
 # tests/check_units.py holds this file consistent.
 
 [[unit]]
 name = "sandbox-terraform"
+repository = "https://github.com/infrastructurebuilder/csis-sandbox-terraform"
 version = "0.0.1"
 kind = "terraform"
 step = 1
@@ -29,6 +36,7 @@ what = "the network, EFS volume, IAM role, placement group and head node"
 
 [[unit]]
 name = "ansible-collection-csis-spack"
+repository = "https://github.com/infrastructurebuilder/ansible-collection-csis-spack"
 version = "0.3.1"
 kind = "ansible"
 step = 2
@@ -39,6 +47,7 @@ what = "the Ansible collection infrastructurebuilder.csis_spack: the modules tha
 
 [[unit]]
 name = "sandbox-provisioning"
+repository = "https://github.com/infrastructurebuilder/csis-sandbox-provisioning"
 version = "0.0.1"
 kind = "ansible"
 step = 2
@@ -48,6 +57,7 @@ what = "the head node's software (site.yml), the compute-node image, users, Jupy
 
 [[unit]]
 name = "cloudflow"
+repository = "https://github.com/infrastructurebuilder/cloudflow"
 version = "1.6.0b0"
 kind = "python"
 step = 3
@@ -57,6 +67,7 @@ what = "the workflow engine that starts compute nodes and runs the models, and t
 
 [[unit]]
 name = "model-common"
+repository = "https://github.com/infrastructurebuilder/csis-model-common"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -66,6 +77,7 @@ what = "the module files and notes the model recipes share"
 
 [[unit]]
 name = "model-adcirc-cora"
+repository = "https://github.com/infrastructurebuilder/csis-model-adcirc-cora"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -75,6 +87,7 @@ what = "ADCIRC for the CORA reanalysis"
 
 [[unit]]
 name = "model-eccofs"
+repository = "https://github.com/infrastructurebuilder/csis-model-eccofs"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -84,6 +97,7 @@ what = "ECCOFS (ROMS), from the NOSOFS code package"
 
 [[unit]]
 name = "model-liveocean"
+repository = "https://github.com/infrastructurebuilder/csis-model-liveocean"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -93,6 +107,7 @@ what = "LiveOcean (ROMS)"
 
 [[unit]]
 name = "model-necofs"
+repository = "https://github.com/infrastructurebuilder/csis-model-necofs"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -102,6 +117,7 @@ what = "NECOFS (FVCOM)"
 
 [[unit]]
 name = "model-nosofs"
+repository = "https://github.com/infrastructurebuilder/csis-model-nosofs"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -111,6 +127,7 @@ what = "the NOS operational forecast systems (ROMS and FVCOM)"
 
 [[unit]]
 name = "model-secofs"
+repository = "https://github.com/infrastructurebuilder/csis-model-secofs"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -120,6 +137,7 @@ what = "SECOFS (SCHISM)"
 
 [[unit]]
 name = "model-ucla-roms"
+repository = "https://github.com/infrastructurebuilder/csis-model-ucla-roms"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -129,6 +147,7 @@ what = "UCLA ROMS"
 
 [[unit]]
 name = "model-ufscoastal"
+repository = "https://github.com/infrastructurebuilder/csis-model-ufscoastal"
 version = "0.0.1"
 kind = "scripts"
 step = 4
@@ -138,6 +157,7 @@ what = "UFS Coastal"
 
 [[unit]]
 name = "sandbox-configs"
+repository = "https://github.com/infrastructurebuilder/csis-sandbox-configs"
 version = "0.0.1"
 kind = "data"
 step = 5
@@ -147,6 +167,7 @@ what = "the job and cluster descriptions cloudflow runs with, and their schema"
 
 [[unit]]
 name = "sandbox-ops"
+repository = "https://github.com/infrastructurebuilder/csis-sandbox-ops"
 version = "0.0.1"
 kind = "scripts"
 step = 6
