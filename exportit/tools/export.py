@@ -19,6 +19,11 @@ and are applied, in name order, after the copy. The check therefore compares
 each file in the unit with "its source, plus the patches", so a copy can never
 differ from its origin in a way that is not written down.
 
+A unit's directory is either part of this repository or a repository of its
+own, kept here as a git submodule at the same path (``exportit/MOVINGDAY.md``).
+The mapping file, the patches and the checks are the same for both; only where
+the list of the unit's files is asked differs.
+
 Commands::
 
     export.py copy [UNIT ...]   write or refresh the copies
@@ -42,6 +47,8 @@ from pathlib import Path
 
 EXPORT_DIR = "exportit"
 COMMENT = "#"
+SUBMODULE_MODE = "160000"
+"""How git's index marks an entry that is another repository's commit."""
 
 
 class MapError(Exception):
@@ -235,11 +242,43 @@ def is_declared_new(path: str, declared: list[str]) -> bool:
     return any(path == item or (item.endswith("/") and path.startswith(item)) for item in declared)
 
 
+def is_submodule(root: Path, name: str) -> bool:
+    """Say whether this repository records ``exportit/<name>`` as a submodule."""
+    done = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--stage", "--", f"{EXPORT_DIR}/{name}"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return done.stdout.startswith(SUBMODULE_MODE + " ")
+
+
+def unit_files(root: Path, name: str) -> set[str] | None:
+    """List the files a unit holds, tracked or not yet, by their path inside it.
+
+    A unit is either a directory of this repository or a repository of its
+    own, kept here as a submodule. This repository's git knows a submodule as
+    one entry and nothing of what is in it, so a submodule is asked itself.
+    None means the submodule is recorded here and not checked out.
+    """
+    unit_dir = root / EXPORT_DIR / name
+    if (unit_dir / ".git").exists():
+        present = list_files(unit_dir, "--cached", "--others", "--exclude-standard")
+        return {path for path in present if (unit_dir / path).is_file()}
+    if is_submodule(root, name):
+        return None
+    prefix = f"{EXPORT_DIR}/{name}/"
+    present = list_files(root, "--cached", "--others", "--exclude-standard", "--", prefix)
+    return {path[len(prefix) :] for path in present if (root / path).is_file()}
+
+
 def check_unit(root: Path, unit: Unit, files: dict[str, str]) -> list[str]:
     """Compare one unit's directory with what its mapping file promises."""
     problems: list[str] = []
     unit_dir = root / EXPORT_DIR / unit.name
-    prefix = f"{EXPORT_DIR}/{unit.name}/"
+    here = unit_files(root, unit.name)
+    if here is None:
+        return [f"{unit.name}: a submodule that is not checked out; run 'git submodule update --init'"]
     with tempfile.TemporaryDirectory() as scratch:
         expected_dir = Path(scratch)
         build_expected(root, unit.name, files, expected_dir, patched=True)
@@ -247,8 +286,6 @@ def check_unit(root: Path, unit: Unit, files: dict[str, str]) -> list[str]:
             verdict = same_file(expected_dir / dest, unit_dir / dest)
             if verdict:
                 problems.append(f"{unit.name}: {dest}: {verdict} (source {files[dest]})")
-    present = list_files(root, "--cached", "--others", "--exclude-standard", "--", prefix)
-    here = {path[len(prefix) :] for path in present if (root / path).is_file()}
     extra = sorted(path for path in here if path not in files and not is_declared_new(path, unit.new))
     problems.extend(f"{unit.name}: {path}: neither copied nor declared new" for path in extra)
     for item in unit.new:
@@ -256,7 +293,9 @@ def check_unit(root: Path, unit: Unit, files: dict[str, str]) -> list[str]:
             problems.append(f"{unit.name}: declared new but absent: {item}")
     hidden = sorted(dest for dest in files if dest not in here and (unit_dir / dest).is_file())
     problems.extend(
-        f"{unit.name}: {dest}: ignored by .gitignore; add it with 'git add -f'" for dest in hidden
+        f"{unit.name}: {dest}: ignored by .gitignore; add it with 'git add -f', in the unit's own "
+        f"repository when the unit is a submodule"
+        for dest in hidden
     )
     return problems
 

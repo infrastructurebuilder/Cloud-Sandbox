@@ -1,0 +1,3 @@
+# What this repository's own build and tests leave behind. Nothing else is
+# ignored: a file that turns up here unasked should be seen.
+.DS_Store

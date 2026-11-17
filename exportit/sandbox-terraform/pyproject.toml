@@ -1,6 +1,6 @@
 [project]
 name = "sandbox-terraform"
-version = "0.1.0"
+version = "0.0.1"
 description = "Terraform for a Cloud Sandbox: network, EFS volume, IAM role and head node"
 requires-python = ">=3.12"
 dependencies = []

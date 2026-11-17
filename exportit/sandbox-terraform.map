@@ -25,3 +25,4 @@ new tests/
 new tools/                     # fetches the pinned OpenTofu into .tofu/
 new versions.tofu              # the OpenTofu version both modules require (read by OpenTofu only)
 new remote-state/versions.tofu
+new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)
