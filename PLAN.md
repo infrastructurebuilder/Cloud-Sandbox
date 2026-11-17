@@ -1,5 +1,21 @@
 # Plans
 
+## Moving day: the units into private repositories, as submodules (2026-11-17)
+
+*Status:* planned 2026-11-17 on `feature/movingday-plan`, at the
+operator's request; nothing executed, no repository created. The plan
+is [exportit/MOVINGDAY.md](exportit/MOVINGDAY.md), where the operator
+asked for it. It is executed on "do moving day", one phase at a time,
+after its seven decisions have been asked.
+
+Each of the fifteen mapped units gets a private repository on
+`infrastructurebuilder` and comes back as a git submodule at the same
+path under `exportit/`. The mapping files, `cloudflow.patches/` and
+`tools/` stay here, and so do the originals. It decides stage 19 ahead
+of its place in the order below (relocate all), and does stage 22's
+work except the deletion of the original paths; the page lists every
+place where it departs from the standing plan.
+
 ## The remaining work, in order (2026-11-14)
 
 *Status:* planned 2026-11-14, every item on its own. Done: items 1 and 2
