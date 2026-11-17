@@ -1,8 +1,15 @@
 # Stage 19: relocate, or not
 
-*Status:* planned 2026-11-14 on `feature/remaining-plans`; nothing
-executed. It is a decision: at "do 19" it is asked, and the answer is
-recorded. Tenth in the order of the remaining work
+*Status:* **decided 2026-11-17, ahead of its turn: relocate all.** The
+operator asked for every unit to be given a private repository on
+`infrastructurebuilder` and kept as a submodule
+([moving day](../exportit/MOVINGDAY.md)), which was done the same day.
+What "What has to be true before it is asked" required was not all true
+then: the live proof (stage 15) had not run, for want of an AWS account,
+and stages 16 to 18 and the collection's stage 5 were not done. That is
+the operator's choice, recorded here. Planned 2026-11-14 on
+`feature/remaining-plans`, as a decision: at "do 19" it was to be asked,
+and the answer recorded. Tenth in the order of the remaining work
 ([PLAN.md](../PLAN.md)), after everything that makes the commit tree
 good, as the operator said on 2026-11-13: "We might never relocate this.
 We're figuring that out after we've got a good commit tree." Stages 20
@@ -47,6 +54,14 @@ to 22 follow only if the answer is to relocate.
 | Some | stage 22 for the named units; 20 only if `sandbox-configs` is among them; 21 only if `sandbox-terraform` and `sandbox-provisioning` both are |
 | None, move into place | a new set of stages, planned then |
 | None, keep | the parity watch ends; PLAN.md and REMINDERS.md say so |
+
+## The answer
+
+**Relocate all**, given on 2026-11-17 by asking for moving day rather
+than at "do 19". Of "what the answer changes": stages 20 and 21 stay
+planned, 20 now after `sandbox-configs` moved whole; stage 22's
+repositories exist, and what is left of it is the deletion of the
+original paths.
 
 ## Acceptance
 

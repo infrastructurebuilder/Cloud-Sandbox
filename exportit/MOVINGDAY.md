@@ -1,14 +1,15 @@
 # Moving day: each unit into a private repository, kept here as a submodule
 
-*Status:* planned 2026-11-17 at the operator's request. **Begun the same
-day on "do moving day":** the six decisions are under
-[Decisions taken](#decisions-taken); **M0 is done** on
-`feature/movingday-m0`, where this repository was made ready; and **M1,
-the pilot, is done** on `feature/movingday-m1`: `csis-model-common`
-exists, private, and `exportit/model-common` is a submodule. **Next is
-M2, the other fourteen**, asked first. One repository has been created
-and pushed to; nothing of Cloud-Sandbox itself has been pushed, and
-none of these branches is merged into `develop`.
+*Status:* planned 2026-11-17 at the operator's request, and **carried out
+the same day through M3**: the decisions are under
+[Decisions taken](#decisions-taken); M0 made this repository ready; M1
+moved the pilot; M2 moved the other fourteen; **M3 brought the records
+up to date**. All fifteen units are private repositories on
+`infrastructurebuilder` and submodules here. **Left: M4**, Spec Kit,
+which waits for the collection's Spec Kit adoption to be merged and for
+its four decisions. The work is on `feature/movingday-plan`, `-m0`,
+`-m1` and `-m2`, each cut from the one before; none is merged into
+`develop`, and nothing of Cloud-Sandbox itself has been pushed.
 
 ## What was asked
 
@@ -349,6 +350,68 @@ The same method, in the table's order, each unit one commit on the
 branch. `cloud-sandbox` goes last, after M3's item 1 has put the other
 fourteen URLs into its `units.toml`.
 
+**Done 2026-11-17, on `feature/movingday-m2`**, on the operator's "do the
+other fourteen". All fifteen units are now private repositories on
+`infrastructurebuilder`, none a fork, each holding `main`, `develop` and
+its first tag at one commit and nothing else, and each a submodule here
+at the path its copy had.
+
+| Repository | History carried | First tag |
+| --- | --- | --- |
+| `csis-model-common` (the pilot) | 3 commits | 0.0.1 |
+| `cloudflow` | 114 commits, then its 9 patches as 9 commits | 1.6.0b0 |
+| `csis-model-adcirc-cora` | 4 | 0.0.1 |
+| `csis-model-eccofs` | 7 | 0.0.1 |
+| `csis-model-liveocean` | 5 | 0.0.1 |
+| `csis-model-necofs` | 4 | 0.0.1 |
+| `csis-model-nosofs` | 6 | 0.0.1 |
+| `csis-model-secofs` | 8 | 0.0.1 |
+| `csis-model-ucla-roms` | 2 | 0.0.1 |
+| `csis-model-ufscoastal` | 2 | 0.0.1 |
+| `csis-sandbox-configs` | 4 | 0.0.1 |
+| `csis-sandbox-provisioning` | 19 | 0.0.1 |
+| `csis-sandbox-terraform` | 44 | 0.0.1 |
+| `csis-sandbox-ops` | 14 | 0.0.1 |
+| `csis-cloud-sandbox` (the umbrella) | 62 | 0.0.1 |
+
+Each has one more commit on top, which adds what exists only in the
+unit.
+
+- **Every gate held for fourteen of them at the first attempt**, and for
+  `sandbox-provisioning` at the second (below): no remote after the
+  rewrite; the tree equal to the copy; the unit's own `just test` and
+  `just full-test` passing alone with nothing left untracked; private and
+  not a fork; only the three names pushed; the submodule at the pushed
+  commit, holding the tree the copy held.
+- **Found: `sandbox-provisioning`'s container test could not run in a
+  repository of its own.** It copies the unit into the container and
+  commits it there, to fetch it as the first boot would. The copy took
+  the unit's `.git` along, and the commit then found nothing to commit
+  and failed. As a submodule it would have carried a pointer to a
+  directory the container does not have. The unit's full test, alone in
+  its extracted clone, is the gate that stopped on it, before anything
+  was pushed. The copy now leaves `.git` behind
+  (`tests/container/converge.sh`); the unit was extracted again and
+  passed, the container applied twice and checked. The first extraction
+  is kept in `movingday-work/sandbox-provisioning.first-attempt`.
+- **The commits here are by batch, not one for each unit** as M2 said:
+  the eight models with `sandbox-ops`; `sandbox-configs`,
+  `sandbox-terraform` and `cloudflow`; the umbrella; and
+  `sandbox-provisioning`. The units were tested and pushed in groups
+  while the long tests of others ran.
+- **M3's item 1 was done here**, because the umbrella had to be extracted
+  with it: [units.toml](cloud-sandbox/units.toml) names every unit's
+  repository, its test holds the field, and a test in `tools/` holds
+  each submodule's URL in [.gitmodules](../.gitmodules) to the repository
+  the manifest names.
+- **Moved aside, not deleted:** what `git rm` left in five directories
+  (environments and caches of `sandbox-configs`, `sandbox-terraform`,
+  `cloudflow`, `cloud-sandbox` and `sandbox-provisioning`) is in
+  `movingday-work/<unit>.leftovers`, with the fifteen clones the
+  repositories were pushed from and their test logs. All of it can go
+  when the operator says so.
+- The root `just test` passes with all fifteen as submodules.
+
 ### M3: records
 
 1. [units.toml](cloud-sandbox/units.toml) gains each unit's repository
@@ -371,6 +434,28 @@ fourteen URLs into its `units.toml`.
 5. The units' `release` targets still say "nothing to release from
    exportit/". How a unit is released from its own repository is not
    decided here; a reminder is left.
+
+**Done 2026-11-17, on `feature/movingday-m2`**, on the operator's "do
+the records":
+
+1. [units.toml](cloud-sandbox/units.toml): done in M2, before the
+   umbrella was extracted.
+2. [MAP.md](MAP.md): the introduction, the state *relocated* in the
+   Units table, a paragraph on submodules under "How a copy is made and
+   checked", the method (what was done at each step, and that step 6 was
+   not), and the order (what is left of each step: the deletion). The
+   units' own sections are left as the record of how each was made.
+3. [SPECS/TODO.md](../SPECS/TODO.md): the standing decision replaced,
+   the table and "Landed" brought up to date;
+   [stage 19](../SPECS/STAGE-19.md) decided, with the conditions it set
+   that were not met, as the operator's choice;
+   [stage 22](../SPECS/STAGE-22.md) left with the deletion.
+   [REMINDERS.md](REMINDERS.md): "whether to relocate at all" closed;
+   new items for the deletion, the links, the configs, releasing, and
+   this working directory.
+4. [PLAN.md](../PLAN.md): this plan's status, and the order of the
+   remaining work.
+5. The release reminder is in REMINDERS.md.
 
 ### M4: Spec Kit in the units' repositories
 

@@ -1,7 +1,16 @@
 # Stage 22: the real relocations
 
-*Status:* planned 2026-11-14 on `feature/remaining-plans`; nothing
-executed. Only if stage 19 relocates. Last in the order of the remaining
+*Status:* **half done by moving day, 2026-11-17.** Steps 1 to 3 of
+"each step" were carried out for every unit, in another order than the
+one below, because nothing was deleted: each unit is a private
+repository on `infrastructurebuilder` (`csis-<unit>`, `cloudflow` under
+its own name), pushed with its history and first tag, and kept in
+Cloud-Sandbox as a submodule at its old path under `exportit/`
+([MOVINGDAY.md](../exportit/MOVINGDAY.md)). Its two decisions were asked
+there: names as above, private for all; git-flow in each. **What is left
+is item 4 of each step: deleting the unit's original paths**, in the
+order of the table, with what that breaks. Planned 2026-11-14 on
+`feature/remaining-plans`; stage 19 decided to relocate on 2026-11-17. Last in the order of the remaining
 work ([PLAN.md](../PLAN.md)). It is executed one step at a time, each on
 "do 22.<n>", after that step's **YOUR DECISION**s, and nothing is ever
 pushed to `ioos`.

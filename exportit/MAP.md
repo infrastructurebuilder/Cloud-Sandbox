@@ -1,13 +1,20 @@
 # Relocation map
 
-This directory holds copies of the parts of Cloud-Sandbox that could
-live in repositories of their own. Nothing here has been moved: the
-original paths are untouched, and no other repository has been
-created. Whether anything is relocated at all is not decided: the
-operator will decide once the commit tree is in good order
-(2026-11-13). What follows says how it would be done, not that it
-will be. This page says, for each unit, where its files come from,
-where the copy is, and how the real relocation would be done.
+This directory holds the parts of Cloud-Sandbox that can live in
+repositories of their own, and since **moving day, 2026-11-17**, each of
+them does: every unit below is a private repository on
+`infrastructurebuilder`, and is kept here as a git submodule at the path
+its copy had ([MOVINGDAY.md](MOVINGDAY.md) is the plan and its record).
+The original paths are untouched: `cloudflow/`, `scripts/`, `terraform/`,
+`models/` and the rest are still in this repository, and each unit is
+still held to them by its mapping file. Deleting the originals is the
+step that has not been taken. This page says, for each unit, where its
+files come from, where the unit is, and what is left to do.
+
+Much of what follows was written before moving day and says how a
+relocation *would* be done; the three sections that describe the method,
+the state and the order have been brought up to date, and the units' own
+sections are left as the record of how each was made.
 
 The reasons behind the split are in
 [SPECS/ANALYSIS.md](../SPECS/ANALYSIS.md); the work is
@@ -16,21 +23,23 @@ staged in [SPECS/TODO.md](../SPECS/TODO.md).
 ## Units
 
 "State" is one of: *planned* (assigned, nothing copied), *copied*
-(the copy exists and is checked against its source), *translated*
+(the unit's files are checked against their sources), *translated*
 (rewritten in another form, with the originals carried beside it and
-tests that hold the two together), *relocated* (never used here:
-nothing leaves this repository).
+tests that hold the two together), *relocated* (a private repository of
+its own on `infrastructurebuilder`, kept here as a submodule; the
+originals stay). Every unit is relocated since 2026-11-17, and still
+copied or translated as before: the check goes on.
 
 | Unit | Copy | Source paths | Stage | State |
 | --- | --- | --- | ---: | --- |
-| `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` (plotting included since 2026-11-13); root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../SPECS/COMPLETED/STAGE-2.md) | copied 2026-11-12 |
-| cloudflow's documentation | [cloudflow/docs/sphinx/](cloudflow/docs/sphinx/) | `docs/source/` and the files that built it | [8](../SPECS/COMPLETED/STAGE-8.md) | copied 2026-11-12 |
-| `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../SPECS/COMPLETED/STAGE-3.md) | translated 2026-11-12 |
-| `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../SPECS/COMPLETED/STAGE-4.md) | copied 2026-11-12 |
-| `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../SPECS/COMPLETED/STAGE-5.md) | copied 2026-11-12 |
-| `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../SPECS/COMPLETED/STAGE-6.md) | copied 2026-11-12 |
-| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 15 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 14 operator tools and the Spack mirror's public key (16 until stage 11 took `spack-pubkey.sh`) | [7](../SPECS/COMPLETED/STAGE-7.md) | copied 2026-11-12 |
-| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../SPECS/COMPLETED/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13 |
+| `cloudflow` | [cloudflow/](cloudflow/) | `cloudflow/` (plotting included since 2026-11-13); root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, `LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md` | [2](../SPECS/COMPLETED/STAGE-2.md) | copied 2026-11-12; relocated 2026-11-17 as `cloudflow` |
+| cloudflow's documentation | [cloudflow/docs/sphinx/](cloudflow/docs/sphinx/) | `docs/source/` and the files that built it | [8](../SPECS/COMPLETED/STAGE-8.md) | copied 2026-11-12; relocated with cloudflow |
+| `sandbox-provisioning` | [sandbox-provisioning/](sandbox-provisioning/) | `scripts/setup-instance.sh`, `funcs-setup-instance.sh`, `environment-vars.sh`, `create_image.*`, four `scripts/system/` files they install | [3](../SPECS/COMPLETED/STAGE-3.md) | translated 2026-11-12; relocated 2026-11-17 as `csis-sandbox-provisioning` |
+| `sandbox-terraform` | [sandbox-terraform/](sandbox-terraform/) | `terraform/` | [4](../SPECS/COMPLETED/STAGE-4.md) | copied 2026-11-12; relocated 2026-11-17 as `csis-sandbox-terraform` |
+| `model-<name>`, eight of them, and `model-common` | [model-adcirc-cora/](model-adcirc-cora/) and the others in [the model units](#the-model-units) | `models/`, `patches/` | [5](../SPECS/COMPLETED/STAGE-5.md) | copied 2026-11-12; relocated 2026-11-17 as `csis-model-<name>` and `csis-model-common` |
+| `sandbox-configs` | [sandbox-configs/](sandbox-configs/) | `job.configs/`, `cluster.configs/` | [6](../SPECS/COMPLETED/STAGE-6.md) | copied 2026-11-12; relocated 2026-11-17 as `csis-sandbox-configs`, whole |
+| `sandbox-ops` | [sandbox-ops/](sandbox-ops/) | the 15 files of `scripts/` and `misc/` still in use that `sandbox-provisioning` does not take: 14 operator tools and the Spack mirror's public key (16 until stage 11 took `spack-pubkey.sh`) | [7](../SPECS/COMPLETED/STAGE-7.md) | copied 2026-11-12; relocated 2026-11-17 as `csis-sandbox-ops` |
+| `cloud-sandbox` (umbrella) | [cloud-sandbox/](cloud-sandbox/) | `README.md`, `DEPLOYMENT.md`, `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `images/sandbox-stack.png`, `TODO`, `.github/`, `LICENSE`, `.gitignore`; the attic: the superseded and dead files of `scripts/` and `misc/` | [8](../SPECS/COMPLETED/STAGE-8.md) | copied 2026-11-12; attic since 2026-11-13; relocated 2026-11-17 as `csis-cloud-sandbox` |
 | not relocated | none | the built HTML under `docs/` (rebuilt from `docs/source/`), `docs/save/`; this work's own `SPECS/`, `PLAN.md`, `Justfile` | [8](../SPECS/COMPLETED/STAGE-8.md) | dropped 2026-11-12, each with its reason in a mapping file |
 
 Every tracked top-level path of the repository appears in one row.
@@ -65,32 +74,56 @@ repository root:
 So a change to an original that is not copied again fails the bar, and
 so does an edit made directly to a copy.
 
+Since moving day a unit's directory is a submodule, and nothing of this
+changes: the mapping files and the patches are here, `just export`
+writes into the submodule's working directory, and the check reads the
+unit's files from the unit's own repository. What is new is where the
+result is committed: in the unit's repository, after which this
+repository records the unit's new commit (`git add exportit/<unit>`).
+`just submodules-check`, part of `just test`, fails when a unit is not
+checked out; `just submodules-pushed` fails when this repository records
+a commit that is not yet on the unit's remote.
+
 Some originals are tracked although `.gitignore` excludes them (the
 notebooks). Their copies have to be added with `git add -f`; the check
 says so when one is missing from the index.
 
 ## How a unit would really be relocated
 
-The same steps for every unit. None of them has been carried out for
-real; steps 2 and 3 are what `just export-prove` rehearses.
+**Carried out for all fifteen units on 2026-11-17, except step 6.** The
+exact commands, with the gate after each, are the seven boxes of
+[MOVINGDAY.md](MOVINGDAY.md#the-method-for-one-unit). What was planned
+here, and what was done:
 
 1. Create an empty repository for the unit, under the owner that will
    maintain it. Never under `ioos`, and never as a fork of
-   `ioos/Cloud-Sandbox`.
+   `ioos/Cloud-Sandbox`. **Done:** private, on `infrastructurebuilder`,
+   named `csis-<unit>` (`cloudflow` under its own name).
 2. Make a throw-away clone of this repository and rewrite it with
    `git filter-repo`, driven by the unit's directives, so that only
    the unit's paths remain and they sit at their new places. The
    unit's history comes with it. `filter-repo` rewrites the clone it
    runs in and removes that clone's `origin`, which is the safeguard
    against pushing rewritten history back to where it came from.
-3. Check that no remote is left.
+   **Done.**
+3. Check that no remote is left. **Done, as a gate.**
 4. Apply the unit's patches, one commit each, and add the files that
    exist only in the copy (README, build file, `Justfile`, tests) as a
-   further commit.
+   further commit. **Done;** the result was compared with the copy,
+   file for file, before anything was pushed.
 5. Add the new repository as the clone's only remote and push.
+   **Done:** `main`, `develop` and the first tag, by name; the rewritten
+   copies of this repository's other branches and tags stayed behind.
 6. In Cloud-Sandbox, on a feature branch, delete the relocated paths
-   and leave a pointer to the new repository.
+   and leave a pointer to the new repository. **Not done, on purpose.**
+   The original paths are all still here. What replaced the *copy*,
+   under `exportit/`, is a submodule; what will replace the *originals*
+   is still [stage 22](../SPECS/STAGE-22.md)'s to do.
 7. The units that depend on it refer to it by version from then on.
+   **Not yet:** no unit installs another from its repository.
+   `units.toml` names each repository and its version.
+
+The original sketch of the commands, kept for the record:
 
 ```sh
 # From the Cloud-Sandbox checkout:
@@ -1352,6 +1385,13 @@ this file's copy check covers it.
 
 ## The order of the real relocations
 
+**Where this stands since moving day (2026-11-17):** every unit below has
+its repository, so the first half of every step is done, in an order
+that did not have to be this one, because nothing was deleted and no
+unit names another by repository yet. What is left of each step is its
+last column: deleting the unit's original paths from Cloud-Sandbox, with
+what that breaks. That order still matters, and is the order below.
+
 A unit moves after every unit it names by version, so that it can name a
 version that exists. `units.toml` holds this order; the steps below
 follow it. Each is the method under
@@ -1374,7 +1414,7 @@ The machinery of this work does not move: `exportit/`, `SPECS/`,
 `PLAN.md` and the root `Justfile` are deleted in step 8, and the
 umbrella gets its own `Justfile`.
 
-Not one of these steps has been carried out. `just full-test` rehearses
-the extraction of every unit (steps 1–7 and the umbrella's files) on
-throw-away clones; nothing has been pushed anywhere for a relocation,
-and no repository has been created.
+The repositories exist and are pushed (2026-11-17); not one original
+path has been deleted. `just full-test` goes on rehearsing the extraction
+of every unit on throw-away clones, which now proves that a unit's
+repository could be made again from the originals and the mapping.
