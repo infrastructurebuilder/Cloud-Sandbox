@@ -61,6 +61,13 @@ directory was `INPROGRESS/`.)
 The order of the work is in [PLAN.md](../PLAN.md), with the collection's
 stages 4 and 5 among these.
 
+Beside the stages: [moving day](../exportit/MOVINGDAY.md), planned
+2026-11-17 at the operator's request. It gives each unit a private
+repository and keeps it here as a submodule, which decides stage 19
+ahead of its turn and leaves stage 22 only the deletion of the original
+paths. Until it is executed, the standing decision "nothing leaves this
+repository" above still describes what is true.
+
 ## Landed
 
 All eight stages, squash-merged into `develop` on 2026-11-12, one commit
