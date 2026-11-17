@@ -1,7 +1,9 @@
 # Moving day: each unit into a private repository, kept here as a submodule
 
 *Status:* planned 2026-11-17 on `feature/movingday-plan`, at the
-operator's request. Nothing is executed: no repository has been created,
+operator's request; the first tags corrected by the operator the same
+day (0.0.1 for the `model-*` and `sandbox-*` repositories). Nothing is
+executed: no repository has been created,
 nothing has been pushed, and no directory has been changed. It is
 executed on "do moving day", one phase at a time, after each **YOUR
 DECISION** below has been asked, one at a time.
@@ -66,25 +68,34 @@ forced.
 
 | # | Unit and path | Repository (default name) | Files | First tag |
 | ---: | --- | --- | ---: | --- |
-| 1 | [model-common](model-common/) | `model-common` | 11 | 0.1.0 |
+| 1 | [model-common](model-common/) | `model-common` | 11 | 0.0.1 |
 | 2 | [cloudflow](cloudflow/) | `cloudflow` | 255 | 1.6.0b0 |
-| 3 | [model-adcirc-cora](model-adcirc-cora/) | `model-adcirc-cora` | 63 | 0.1.0 |
-| 4 | [model-eccofs](model-eccofs/) | `model-eccofs` | 18 | 0.1.0 |
-| 5 | [model-liveocean](model-liveocean/) | `model-liveocean` | 15 | 0.1.0 |
-| 6 | [model-necofs](model-necofs/) | `model-necofs` | 22 | 0.1.0 |
-| 7 | [model-nosofs](model-nosofs/) | `model-nosofs` | 14 | 0.1.0 |
-| 8 | [model-secofs](model-secofs/) | `model-secofs` | 21 | 0.1.0 |
-| 9 | [model-ucla-roms](model-ucla-roms/) | `model-ucla-roms` | 9 | 0.1.0 |
-| 10 | [model-ufscoastal](model-ufscoastal/) | `model-ufscoastal` | 22 | 0.1.0 |
-| 11 | [sandbox-configs](sandbox-configs/) | `sandbox-configs` | 141 | 0.1.0 |
-| 12 | [sandbox-provisioning](sandbox-provisioning/) | `sandbox-provisioning` | 101 | 0.1.0 |
-| 13 | [sandbox-terraform](sandbox-terraform/) | `sandbox-terraform` | 37 | 0.1.0 |
-| 14 | [sandbox-ops](sandbox-ops/) | `sandbox-ops` | 23 | 0.1.0 |
+| 3 | [model-adcirc-cora](model-adcirc-cora/) | `model-adcirc-cora` | 63 | 0.0.1 |
+| 4 | [model-eccofs](model-eccofs/) | `model-eccofs` | 18 | 0.0.1 |
+| 5 | [model-liveocean](model-liveocean/) | `model-liveocean` | 15 | 0.0.1 |
+| 6 | [model-necofs](model-necofs/) | `model-necofs` | 22 | 0.0.1 |
+| 7 | [model-nosofs](model-nosofs/) | `model-nosofs` | 14 | 0.0.1 |
+| 8 | [model-secofs](model-secofs/) | `model-secofs` | 21 | 0.0.1 |
+| 9 | [model-ucla-roms](model-ucla-roms/) | `model-ucla-roms` | 9 | 0.0.1 |
+| 10 | [model-ufscoastal](model-ufscoastal/) | `model-ufscoastal` | 22 | 0.0.1 |
+| 11 | [sandbox-configs](sandbox-configs/) | `sandbox-configs` | 141 | 0.0.1 |
+| 12 | [sandbox-provisioning](sandbox-provisioning/) | `sandbox-provisioning` | 101 | 0.0.1 |
+| 13 | [sandbox-terraform](sandbox-terraform/) | `sandbox-terraform` | 37 | 0.0.1 |
+| 14 | [sandbox-ops](sandbox-ops/) | `sandbox-ops` | 23 | 0.0.1 |
 | 15 | [cloud-sandbox](cloud-sandbox/) (the umbrella) | **`cloud-sandbox-umbrella`** | 91 | 0.1.0 |
 
-"Files" is the number tracked in the copy today. The versions are
-[units.toml](cloud-sandbox/units.toml)'s; the umbrella has none there,
-and 0.1.0 is proposed.
+"Files" is the number tracked in the copy today.
+
+**The first tags were set by the operator on 2026-11-17: 0.0.1 for every
+`model-*` and `sandbox-*` repository**, thirteen of them. Until then
+[units.toml](cloud-sandbox/units.toml) said 0.1.0 for all thirteen, and
+so do the `pyproject.toml` of `sandbox-provisioning`, `sandbox-terraform`
+and `sandbox-configs`; M0's item 6 brings them to 0.0.1, so that a tag
+names the version its repository declares. `cloudflow` keeps 1.6.0b0,
+the version its `pyproject.toml` has carried since stage 2. The umbrella
+has no version in `units.toml`, and the instruction does not name it
+(`cloud-sandbox` is neither `model-*` nor `sandbox-*`): 0.1.0 is
+proposed, and asked with decision 1, where its name is.
 
 **The umbrella cannot be called `cloud-sandbox`.** GitHub's repository
 names do not distinguish upper and lower case, and
@@ -116,6 +127,8 @@ Asked one at a time at "do moving day", the default first.
    `units.toml` says a unit's name is its repository's name, so with
    anything but the default it gains a `repository` field (it gains the
    URL either way, in M3).
+   Asked with it: **the umbrella's first tag**, 0.1.0 (default), or
+   0.0.1 like the thirteen.
 
 2. **YOUR DECISION (history):** each repository starts with the unit's
    history, extracted from this one with `git filter-repo`, as
@@ -156,10 +169,13 @@ Asked one at a time at "do moving day", the default first.
    Either way: never a fork, never under `ioos`, and the push goes only
    to a remote whose URL names `infrastructurebuilder`.
 
-7. **YOUR DECISION (first tags):** each repository is tagged with the
-   version in the table, the bare number as the collection's tags are
-   (default: stage 22's step 3); or no tags until a unit is first
-   released.
+Already decided:
+
+- **First tags** (the operator, 2026-11-17): every `model-*` and
+  `sandbox-*` repository is first tagged 0.0.1, not the 0.1.0 this plan
+  first proposed. The tag is the bare number, as the collection's tags
+  are. `cloudflow` is tagged 1.6.0b0 and the umbrella as decision 1
+  settles, unless you say otherwise then.
 
 ## Phases
 
@@ -206,6 +222,15 @@ Nothing is merged into `develop` or pushed in Cloud-Sandbox without it.
    check`, so that git itself refuses to push Cloud-Sandbox while a
    recorded submodule commit is unpushed.
 
+6. **The thirteen units' version becomes 0.0.1** (the operator's first
+   tag): in [units.toml](cloud-sandbox/units.toml); in the
+   `pyproject.toml` and `uv.lock` of `sandbox-provisioning`,
+   `sandbox-terraform` and `sandbox-configs`, which
+   [tools/tests/test_umbrella.py](tools/tests/test_umbrella.py) holds
+   to it; and wherever a test or a page of those units states 0.1.0 as
+   the unit's own version. The collection's 0.1.0, named in
+   [MAP.md](MAP.md) as history, is not one of these and stays.
+
 M0 changes nothing outside this repository, and `just test` and
 `just full-test` pass with all fifteen units still plain directories.
 
@@ -223,7 +248,8 @@ fourteen URLs into its `units.toml`.
 
 ### M3: records
 
-1. [units.toml](cloud-sandbox/units.toml) gains each unit's repository;
+1. [units.toml](cloud-sandbox/units.toml) gains each unit's repository
+   (its versions were set in M0);
    its header no longer says "nothing has left Cloud-Sandbox";
    `tests/check_units.py` holds the new field. This is a change inside
    the umbrella unit, made before the umbrella is extracted.
@@ -334,7 +360,7 @@ machine; it is asked first (decision 6).
 # moving day, one unit -- box 5 of 7 -- v1
 UNIT=model-common
 REPO=model-common
-VERSION=0.1.0
+VERSION=0.0.1
 WORK=/Volumes/MiniSSD/git/Work/Phase3/movingday-work
 GH_PAGER=cat gh repo create "infrastructurebuilder/$REPO" --private --description "Cloud Sandbox unit: $UNIT"
 cd "$WORK/$UNIT"

@@ -6,7 +6,8 @@
 operator's request; nothing executed, no repository created. The plan
 is [exportit/MOVINGDAY.md](exportit/MOVINGDAY.md), where the operator
 asked for it. It is executed on "do moving day", one phase at a time,
-after its seven decisions have been asked.
+after its six decisions have been asked. The first tags are decided
+(2026-11-17): 0.0.1 for every `model-*` and `sandbox-*` repository.
 
 Each of the fifteen mapped units gets a private repository on
 `infrastructurebuilder` and comes back as a git submodule at the same
