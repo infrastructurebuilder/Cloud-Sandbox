@@ -93,8 +93,12 @@ echo "== putting the playbooks in a git repository inside the container"
 in_container mkdir -p /srv/provisioning
 # ustar: no extended attributes from the host. Extracted as root's own files,
 # or git refuses to work in a directory that someone else owns.
-tar -C "$unit" --format ustar --exclude=.venv --exclude=.collections --exclude=.pytest_cache \
-    --exclude=.ruff_cache --exclude=__pycache__ -cf - . |
+# The unit's own .git stays behind: what is tested is the files as they are
+# now, committed or not, in a repository made for the test. With it, the commit
+# below finds nothing to commit (a repository of its own) or a pointer to a
+# directory that is not in the container (a submodule).
+tar -C "$unit" --format ustar --exclude=./.git --exclude=.venv --exclude=.collections \
+    --exclude=.pytest_cache --exclude=.ruff_cache --exclude=__pycache__ -cf - . |
     docker exec --interactive "$container" tar -C /srv/provisioning --no-same-owner -xf -
 in_container bash -c '
     set -e
