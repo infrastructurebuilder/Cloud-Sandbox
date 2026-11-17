@@ -453,7 +453,9 @@ the records":
    [stage 22](../SPECS/STAGE-22.md) left with the deletion.
    [REMINDERS.md](REMINDERS.md): "whether to relocate at all" closed;
    new items for the deletion, the links, the configs, releasing, and
-   this working directory.
+   this working directory. The last was closed the same day, when the
+   directory was deleted on the operator's word, after each of its
+   fifteen clones was found fully pushed.
 4. [PLAN.md](../PLAN.md): this plan's status, and the order of the
    remaining work.
 5. The release reminder is in REMINDERS.md.

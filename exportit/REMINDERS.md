@@ -41,12 +41,6 @@ aside and why, and where the details are.
   `release` target still says "nothing to release from exportit/". How a
   unit is released, now that it has a repository and a first tag, is not
   decided.
-- **The working directory of moving day** (2026-11-17).
-  `/Volumes/MiniSSD/git/Work/Phase3/movingday-work`, beside this
-  repository, holds the fifteen clones the repositories were pushed
-  from, their test logs, `sandbox-provisioning`'s first extraction, and
-  what was moved aside from five old directories (environments and
-  caches). Nothing in it is needed; it goes when the operator says so.
 - **The stage 12 tasks of the `spack` role can go** (2026-11-14). Since
   [stage 12](../SPECS/COMPLETED/STAGE-12.md) the role removes the script's two
   settings (the install-tree padding and the Tcl modules) from the login
