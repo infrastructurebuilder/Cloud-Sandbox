@@ -111,6 +111,7 @@ copy scripts/upgrade-mpi.sh                                      attic/dead/scri
 # Not relocated: the records and the entry point of this reconstruction,
 # which go when the work is done.
 drop SPECS/
+drop .gitmodules   # names the units kept as submodules under exportit/ (MOVINGDAY.md)
 drop PLAN.md
 drop Justfile
 

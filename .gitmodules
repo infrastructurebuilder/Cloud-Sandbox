@@ -1,0 +1,4 @@
+[submodule "exportit/model-common"]
+	path = exportit/model-common
+	url = ../csis-model-common.git
+	branch = develop
