@@ -8,8 +8,10 @@ same day on "do moving day". The plan is
 for it; its six first decisions are taken and recorded there. **M0 to
 M3 are done**, on `feature/movingday-m0`, `-m1` and `-m2`: all fifteen
 units are private repositories on `infrastructurebuilder` and
-submodules under `exportit/`, and the records say so. **Left: M4**, Spec
-Kit, after the collection's adoption is merged. The four branches were squash-merged into
+submodules under `exportit/`, and the records say so. **M4 is done**
+(2026-11-18) on `feature/movingday-m4` and on `feature/speckit` in each
+of the fifteen units: Spec Kit and a constitution with a shared part in
+every unit, not yet merged or pushed. The four branches were squash-merged into
 `develop` on 2026-11-17 and kept; Cloud-Sandbox itself is not pushed. A last phase, M4, with four decisions of
 its own, initialises the new repositories with Spec Kit and a
 constitution whose shared part is the same in each, on the collection's

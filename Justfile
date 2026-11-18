@@ -35,7 +35,7 @@ submodules-init:
 build: (each "build")
 
 # The acceptance tests: the units are checked out, the copies match their sources; lint, type-check and fast tests pass everywhere.
-test: submodules-check export-check (each "test")
+test: submodules-check export-check constitution-check (each "test")
 
 # Everything in test, plus the slow tests and the extraction proof for each copied unit.
 full-test: export-check (each "full-test") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs") (export-prove "sandbox-ops") (export-prove "cloud-sandbox")
@@ -85,6 +85,14 @@ submodules-pushed:
     done <<<"$recorded"
     [ "$bad" = 0 ] || exit 1
     echo "submodules: every recorded commit is on its remote"
+
+# Write the shared part of every unit's constitution, and its CLAUDE.md, from exportit/tools/constitution/ (or only the units named).
+constitution *units:
+    uv run --project exportit/tools python exportit/tools/constitution.py write {{ units }}
+
+# Fail when a unit's shared constitution or CLAUDE.md differs from its source here.
+constitution-check:
+    uv run --project exportit/tools python exportit/tools/constitution.py check
 
 # Print the git filter-repo directives that would extract a unit with its history.
 export-filter name:

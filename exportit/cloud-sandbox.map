@@ -123,3 +123,6 @@ new tests/
 new attic/CATALOGUE.tsv
 new attic/README.md
 new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)
+new .specify/     # Spec Kit 1.2.3 and the constitution (MOVINGDAY.md, M4)
+new .claude/      # Spec Kit's skills
+new CLAUDE.md     # written by `just constitution`
