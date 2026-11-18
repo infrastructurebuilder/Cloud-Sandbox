@@ -1,16 +1,11 @@
 # Moving day: each unit into a private repository, kept here as a submodule
 
 *Status:* planned 2026-11-17 at the operator's request, and **carried out
-the same day through M3**: the decisions are under
-[Decisions taken](#decisions-taken); M0 made this repository ready; M1
-moved the pilot; M2 moved the other fourteen; **M3 brought the records
-up to date**. All fifteen units are private repositories on
-`infrastructurebuilder` and submodules here. **Left: M4**, Spec Kit,
-which waits for the collection's Spec Kit adoption to be merged and for
-its four decisions. The work is on `feature/movingday-plan`, `-m0`,
-`-m1` and `-m2`, each cut from the one before; all four were squash-merged into
-`develop` on 2026-11-17, one commit each, and kept; nothing of
-Cloud-Sandbox itself has been pushed.
+through M4**: M0 to M3 on 2026-11-17, merged into `develop` and pushed;
+**M4, Spec Kit in all fifteen units, done on 2026-11-18** on
+`feature/movingday-m4` here and on `feature/speckit` in each unit,
+committed locally and not yet merged or pushed. The decisions are under
+[Decisions taken](#decisions-taken) and under M4.
 
 ## What was asked
 
@@ -543,6 +538,49 @@ operator accepted.
 What it does not solve: until a unit's originals are deleted, spec-driven
 work in that unit is limited to its own new files (its tests, its build,
 the Ansible roles), by the first addition above.
+
+**Decisions taken, 2026-11-18,** asked one at a time at "do M4":
+
+| # | Decision | The operator's answer |
+| ---: | --- | --- |
+| 7 | Which repositories get Spec Kit | **All fifteen**, not the six the plan proposed |
+| 8 | Where the shared part is kept | One source here, written out, with a drift check (the default) |
+| 9 | The shared part's text | From the collection's constitution (the default) |
+| 10 | Cloud-Sandbox itself | Keeps `SPECS/` and `PLAN.md` for now (the default) |
+| | Each repository's own principles | Accepted as drafted, without changes |
+
+**Done 2026-11-18, on `feature/movingday-m4`** here and on
+`feature/speckit` in each of the fifteen units:
+
+- **Spec Kit 1.2.3 in every unit**, its 29 files taken from the
+  collection's `develop` as they were installed there (the collection had
+  changed none of them since), with the same options; git-flow
+  initialised in each unit's checkout (squash and keep on, push off).
+- **The shared part**, [constitution/shared.md](tools/constitution/shared.md),
+  four principles (S1 acceptance tests through the Justfile, S2 the
+  operator decides, S3 a copied file is changed in Cloud-Sandbox, S4
+  nothing toward `ioos`), the development workflow and governance, at
+  version 1.0.0; and one shared [CLAUDE.md](tools/constitution/CLAUDE.md).
+  [tools/constitution.py](tools/constitution.py) writes both into every
+  unit (`just constitution`) and checks them (`just constitution-check`,
+  part of `just test`); 12 tests.
+- **Each unit's own part**: two or three principles and its technical
+  constraints, drawn from MAP.md and from what its tests already hold;
+  the nine model repositories share one text with the model's name.
+- **The maps** declare `.specify/`, `.claude/` and `CLAUDE.md` as new in
+  every unit. `specs/` is declared when a unit's first spec exists.
+- **cloudflow's source distribution** leaves the planning material out,
+  and a slow test holds it to that. No other unit ships an archive.
+- **Found:** the script harness of `sandbox-ops` and the nine model units
+  counts every shell script in the unit, and failed on Spec Kit's six.
+  They are Spec Kit's tooling, not the unit's, and are now left out of
+  it, with `.claude/`.
+- Each unit's `.gitignore` leaves out `.claude/settings.local.json`.
+- The root `just test` passes.
+
+**Not done, waiting for the operator's word:** finishing `feature/speckit`
+into `develop` in each unit, pushing the units, and then merging and
+pushing this branch, in that order (the units first).
 
 ## The method, for one unit
 
