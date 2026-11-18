@@ -1383,6 +1383,51 @@ this file's copy check covers it.
   `sandbox-provisioning` needing it; a test in `tools` holds the pinned
   tag to its version there.
 
+## Syncing from the original
+
+Added by [stage 23](../SPECS/STAGE-23.md), 2026-11-18, so that the
+original repository's later changes can still reach the units once
+their originals are deleted from Cloud-Sandbox.
+
+- **Each unit has a baseline**, in
+  [units.toml](cloud-sandbox/units.toml): the commit of the original
+  its copied files are, with its patches. All fifteen began at
+  `ca0604a`. `just export-baselines` checks every unit against the
+  original as it was at its own baseline, read from this repository's
+  history, or from a clone given as `source=`.
+- **The export tool reads the originals from elsewhere** when told:
+  `--source <clone>` (a clean checkout of the original) and
+  `--at <commit>`, for every command. The mapping files and the patches
+  are always read here. `local` directives name this repository's own
+  files (`SPECS/`, `PLAN.md`, the `Justfile`, `.gitmodules`): dropped
+  here, and a problem if an original ever has one.
+- **`just export-sync <unit> <clone> <branch>`** carries the original's
+  commits since the unit's baseline into the unit's repository. The
+  clone is filtered with the unit's directives, as the unit's first
+  extraction was; that gives the unit's existing history the same
+  commit IDs, so only the new upstream commits are new to it, and they
+  are merged onto `feature/<branch>` from the unit's `develop`, with
+  their authors and dates. The baseline in `units.toml` then moves.
+  Nothing is pushed.
+
+What the maps decide, and what they leave:
+
+| The original's change | What a sync does |
+| --- | --- |
+| A copied file changed | carried, with its commit |
+| A new file inside a directory a unit copies whole | carried |
+| A new file that no map claims | stops: "not assigned to any unit"; a map line decides where it goes |
+| A file a map names, deleted | stops: the map line "matches no tracked file"; the map is changed |
+| A change to a patched file that the patch survives | carried, the correction kept |
+| A change to a patched file that the patch does not survive | stops on the merge's conflict, the unit left as it was; the patch is written again here |
+| A changed original that a unit translates (`sandbox-provisioning`) | carried, and reported: its parity tests say where the translation no longer holds |
+| A file only this repository may have (`local`) | stops |
+
+`just sync-rehearse`, part of `just full-test`, runs one sync of each
+kind against throw-away clones of the real units: on 2026-11-18 all
+seven did as the table says, with the carried commits keeping their
+author.
+
 ## The order of the real relocations
 
 **Where this stands since moving day (2026-11-17):** every unit below has

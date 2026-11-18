@@ -9,10 +9,11 @@ Cloud-Sandbox as a submodule at its old path under `exportit/`
 ([MOVINGDAY.md](../exportit/MOVINGDAY.md)). Its two decisions were asked
 there: names as above, private for all; git-flow in each. **What is left
 is item 4 of each step: deleting the unit's original paths**, in the
-order of the table, with what that breaks. **The deletion waits for
-[stage 23](STAGE-23.md)** (planned 2026-11-18), so that changes to the
+order of the table, with what that breaks. **The deletion waited for
+[stage 23](STAGE-23.md)** (executed 2026-11-18), so that changes to the
 original repository can still reach the units once their originals are
-gone. Planned 2026-11-14 on
+gone: `just export-sync` carries them, and `just export-baselines` holds
+every unit to its baseline without the originals here. Planned 2026-11-14 on
 `feature/remaining-plans`; stage 19 decided to relocate on 2026-11-17. Last in the order of the remaining
 work ([PLAN.md](../PLAN.md)). It is executed one step at a time, each on
 "do 22.<n>", after that step's **YOUR DECISION**s, and nothing is ever
