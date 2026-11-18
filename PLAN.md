@@ -55,7 +55,8 @@ are not in it.
 | 10 | [19](SPECS/STAGE-19.md) | Relocate all, some, or none (a decision). **Decided 2026-11-17 by moving day: all** | 1 to 9, as "a good commit tree" (not all met: the operator's choice) | done |
 | 11 | [20](SPECS/STAGE-20.md) | `sandbox-configs` split by owner | 19 relocates it | medium |
 | 12 | [21](SPECS/STAGE-21.md) | The first boot runs the playbooks (`main.tf`'s two values) | 19 relocates both units; put into use at 22, step 6 | small |
-| 13 | [22](SPECS/STAGE-22.md) | The real relocations, eight steps in MAP.md's order. **The repositories made by moving day**; left: deleting the original paths | 19, 20, 21 | medium |
+| 13 | [23](SPECS/STAGE-23.md) | Syncing from the original after its paths are deleted: `export.py --source`, a baseline per unit, `export.py sync`, and a rehearsal | moving day (done) | medium |
+| 14 | [22](SPECS/STAGE-22.md) | The real relocations, eight steps in MAP.md's order. **The repositories made by moving day**; left: deleting the original paths | 19, 20, 21, and 23 before the deletion | medium |
 
 Standing beside all of them: the parity watch on `main` (the next
 section), which, while it lasts, comes before any of these whenever

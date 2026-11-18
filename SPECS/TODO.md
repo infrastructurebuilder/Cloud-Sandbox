@@ -62,6 +62,7 @@ directory was `INPROGRESS/`.)
 | [20](STAGE-20.md) | `sandbox-configs` split by owner | Planned 2026-11-14; still possible, after `sandbox-configs` moved whole |
 | [21](STAGE-21.md) | The first boot runs the playbooks | Planned 2026-11-14 |
 | [22](STAGE-22.md) | The real relocations | The repositories made by moving day (2026-11-17); left: deleting the original paths |
+| [23](STAGE-23.md) | Syncing from the original after its paths are deleted | Planned 2026-11-18; before 22's deletion |
 
 The order of the work is in [PLAN.md](../PLAN.md), with the collection's
 stages 4 and 5 among these.
