@@ -11,6 +11,9 @@ directive::
     local  <source>           a file of this repository's own work, never of the
                               original: dropped here, and a problem if a given
                               original (``--source``) ever has it
+    owned                     the unit owns its copied files: their originals are
+                              deleted here (stage 22), so its copies are no longer
+                              checked against them, only its lineage is
 
 A path that ends in ``/`` stands for everything beneath it; as a destination,
 ``./`` is the root of the unit. When several
@@ -39,6 +42,8 @@ Commands::
     export.py check --baselines   verify every unit against its own baseline (units.toml)
     export.py filter UNIT         print directives for ``git filter-repo``
     export.py prove UNIT          run the extraction on a throw-away clone
+    export.py lineage [UNIT ...]  the original at each unit's baseline, filtered with
+                                  its directives, is a commit of the unit's history
     export.py sync UNIT --source PATH --branch NAME
                                   carry the original's commits since the unit's
                                   baseline into the unit's repository, on a branch
@@ -105,6 +110,8 @@ class Unit:
     covers: list[str] = field(default_factory=list[str])
     rules: list[Rule] = field(default_factory=list[Rule])
     new: list[str] = field(default_factory=list[str])
+    owned: bool = False
+    """Its originals are deleted here: it owns its copied files (stage 22, decision 5)."""
 
 
 @dataclass
@@ -166,6 +173,8 @@ def parse_map(path: Path) -> Unit:
             unit.rules.append(Rule(unit.name, args[0], None, number))
         elif verb == "new" and len(args) == 1:
             unit.new.append(args[0])
+        elif verb == "owned" and not args:
+            unit.owned = True
         elif verb == "local" and len(args) == 1:
             unit.rules.append(Rule(unit.name, args[0], None, number, local=True))
         else:
@@ -604,10 +613,83 @@ def command_check_baselines(root: Path, given: Path | None) -> int:
             plan = resolve(units, source.files, external=True)
             found = [problem for problem in plan.problems if concerns(problem, set(names), units)]
             for name in sorted(names):
+                if units[name].owned:
+                    continue  # its copies are its own now; the lineage check holds it to the original
                 found += check_unit(root, units[name], plan.files[name], source.tree)
         problems += found
         state = "ok" if not found else f"{len(found)} problems"
-        print(f"baseline {commit[:12]}: {len(names)} units ({', '.join(sorted(names))}): {state}")
+        owned = sorted(name for name in names if units[name].owned)
+        note = f"; owned, not checked: {', '.join(owned)}" if owned else ""
+        print(f"baseline {commit[:12]}: {len(names)} units ({', '.join(sorted(names))}): {state}{note}")
+    for problem in problems:
+        print(f"PROBLEM {problem}", file=sys.stderr)
+    return 1 if problems else 0
+
+
+def command_lineage(root: Path, given: Path | None, names: list[str]) -> int:
+    """Hold each unit's history to the original: what a sync depends on.
+
+    The original at the unit's baseline (this repository's history, or a given
+    clone of the original) is cloned and filtered with the unit's directives, as
+    the unit's first extraction was. The commit that gives must be in the unit's
+    own history: then a later original, filtered the same way, shares the unit's
+    history and its new commits can be merged. It stays true when a unit changes
+    its own files, which is why it replaces the extraction proof once the
+    originals are gone.
+    """
+    units = load_units(root)
+    commits = baselines(root)
+    problems: list[str] = []
+    for name in pick(units, names):
+        unit_dir = root / EXPORT_DIR / name
+        if not (unit_dir / ".git").exists():
+            problems.append(f"{name}: not a checked-out repository of its own")
+            continue
+        with open_source(root, given, commits[name]) as source:
+            plan = resolve(units, source.files, external=True)
+            directives = filter_directives(units, plan, name, source.files)
+        repo = (given or root).resolve()
+        with tempfile.TemporaryDirectory() as scratch:
+            clone = Path(scratch) / "clone"
+            (Path(scratch) / "paths.txt").write_text("\n".join(directives) + "\n")
+            # Only the baseline and its history: a repository made for this, which
+            # filter-repo rightly takes for no fresh clone, hence --force.
+            subprocess.run(["git", "init", "--quiet", str(clone)], check=True)
+            subprocess.run(
+                ["git", "-C", str(clone), "fetch", "--quiet", "--no-tags", str(repo), commits[name]],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(clone), "checkout", "--quiet", "-b", "lineage", "FETCH_HEAD"], check=True
+            )
+            subprocess.run(
+                [
+                    "uvx",
+                    "--quiet",
+                    "git-filter-repo",
+                    "--force",
+                    "--quiet",
+                    "--paths-from-file",
+                    str(Path(scratch) / "paths.txt"),
+                ],
+                cwd=clone,
+                check=True,
+                capture_output=True,
+            )
+            head = git_output(clone, "rev-parse", "lineage").strip()
+        shared = (
+            subprocess.run(
+                ["git", "-C", str(unit_dir), "merge-base", "--is-ancestor", head, "HEAD"], check=False
+            ).returncode
+            == 0
+        )
+        if shared:
+            print(f"{name}: the original at {commits[name][:12]}, filtered, is {head[:12]}, in its history")
+        else:
+            problems.append(
+                f"{name}: the original at {commits[name][:12]}, filtered, is {head[:12]}, which its history "
+                "does not hold: a sync could not merge into it"
+            )
     for problem in problems:
         print(f"PROBLEM {problem}", file=sys.stderr)
     return 1 if problems else 0
@@ -729,7 +811,8 @@ def command_sync(root: Path, name: str, given: Path, branch: str) -> int:
             f"Synced by Cloud-Sandbox's export.py sync {name}, from {given}."
         )
         merge_or_undo(unit_dir, start, target, upstream, message)
-        problems = check_unit(root, units[name], plan.files[name], source.tree)
+        # An owned unit's copies are its own (stage 22, decision 5): the merge decided them.
+        problems = [] if units[name].owned else check_unit(root, units[name], plan.files[name], source.tree)
     if problems:
         for problem in problems:
             print(f"PROBLEM {problem}", file=sys.stderr)
@@ -767,6 +850,7 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("--baselines", action="store_true", help="each unit at its own baseline")
     commands.add_parser("filter").add_argument("unit")
     commands.add_parser("prove").add_argument("unit")
+    commands.add_parser("lineage").add_argument("units", nargs="*")
     sync = commands.add_parser("sync")
     sync.add_argument("unit")
     sync.add_argument("--branch", required=True, help="the branch to make in the unit, as sync-1")
@@ -779,6 +863,10 @@ def main(argv: list[str] | None = None) -> int:
             if given is None or args.at is not None:
                 raise MapError("sync needs --source, the original's checkout, and takes no --at")
             return command_sync(root, str(args.unit), given.resolve(), str(args.branch))
+        if command == "lineage":
+            if args.at is not None:
+                raise MapError("lineage takes no --at: each unit has its own baseline")
+            return command_lineage(root, given, list(args.units))
         if command == "check" and args.baselines:
             if args.at is not None or args.units:
                 raise MapError("check --baselines takes no --at and no units: each unit has its own")

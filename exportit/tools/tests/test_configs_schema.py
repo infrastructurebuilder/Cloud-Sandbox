@@ -30,7 +30,7 @@ def test_every_line_named_reads_its_key(name: str) -> None:
     wrong: list[str] = []
     for key, ref in references(name):
         path, line = ref.rsplit(":", 1)
-        text = Path(configs_schema.ROOT / path).read_text().splitlines()[int(line) - 1]
+        text = Path(configs_schema.CODE / path).read_text().splitlines()[int(line) - 1]
         if f"'{key}'" not in text and f'"{key}"' not in text:
             wrong.append(f"{ref} does not read {key}: {text.strip()}")
     assert not wrong, wrong

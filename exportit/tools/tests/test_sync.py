@@ -262,3 +262,43 @@ def test_set_baseline_changes_one_unit_only(world: dict[str, Path | str]) -> Non
     assert after.replace("f" * 40, str(world["baseline"]), 1) == text
     export.set_baseline(root, "cloud-sandbox", "e" * 40)
     assert export.baselines(root) == {"lib": "f" * 40, "cloud-sandbox": "e" * 40}
+
+
+def test_the_units_history_holds_the_original_at_its_baseline(world: dict[str, Path | str]) -> None:
+    original, root, _ = paths_of(world)
+    assert run(root, "--source", str(original), "lineage", "lib") == 0
+
+
+def test_a_unit_whose_history_is_not_the_originals_fails_the_lineage(
+    world: dict[str, Path | str], capsys: pytest.CaptureFixture[str]
+) -> None:
+    original, root, unit = paths_of(world)
+    subprocess.run(["rm", "-rf", str(unit)], check=True)
+    unit.mkdir()
+    git(unit, "init", "--quiet")
+    commit(unit, "The same files, written afresh", {"src/pkg/a.py": "a = 2\n", "README.md": "lib\n"}, who=US)
+    assert run(root, "--source", str(original), "lineage", "lib") == 1
+    assert "which its history does not hold" in capsys.readouterr().err
+
+
+def test_an_owned_unit_may_change_its_copies(
+    world: dict[str, Path | str], capsys: pytest.CaptureFixture[str]
+) -> None:
+    original, root, unit = paths_of(world)
+    commit(unit, "The unit changes a copied file", {"src/pkg/a.py": "a = 'ours'\n"}, who=US)
+    assert run(root, "--source", str(original), "check", "--baselines") == 1
+    capsys.readouterr()
+    (root / "exportit/lib.map").write_text(LIB_MAP + "owned\n")
+    assert run(root, "--source", str(original), "check", "--baselines") == 0
+    assert "owned, not checked: lib" in capsys.readouterr().out
+    assert run(root, "--source", str(original), "lineage", "lib") == 0
+
+
+def test_an_owned_unit_still_takes_a_sync_merged_with_its_own_changes(world: dict[str, Path | str]) -> None:
+    original, root, unit = paths_of(world)
+    (root / "exportit/lib.map").write_text(LIB_MAP + "owned\n")
+    commit(unit, "The unit adds a line of its own", {"src/pkg/a.py": "a = 2\n# ours\n"}, who=US)
+    commit(original, "Upstream adds a module", {"pkg/c.py": "c = 1\n"})
+    assert run(root, "--source", str(original), "sync", "lib", "--branch", "sync-1") == 0
+    assert (unit / "src/pkg/a.py").read_text() == "a = 2\n# ours\n"
+    assert (unit / "src/pkg/c.py").read_text() == "c = 1\n"

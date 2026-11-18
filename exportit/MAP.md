@@ -84,6 +84,17 @@ repository records the unit's new commit (`git add exportit/<unit>`).
 checked out; `just submodules-pushed` fails when this repository records
 a commit that is not yet on the unit's remote.
 
+Since stage 22's step 0 (2026-11-18), the acceptance tests no longer read
+the originals in the working tree, which stage 22 deletes: `just test`
+runs `just export-baselines` (each unit against the original at its
+baseline, read from this repository's history) in place of
+`just export-check`, and `just full-test` runs `just export-lineage` (the
+original at each unit's baseline, filtered, is a commit of the unit's
+own history) in place of `just export-prove`. A unit whose originals are
+deleted carries `owned` in its map: it owns its copied files, the
+baseline check passes it by, and the lineage check alone holds it to the
+original.
+
 Some originals are tracked although `.gitignore` excludes them (the
 notebooks). Their copies have to be added with `git add -f`; the check
 says so when one is missing from the index.
