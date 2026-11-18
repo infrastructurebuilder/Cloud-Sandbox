@@ -2,10 +2,10 @@
 
 *Status:* **half done by moving day, 2026-11-17;** the rest, the deletion
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
-at the operator's request, and not executed. It is executed on "do 22",
-after each **YOUR DECISION** under [The decisions](#the-decisions) has
-been asked, one at a time; with decision 1's default, each step after
-that on its own `do 22.<n>`. Nothing is ever pushed to `ioos`.
+at the operator's request; **its five decisions asked and answered on
+"do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). No step is
+executed: each runs on its own `do 22.<n>`, step 0 first. Nothing is
+ever pushed to `ioos`.
 
 Moving day carried out steps 1 to 3 of the plan of 2026-11-14 for every
 unit (kept below, under [As planned on 2026-11-14](#as-planned-on-2026-11-14)):
@@ -116,6 +116,24 @@ units' repositories, not the originals, and can be done before or after.
    holds them to the original. Or: a copied file is still changed only
    by a patch in Cloud-Sandbox, applied to the unit by hand, and S3
    stays.
+
+## Decisions taken
+
+Asked on 2026-11-18 at "do 22", one at a time; every answer was the
+default:
+
+1. **One step at a time**, each on its own `do 22.<n>`, merged before
+   the next begins.
+2. **The root `.gitignore` and `LICENSE` stay.**
+3. **The files no unit took are deleted with their step** (cloudflow's,
+   step 1).
+4. **Cloud-Sandbox is the workshop afterwards**, with a root `README.md`
+   saying so (step 8).
+5. **A unit owns its copied files once its originals are deleted:** S3
+   becomes "a change from the original arrives by sync", at shared
+   version 2.0.0, written to each unit at its step; the baseline check
+   stops checking that unit's copies, and the lineage check holds it to
+   the original.
 
 ## Out of scope
 
