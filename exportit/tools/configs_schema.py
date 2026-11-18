@@ -5,8 +5,11 @@ A job description is the JSON file that ``JobFactory.job()`` reads; its
 reads the rest. A cluster description is read by ``ClusterFactory.cluster()``;
 its ``platform`` picks ``AWSCluster`` or ``LocalCluster``.
 
-Each key is recorded with the line that reads it, as ``path:line`` in this
-repository. A key is *required* when it is read as ``cfDict['KEY']`` with
+Each key is recorded with the line that reads it, as ``path:line``: the path
+is cloudflow's own (``cloudflow/job/...``), and the code is read from the
+cloudflow unit, ``exportit/cloudflow/src/`` (since stage 22's step 0; before
+it, from the original ``cloudflow/`` at the repository's root, which was the
+same code without the unit's patches). A key is *required* when it is read as ``cfDict['KEY']`` with
 nothing around it that would survive its absence. It is *optional* when it
 is read with ``cfDict.get()``, inside a ``try`` that catches ``KeyError``, or
 under ``if 'KEY' in cfDict`` (unless that ``if`` raises when the key is
@@ -32,6 +35,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+CODE = ROOT / "exportit" / "cloudflow" / "src"
+"""Where cloudflow's code is read from: the unit, whose ``src/cloudflow/`` is the package."""
 JOB_DIR = Path("cloudflow/job")
 CLUSTER_DIR = Path("cloudflow/cluster")
 SCHEMA_DIR = Path("exportit/sandbox-configs/schema")
@@ -105,7 +110,7 @@ def classify(node: ast.AST, key: str, parents: dict[ast.AST, ast.AST]) -> str:
 
 def dict_reads(path: Path) -> Reads:
     """List the keys a file reads from a description, by kind."""
-    tree = ast.parse((ROOT / path).read_text())
+    tree = ast.parse((CODE / path).read_text())
     parents = parents_of(tree)
     reads: Reads = {"required": {}, "optional": {}, "conditional": {}}
 
@@ -186,7 +191,7 @@ def factory_choices(
     ``JobFactory`` chooses on ``model``, then on ``jobtype``;
     ``ClusterFactory`` on ``provider`` alone (inner is None, given as '').
     """
-    tree = ast.parse((ROOT / path).read_text())
+    tree = ast.parse((CODE / path).read_text())
     choices: list[tuple[str, str, str]] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.If) or not compared_constants(node.test, selector):

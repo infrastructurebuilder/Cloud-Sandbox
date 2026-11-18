@@ -76,48 +76,34 @@ way the eight stages were made, so that every unit stays a faithful
 copy or translation of what is in the repository.
 
 1. **Look.** `git fetch origin`, then
-   `git log <baseline>..origin/main`. Nothing new: nothing to do. Only
-   `origin` is read; nothing is fetched from or pushed to IOOS.
-2. **Merge onto a branch.** `git flow feature start sync-<n>`, then
-   `git merge origin/main` on it. `just test` then lists the drift: the
-   copy check names every copied file that now differs from its source,
-   every new tracked file that no unit takes, and every map line that
-   matches nothing any more.
-3. **Plan.** `SPECS/SYNC-<n>.md`, in the form of a stage: each
-   change on `main`, the unit it lands in, and what it takes (a fresh
-   copy, a patch that no longer applies, a new file to assign, a role
-   or task to translate again with its traceability). Existing
-   decisions stand. Where a change gives a compelling reason to revisit
-   one, the plan says so under its own heading, with the decision and
-   the reason, and asks rather than changes it; smaller discrepancies
+   `git log <baseline>..origin/main`, the baseline being the units'
+   (in [units.toml](exportit/cloud-sandbox/units.toml); `ca0604a` for
+   all of them to begin with). Nothing new: nothing to do. Only `origin`
+   is read; nothing is fetched from or pushed to IOOS.
+2. **Plan.** `SPECS/SYNC-<n>.md`, in the form of a stage: each change on
+   `main`, the unit it lands in, and what it takes (a carried commit, a
+   patch that no longer survives, a new file to assign, a map line to
+   change, a role or task to translate again with its traceability).
+   Existing decisions stand. Where a change gives a compelling reason to
+   revisit one, the plan says so under its own heading, with the decision
+   and the reason, and asks rather than changes it; smaller discrepancies
    are listed too.
-4. **Execute on "do sync <n>"**: ask each YOUR DECISION singly, carry
-   the changes, update [exportit/MAP.md](exportit/MAP.md) and the
-   affected `README.md` and `UNIT.md` files, and pass the root `just test`
-   and `just full-test`. Commit locally; merge into `develop` and push to
-   `origin` only when told. The new baseline is the `main` commit merged.
+3. **Execute on "do sync <n>"**: ask each YOUR DECISION singly; then, for
+   each unit the changes touch, `just export-sync <unit> <clone of main>
+   sync-<n>`, which merges the upstream commits since the unit's baseline
+   onto `feature/sync-<n>` in the unit's repository, with their authors,
+   and moves its baseline. The clone of `main` is one the operator gives
+   by its path ([stage 23](SPECS/STAGE-23.md), decision 1). Update
+   [exportit/MAP.md](exportit/MAP.md) and the affected pages, pass each
+   unit's acceptance tests and the root `just test` and `just full-test`.
+   Commit locally; finish the units' branches, merge here and push, units
+   first, only when told.
 
-**Since moving day and [stage 23](SPECS/STAGE-23.md) (2026-11-18),** the
-units are repositories of their own, and steps 2 and 4 carry a change
-into them as well as into the originals here:
-
-- each unit's baseline is in
-  [units.toml](exportit/cloud-sandbox/units.toml) (`ca0604a` for all
-  fifteen to begin with), and `just export-baselines` holds every unit
-  to its baseline;
-- "carry" is `just export-sync <unit> <clone of the original> sync-<n>`,
-  one unit at a time: the upstream commits since the unit's baseline are
-  merged into the unit's repository on `feature/sync-<n>` there, with
-  their authors, and the baseline moves. What the maps cannot decide (a
-  file no map claims, a map line that matches nothing, a patch that no
-  longer survives, a translated original that changed) stops it or is
-  reported, for the stage to settle;
-- the clone of the original is one the operator gives, by its path, each
-  time (stage 23's decision 1): this repository gains no remote toward
-  it, and none toward `ioos`;
-- while the originals are still here, step 2's merge of `main` moves them
-  too, so that `just export-check` and the units agree; once stage 22
-  deletes them, only the units and their baselines move.
+**`main` is no longer merged into `develop`** (since stage 22's step 0,
+2026-11-18). It was, until then, to keep the originals here in step with
+the units. Once stage 22 deletes the originals, a merge of `main` would
+bring back every original it changed and conflict on the rest; the sync
+alone carries the changes, into the units, where the files now live.
 
 ## Reconstruction into independent units (2026-11-12)
 

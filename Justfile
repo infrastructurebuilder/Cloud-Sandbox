@@ -34,12 +34,11 @@ submodules-init:
 # Build every project's artifacts.
 build: (each "build")
 
-# The acceptance tests: the units are checked out, the copies match their sources; lint, type-check and fast tests pass everywhere.
-test: submodules-check export-check constitution-check (each "test")
+# The acceptance tests: the units are checked out, each unit's copies are the original at its baseline plus its patches (owned units excepted), the constitutions agree; lint, type-check and fast tests pass everywhere.
+test: submodules-check export-baselines constitution-check (each "test")
 
-# Everything in test, plus the slow tests and the extraction proof for each copied unit.
-full-test: export-check export-baselines sync-rehearse (each "full-test") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs") (export-prove "sandbox-ops") (export-prove "cloud-sandbox")
-    for unit in {{ model_units }}; do just export-prove "$unit"; done
+# Everything in test, plus the slow tests, each unit's lineage from the original, and the sync rehearsal. (Since stage 22's step 0 the lineage check stands where the extraction proof stood: it reads this repository's history, not its originals.)
+full-test: submodules-check export-baselines constitution-check export-lineage sync-rehearse (each "full-test")
 
 # Nothing is published from this repository.
 release: full-test
@@ -49,7 +48,7 @@ release: full-test
 export *names:
     {{ export_tool }} copy {{ names }}
 
-# Check every copy against its source and its mapping file; source= reads the originals from a clean clone of the original instead of this repository.
+# Check every copy against the originals in the working tree, or, with source=, in a clean clone of the original. Not part of the acceptance tests since stage 22's step 0: the originals here are going.
 export-check source="":
     {{ export_tool }} {{ if source != "" { "--source " + source } else { "" } }} check
 
@@ -60,6 +59,10 @@ export-baselines source="":
 # Carry a clean clone of the original's commits since a unit's baseline into the unit's repository, on feature/<branch> there (stage 23). Nothing is pushed.
 export-sync unit source branch:
     {{ export_tool }} --source {{ source }} sync {{ unit }} --branch {{ branch }}
+
+# Hold each unit's history to the original at its baseline, filtered with its directives: what a sync depends on (all units when none is named).
+export-lineage *units:
+    {{ export_tool }} lineage {{ units }}
 
 # Rehearse a sync from a made-up changed original into throw-away clones of the units: one scenario for each kind of change (stage 23).
 sync-rehearse:

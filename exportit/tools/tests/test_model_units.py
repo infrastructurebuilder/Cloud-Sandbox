@@ -1,8 +1,9 @@
 """The model units of stage 5: their shared harness, and the install contract in MAP.md.
 
 These tests read this repository itself, not a throw-away one: the harness
-copies under ``exportit/model-*/tests/``, cloudflow's launchers under
-``cloudflow/workflows/``, and the contract table in ``exportit/MAP.md``.
+copies under ``exportit/model-*/tests/``, cloudflow's launchers as the
+cloudflow unit has them (``exportit/cloudflow/src/cloudflow/workflows/``), and
+the contract table in ``exportit/MAP.md``.
 """
 
 from __future__ import annotations
@@ -17,7 +18,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 EXPORT = ROOT / "exportit"
 HARNESS = "tests/check-scripts.sh"
-LAUNCHERS = ROOT / "cloudflow" / "workflows"
+# The launchers as the cloudflow unit has them (since stage 22's step 0; before it, the originals).
+LAUNCHERS = EXPORT / "cloudflow" / "src" / "cloudflow" / "workflows"
 
 
 def model_units() -> list[Path]:

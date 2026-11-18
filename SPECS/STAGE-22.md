@@ -3,8 +3,9 @@
 *Status:* **half done by moving day, 2026-11-17;** the rest, the deletion
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
-"do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). No step is
-executed: each runs on its own `do 22.<n>`, step 0 first. Nothing is
+"do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
+on 2026-11-18 ([Outcome](#outcome)); each further step runs on its own
+`do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
 Moving day carried out steps 1 to 3 of the plan of 2026-11-14 for every
@@ -134,6 +135,27 @@ default:
    version 2.0.0, written to each unit at its step; the baseline check
    stops checking that unit's copies, and the lineage check holds it to
    the original.
+
+## Outcome
+
+### Step 0, 2026-11-18, on `feature/delete-step-0`
+
+Nothing deleted. In place:
+
+- **`just test`** runs `export-baselines` instead of `export-check`.
+- **`just full-test`** runs `export-lineage` instead of the fifteen
+  `export-prove`: all fifteen units hold the original at `ca0604a`,
+  filtered, in their history (about a minute for the fifteen).
+- **`export.py`**: `lineage [UNIT ...]`, which fetches only the
+  baseline's history into a repository made for it and filters it; and
+  the map directive `owned`, which the baseline check honours and a sync
+  honours after its merge. Four new tests (85 in the tool).
+- **`configs_schema.py`** reads cloudflow's code from the unit
+  (`exportit/cloudflow/src/`); the schema it writes is unchanged, the
+  unit's patches touching none of the lines it reads.
+  **`test_model_units.py`** reads the unit's launchers.
+- **The parity watch** in PLAN.md no longer merges `main`; a sync alone
+  carries changes.
 
 ## Out of scope
 
