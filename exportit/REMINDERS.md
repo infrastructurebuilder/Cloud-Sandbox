@@ -27,6 +27,10 @@ aside and why, and where the details are.
   [stage 22](../SPECS/STAGE-22.md), in
   [MAP.md's order](MAP.md#the-order-of-the-real-relocations). Until it is
   done, a copied file is changed by a patch here, never in the unit.
+  Since [stage 23](../SPECS/STAGE-23.md) a later original can be synced
+  into the units without the originals here; with them deleted, the
+  shared constitution's principle S3 (a copied file is changed in
+  Cloud-Sandbox) is amended for each unit whose originals go.
 - **Links that leave a unit** (2026-11-17, moving day's decision 5).
   27 links in the units' own pages lead out of the unit, 25 of them to
   [MAP.md](MAP.md). They resolve where the units are checked out under

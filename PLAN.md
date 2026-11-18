@@ -97,6 +97,28 @@ copy or translation of what is in the repository.
    and `just full-test`. Commit locally; merge into `develop` and push to
    `origin` only when told. The new baseline is the `main` commit merged.
 
+**Since moving day and [stage 23](SPECS/STAGE-23.md) (2026-11-18),** the
+units are repositories of their own, and steps 2 and 4 carry a change
+into them as well as into the originals here:
+
+- each unit's baseline is in
+  [units.toml](exportit/cloud-sandbox/units.toml) (`ca0604a` for all
+  fifteen to begin with), and `just export-baselines` holds every unit
+  to its baseline;
+- "carry" is `just export-sync <unit> <clone of the original> sync-<n>`,
+  one unit at a time: the upstream commits since the unit's baseline are
+  merged into the unit's repository on `feature/sync-<n>` there, with
+  their authors, and the baseline moves. What the maps cannot decide (a
+  file no map claims, a map line that matches nothing, a patch that no
+  longer survives, a translated original that changed) stops it or is
+  reported, for the stage to settle;
+- the clone of the original is one the operator gives, by its path, each
+  time (stage 23's decision 1): this repository gains no remote toward
+  it, and none toward `ioos`;
+- while the originals are still here, step 2's merge of `main` moves them
+  too, so that `just export-check` and the units agree; once stage 22
+  deletes them, only the units and their baselines move.
+
 ## Reconstruction into independent units (2026-11-12)
 
 *Status:* all eight stages merged into `develop` 2026-11-12, one

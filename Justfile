@@ -38,7 +38,7 @@ build: (each "build")
 test: submodules-check export-check constitution-check (each "test")
 
 # Everything in test, plus the slow tests and the extraction proof for each copied unit.
-full-test: export-check (each "full-test") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs") (export-prove "sandbox-ops") (export-prove "cloud-sandbox")
+full-test: export-check export-baselines sync-rehearse (each "full-test") (export-prove "cloudflow") (export-prove "sandbox-provisioning") (export-prove "sandbox-terraform") (export-prove "sandbox-configs") (export-prove "sandbox-ops") (export-prove "cloud-sandbox")
     for unit in {{ model_units }}; do just export-prove "$unit"; done
 
 # Nothing is published from this repository.
@@ -49,9 +49,21 @@ release: full-test
 export *names:
     {{ export_tool }} copy {{ names }}
 
-# Check every copy against its source and its mapping file.
-export-check:
-    {{ export_tool }} check
+# Check every copy against its source and its mapping file; source= reads the originals from a clean clone of the original instead of this repository.
+export-check source="":
+    {{ export_tool }} {{ if source != "" { "--source " + source } else { "" } }} check
+
+# Check every unit against the original as it was at the unit's own baseline (units.toml), read from this repository's history or from a given clone of the original.
+export-baselines source="":
+    {{ export_tool }} {{ if source != "" { "--source " + source } else { "" } }} check --baselines
+
+# Carry a clean clone of the original's commits since a unit's baseline into the unit's repository, on feature/<branch> there (stage 23). Nothing is pushed.
+export-sync unit source branch:
+    {{ export_tool }} --source {{ source }} sync {{ unit }} --branch {{ branch }}
+
+# Rehearse a sync from a made-up changed original into throw-away clones of the units: one scenario for each kind of change (stage 23).
+sync-rehearse:
+    uv run --project exportit/tools python exportit/tools/rehearse_sync.py
 
 # Fail, saying what to do, when a unit kept as a submodule is not checked out (-) or is in conflict (U).
 submodules-check:

@@ -109,11 +109,12 @@ copy scripts/system/spack.etc.spack/compilers.yaml               attic/dead/scri
 copy scripts/upgrade-mpi.sh                                      attic/dead/scripts/upgrade-mpi.sh
 
 # Not relocated: the records and the entry point of this reconstruction,
-# which go when the work is done.
-drop SPECS/
-drop .gitmodules   # names the units kept as submodules under exportit/ (MOVINGDAY.md)
-drop PLAN.md
-drop Justfile
+# which go when the work is done. They are this repository's own, never the
+# original's (stage 23): a given original that had one would be a problem.
+local SPECS/
+local .gitmodules   # names the units kept as submodules under exportit/ (MOVINGDAY.md)
+local PLAN.md
+local Justfile
 
 # Files that exist only in the unit.
 new README.md
