@@ -3,7 +3,8 @@
 *Status:* planned 2026-11-18 on `feature/upstream-sync-plan`, at the
 operator's request, and **executed the same day on "do 23"**, on
 `feature/stage-23-upstream-sync` here and `feature/baselines` in the
-umbrella's repository. The decisions are under
+umbrella's repository, and merged into both `develop`s and pushed the
+same day, after the root `just full-test` passed. The decisions are under
 [Decisions taken](#decisions-taken), the result under
 [Outcome](#outcome). It comes
 before [stage 22](STAGE-22.md)'s deletion of the original paths: once
