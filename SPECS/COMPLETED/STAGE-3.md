@@ -7,7 +7,7 @@ result is under [Outcome](#outcome).
 
 ## Why
 
-[scripts/setup-instance.sh](../../scripts/setup-instance.sh) builds the
+[scripts/setup-instance.sh\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/scripts/setup-instance.sh) builds the
 whole software stack in one pass of shell functions. It cannot be run
 twice, cannot be run in part without editing a copy of it (nine
 sibling scripts are such copies), does not stop when a step fails, and
@@ -22,10 +22,10 @@ The table "setup-instance.sh, step by step" in
 13 functions and the image step, where each one's result lands (root
 volume, EFS or a home directory) and whether it survives a second run.
 The versions are in
-[environment-vars.sh](../../scripts/environment-vars.sh); the files that
-get installed are under [scripts/system/](../../scripts/system/). The
+[environment-vars.sh\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/scripts/environment-vars.sh); the files that
+get installed are under [scripts/system/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/scripts/system). The
 steps that come before it (EFS client, mount, `/save`, the clone) are
-in [terraform/init_template.tpl](../../terraform/init_template.tpl).
+in [terraform/init_template.tpl\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/init_template.tpl).
 
 ## The proposal
 
@@ -98,7 +98,7 @@ the node by its project tag; that is the route for later changes.
 3. `node-image.yml`.
 
    **YOUR DECISION (image creation):** run the existing
-   [create_image.py](../../scripts/create_image.py) from a task, passing
+   [create_image.py\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/scripts/create_image.py) from a task, passing
    the region it currently ignores (default), or rewrite it with the
    `amazon.aws` modules.
 4. The `Justfile`: `test` runs `ansible-playbook --syntax-check`,
@@ -145,7 +145,7 @@ Asked when it surfaced, during execution:
   They are mapped, and three of them already call functions that do
   not exist.
 - JupyterHub and user management ([stage 7](STAGE-7.md)).
-- Changing [terraform/init_template.tpl](../../terraform/init_template.tpl)
+- Changing [terraform/init_template.tpl\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/init_template.tpl)
   itself. The new template is written into the export;
   [stage 4](STAGE-4.md) owns the Terraform side.
 
@@ -188,3 +188,12 @@ Asked when it surfaced, during execution:
 12 roles, 98 named tasks and blocks, 14 in `node-image.yml`. Branch
 `feature/stage-3-ansible`, cut from `feature/stage-2-cloudflow`;
 commits local.
+
+---
+
+\* A link marked with an asterisk opens the file or directory as it was at
+commit [`ca0604a`](https://github.com/infrastructurebuilder/Cloud-Sandbox/commit/ca0604a4a27355b330353c7ded8a1ae00a7e24a6)
+of this repository: the original project, from which every unit was made,
+and every unit's baseline. These files are no longer on `develop`, because
+[stage 22](STAGE-22.md) deleted the originals on 2026-11-19 once
+each unit owned its copies.

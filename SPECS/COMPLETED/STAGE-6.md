@@ -6,8 +6,8 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[job.configs/](../../job.configs/) and
-[cluster.configs/](../../cluster.configs/) are data, not code. cloudflow
+[job.configs/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/job.configs) and
+[cluster.configs/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cluster.configs) are data, not code. cloudflow
 reads them by a path given on the command line. Many of them carry
 one site's AWS identifiers (image id, security groups, subnet, key
 name), so they are that site's configuration and have a different
@@ -88,3 +88,12 @@ schema names the line of code that reads it.
   which cloudflow now requires; the 40 AWS cluster descriptions span
   19 images and 13 placement groups, and only 4 match the latest
   deployment. Details in [MAP.md](../../exportit/MAP.md#sandbox-configs).
+
+---
+
+\* A link marked with an asterisk opens the file or directory as it was at
+commit [`ca0604a`](https://github.com/infrastructurebuilder/Cloud-Sandbox/commit/ca0604a4a27355b330353c7ded8a1ae00a7e24a6)
+of this repository: the original project, from which every unit was made,
+and every unit's baseline. These files are no longer on `develop`, because
+[stage 22](STAGE-22.md) deleted the originals on 2026-11-19 once
+each unit owned its copies.

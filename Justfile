@@ -1,8 +1,11 @@
 # Cloud-Sandbox: the entry point for building and checking this repository.
 #
-# The original tree (cloudflow/, scripts/, terraform/, models/ ...) has no
-# build and no tests of its own. What can be built and tested are the units
-# copied into exportit/; each has its own Justfile and this one runs them all.
+# Since stage 22 (2026-11-19) the original tree (cloudflow/, scripts/,
+# terraform/, models/ ...) is gone from develop. What is built and tested are
+# the units under exportit/, each a repository of its own kept here as a git
+# submodule; each has its own Justfile, and this one runs them all and checks
+# them against the original at their baselines, read from this repository's
+# history.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
@@ -48,7 +51,7 @@ release: full-test
 export *names:
     {{ export_tool }} copy {{ names }}
 
-# Check every copy against the originals in the working tree, or, with source=, in a clean clone of the original. Not part of the acceptance tests since stage 22's step 0: the originals here are going.
+# Check every copy against the originals in a clean clone of the original (source=); without it, against this repository's working tree, which has had no originals since stage 22. Not part of the acceptance tests.
 export-check source="":
     {{ export_tool }} {{ if source != "" { "--source " + source } else { "" } }} check
 

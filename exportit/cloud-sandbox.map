@@ -127,3 +127,8 @@ new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDA
 new .specify/     # Spec Kit 1.2.3 and the constitution (MOVINGDAY.md, M4)
 new .claude/      # Spec Kit's skills
 new CLAUDE.md     # written by `just constitution`
+
+# Its originals were deleted from Cloud-Sandbox by stage 22, step 8 (2026-11-19),
+# all but .gitignore and LICENSE, which Cloud-Sandbox keeps as its own: the unit
+# owns its copied files, and only its lineage is checked.
+owned

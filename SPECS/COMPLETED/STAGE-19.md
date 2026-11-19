@@ -3,14 +3,14 @@
 *Status:* **decided 2026-11-17, ahead of its turn: relocate all.** The
 operator asked for every unit to be given a private repository on
 `infrastructurebuilder` and kept as a submodule
-([moving day](../exportit/MOVINGDAY.md)), which was done the same day.
+([moving day](../../exportit/MOVINGDAY.md)), which was done the same day.
 What "What has to be true before it is asked" required was not all true
 then: the live proof (stage 15) had not run, for want of an AWS account,
 and stages 16 to 18 and the collection's stage 5 were not done. That is
 the operator's choice, recorded here. Planned 2026-11-14 on
 `feature/remaining-plans`, as a decision: at "do 19" it was to be asked,
 and the answer recorded. Tenth in the order of the remaining work
-([PLAN.md](../PLAN.md)), after everything that makes the commit tree
+([PLAN.md](../../PLAN.md)), after everything that makes the commit tree
 good, as the operator said on 2026-11-13: "We might never relocate this.
 We're figuring that out after we've got a good commit tree." Stages 20
 to 22 follow only if the answer is to relocate.
@@ -31,7 +31,7 @@ to 22 follow only if the answer is to relocate.
 **YOUR DECISION:**
 
 - **Relocate all the units** (the order and method are in
-  [MAP.md](../exportit/MAP.md#the-order-of-the-real-relocations)): stages
+  [MAP.md](../../exportit/MAP.md#the-order-of-the-real-relocations)): stages
   20 to 22. Each unit gets a repository of its own on
   `infrastructurebuilder`, extracted with its history, never under
   `ioos`.

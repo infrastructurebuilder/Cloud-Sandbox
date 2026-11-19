@@ -6,7 +6,7 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[scripts/](../../scripts/) holds more than provisioning. Once the setup
+[scripts/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/scripts) holds more than provisioning. Once the setup
 path has gone to Ansible, what is left is a set of unrelated operator
 tools, some current and some dead. They need sorting before they can
 be moved, and some of them are better as an Ansible role than as a
@@ -21,18 +21,18 @@ The part of the 93 files under `scripts/` that
   `test_user.sh`, the sample user list and three `sudoers` files.
 - **Spack mirror upkeep:** `spack-mirror-create.sh`,
   `spack-update-mirror.sh`, `spack-pubkey.sh`, `scp-secret.sh`, the
-  spack-stack equivalents, and [misc/spack/](../../misc/spack/).
+  spack-stack equivalents, and [misc/spack/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/misc/spack).
 - **Data scrubbing:** `scrub_nosofs.sh`, `scrub_liveocean.sh`.
 - **Instance helpers:** `change-instance-type.sh`, `disableHT.sh`,
   `mountEFS.sh`, `update_efs_driver.sh`, `newamised.sh`, `getaws.sh`.
 - **Reporting:** `weekly_summary.nu`, which reads the DynamoDB table
   of C8.
 - **JupyterHub:** two install scripts, five files under
-  `scripts/system/`, and [jupyterhub/README.md](../../jupyterhub/README.md).
+  `scripts/system/`, and [jupyterhub/README.md\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/jupyterhub/README.md).
 - **Slurm leftovers:** unit files and notes under `scripts/system/`,
-  `scripts/archived/` and [misc/](../../misc/).
+  `scripts/archived/` and [misc/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/misc).
 - **Other stacks:** the UFS, spack-stack and `ncdis` entry scripts.
-- **Notes and one-offs** in [misc/](../../misc/).
+- **Notes and one-offs** in [misc/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/misc).
 
 ## Items
 
@@ -104,3 +104,12 @@ About 100 files read and sorted. Branch `feature/stage-7-ops`.
 - Found: nothing installed JupyterHub before (both scripts were broken);
   `scrub_liveocean.sh` does not parse; `add-ufs-setup.sh` calls a
   function that no longer exists; personal data in a few files.
+
+---
+
+\* A link marked with an asterisk opens the file or directory as it was at
+commit [`ca0604a`](https://github.com/infrastructurebuilder/Cloud-Sandbox/commit/ca0604a4a27355b330353c7ded8a1ae00a7e24a6)
+of this repository: the original project, from which every unit was made,
+and every unit's baseline. These files are no longer on `develop`, because
+[stage 22](STAGE-22.md) deleted the originals on 2026-11-19 once
+each unit owned its copies.

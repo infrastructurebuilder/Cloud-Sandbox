@@ -19,10 +19,12 @@ directory was `INPROGRESS/`.)
   (since moving day, 2026-11-17, replacing "nothing leaves this
   repository", which stood from 2026-11-12). Every unit under
   [exportit/](../exportit/) is a repository of its own on
-  `infrastructurebuilder`, at the path its copy had. The original paths
-  stay untouched, and each unit is still held to them by its mapping
-  file. A change to a unit is a commit in its repository; this
-  repository then records the new commit. See
+  `infrastructurebuilder`, at the path its copy had. Since stage 22
+  (2026-11-19) the original paths are gone from `develop` and every unit
+  owns its copied files; `main` and the history keep the originals, and
+  a later original reaches the units by sync (stage 23). A change to a
+  unit is a commit in its repository; this repository then records the
+  new commit. See
   [exportit/MOVINGDAY.md](../exportit/MOVINGDAY.md).
 - **Never push to `ioos/Cloud-Sandbox`**, and never open a pull
   request against it.
@@ -58,11 +60,11 @@ directory was `INPROGRESS/`.)
 | [16](STAGE-16.md) | A build cache for RHEL 10, pushed by the collection | Planned 2026-11-14 |
 | [17](STAGE-17.md) | The Lambda functions, owned | Planned 2026-11-14 |
 | [18](STAGE-18.md) | spack-stack for UFS Coastal | Planned 2026-11-14 |
-| [19](STAGE-19.md) | Relocate, or not | **Decided 2026-11-17 by moving day: relocate all**, ahead of its turn |
+| [19](COMPLETED/STAGE-19.md) | Relocate, or not | **Decided 2026-11-17 by moving day: relocate all**, ahead of its turn |
 | [20](STAGE-20.md) | `sandbox-configs` split by owner | Planned 2026-11-14; still possible, after `sandbox-configs` moved whole |
 | [21](STAGE-21.md) | The first boot runs the playbooks | Planned 2026-11-14 |
-| [22](STAGE-22.md) | The real relocations | The repositories made by moving day (2026-11-17); the deletion of the original paths planned 2026-11-18, in nine steps |
-| [23](STAGE-23.md) | Syncing from the original after its paths are deleted | Merged into `develop` 2026-11-18 |
+| [22](COMPLETED/STAGE-22.md) | The real relocations | The repositories made by moving day (2026-11-17); the original paths deleted in nine steps, merged into `develop` 2026-11-19 |
+| [23](COMPLETED/STAGE-23.md) | Syncing from the original after its paths are deleted | Merged into `develop` 2026-11-18 |
 
 The order of the work is in [PLAN.md](../PLAN.md), with the collection's
 stages 4 and 5 among these.
