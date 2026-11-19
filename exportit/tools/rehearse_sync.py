@@ -162,7 +162,9 @@ def build(work: Path, scenario: Scenario, baseline: str) -> tuple[Path, Path, Pa
         ["git", "clone", "--quiet", "--no-local", str(EXPORT / scenario.unit), str(unit)], check=True
     )
     git(unit, "remote", "remove", "origin")
-    git(unit, "switch", "--quiet", "develop")
+    # The unit as it is checked out here, which may be a feature branch of it,
+    # stands for its develop: that is what a sync starts from.
+    git(unit, "switch", "--quiet", "-C", "develop")
     return original, sandbox, unit
 
 
