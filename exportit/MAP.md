@@ -1463,7 +1463,7 @@ step is done.
 | 3 | the eight `model-<name>` units (**originals deleted, stage 22 step 3, 2026-11-19**) | `model-common` (ADCIRC only) | `models/` and `patches/` gone |
 | 4 | `sandbox-configs` (**originals deleted, stage 22 step 4, 2026-11-19**) | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
 | 5 | `sandbox-provisioning` (**originals deleted, stage 22 step 5, 2026-11-19**) | `ansible-collection-csis-spack`, which is in its own repository already | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
-| 6 | `sandbox-terraform` | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 5's repository |
+| 6 | `sandbox-terraform` (**originals deleted, stage 22 step 6, 2026-11-19**) | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 5's repository |
 | 7 | `sandbox-ops` | `sandbox-provisioning` (its tools read the versions there) | the attic's 76 files moved to `attic/`, which stays; the rest of `scripts/` and `misc/` gone |
 | 8 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |
 
