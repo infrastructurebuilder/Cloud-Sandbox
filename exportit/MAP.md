@@ -1373,26 +1373,27 @@ this file's copy check covers it.
   Spack (concretize, install, regenerate module files, push to the build
   cache), as a module with Ansible's change reporting and check mode,
   in place of shell tasks that hash files before and after.
-- **State:** 0.3.1, tagged and pushed on 2026-11-14 (the repository is
-  public); 0.1.0, 0.2.0 and 0.3.0 before it. 0.3.1 fixed what the
-  sandbox's stage 12 found: Spack leaves a mapping it empties behind, and
+- **State:** 0.0.1, published on Ansible Galaxy and tagged in its
+  repository on 2026-11-19. On that day the collection withdrew its earlier
+  tags, 0.1.0 to 0.3.1, and released all they held as 0.0.1. What was 0.3.1
+  fixed what the sandbox's stage 12 found: Spack leaves a mapping it empties behind, and
   `spack_config` now removes the emptied mapping itself. Eight modules, a `setup` role and
   two filters, tested against a stand-in for Spack and against the real
   Spack v1.2.0, and passing `ansible-test sanity`. It names no package,
   compiler, mirror or path of any site; the sandbox's own lists are one
-  of its examples. Its `PLAN.md` and `COLL-INPROGRESS/` hold the plans,
-  the decisions and what was found. Not on Ansible Galaxy: whether it
-  goes there is not decided.
+  of its examples. It plans its work with Spec Kit, in its own workspace;
+  publishing to Galaxy was its spec 001.
 - **How `sandbox-provisioning` uses it** (since [stage 10](../SPECS/COMPLETED/STAGE-10.md)):
-  a line in `requirements.yml` naming the repository at a tag: `0.3.0`
-  since [stage 11](../SPECS/COMPLETED/STAGE-11.md), `0.3.1` since
-  [stage 12](../SPECS/COMPLETED/STAGE-12.md)
-  (the operator's decision: the git tag until Galaxy is decided),
-  installed into `.collections/` by `just init`, by the container test,
-  and by the head node's first boot before `site.yml` runs.
-  `units.toml` lists it as the one `external` unit, with
-  `sandbox-provisioning` needing it; a test in `tools` holds the pinned
-  tag to its version there.
+  a line in `requirements.yml`. Until 2026-11-19 it named the repository
+  at a tag: `0.3.0` since [stage 11](../SPECS/COMPLETED/STAGE-11.md),
+  `0.3.1` since [stage 12](../SPECS/COMPLETED/STAGE-12.md). Since then it
+  names the collection on Ansible Galaxy, `infrastructurebuilder.csis_spack`,
+  in the range `>=0.0.1,<0.1.0`. It is installed into `.collections/` by
+  `just init`, by the container test, and by the head node's first boot
+  before `site.yml` runs. `units.toml` lists it as the one `external`
+  unit, at 0.0.1, with `sandbox-provisioning` needing it; a test in
+  `tools` holds that version inside the range `requirements.yml` gives,
+  or equal to the tag it names.
 
 ## Syncing from the original
 
