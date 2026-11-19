@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models) and 4 (sandbox-configs) done and merged** on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models) and 4 (sandbox-configs) done and merged**, and **step 5 (sandbox-provisioning) done**, on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -221,6 +221,23 @@ Nothing deleted. In place:
 - **`sandbox-configs.map` says `owned`.** Nothing else changed: the
   schema writer reads cloudflow from its unit since step 0, and writes
   the schema into `sandbox-configs`' own repository, as before.
+
+### Step 5, 2026-11-19, on `feature/delete-sandbox-provisioning`
+
+- **Deleted:** `sandbox-provisioning`'s 26 original files: the script
+  and its library (`setup-instance.sh`, `funcs-setup-instance.sh`),
+  `environment-vars.sh`, `create_image.*`, the user and JupyterHub
+  scripts, `spack-pubkey.sh`, its 13 files of `scripts/system/`, and
+  `jupyterhub/README.md`. The 68 other files of `scripts/` stay for steps
+  7 and 8: 54 the umbrella copies into its attic (25 of them in
+  `scripts/system/`), and `sandbox-ops`' 14.
+- **`sandbox-provisioning.map` says `owned`.** The unit's `legacy/`
+  copies of the script, which its parity tests hold its roles to, are
+  its own now: a later change to the script arrives there by sync, and
+  the parity tests say where the roles no longer follow it.
+- Nothing here read these files: the sync rehearsal changes
+  `setup-instance.sh` in an original built from this repository's
+  history, not in the working tree.
 
 ## Out of scope
 
