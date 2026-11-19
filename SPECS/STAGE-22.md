@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs), 5 (sandbox-provisioning) and 6 (sandbox-terraform) done and merged** on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs), 5 (sandbox-provisioning) and 6 (sandbox-terraform) done and merged**, and **step 7 (sandbox-ops) done**, on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -247,6 +247,15 @@ Nothing deleted. In place:
   the umbrella's, for step 8. No untracked or ignored file was left in
   `terraform/` (no state, no settings).
 - **`sandbox-terraform.map` says `owned`.** Nothing else changed.
+
+### Step 7, 2026-11-19, on `feature/delete-sandbox-ops`
+
+- **Deleted:** `sandbox-ops`' 15 original files: its 14 tools in
+  `scripts/` (among them the two scrub scripts that the set-aside stage
+  14 would have replaced) and the Spack mirror's public key in `misc/`.
+  What is left of `scripts/` (54) and `misc/` (22) is the attic, which
+  the umbrella copies, for step 8.
+- **`sandbox-ops.map` says `owned`.** Nothing else changed.
 
 ## Out of scope
 
