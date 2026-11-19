@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common) and 3 (the eight models) done and merged** on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow), 2 (model-common) and 3 (the eight models) done and merged**, and **step 4 (sandbox-configs) done**, on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -212,6 +212,15 @@ Nothing deleted. In place:
   `liveocean` 10, `necofs` 17, `nosofs` 9, `secofs` 16, `ucla-roms` 4,
   `ufscoastal` 17. Nothing of anyone else's was in either place.
 - **The eight maps say `owned`.** Nothing else changed.
+
+### Step 4, 2026-11-19, on `feature/delete-sandbox-configs`
+
+- **Deleted:** `sandbox-configs`' 130 original files, `job.configs/`
+  (80) and `cluster.configs/` (50). Nothing of anyone else's was in
+  either place.
+- **`sandbox-configs.map` says `owned`.** Nothing else changed: the
+  schema writer reads cloudflow from its unit since step 0, and writes
+  the schema into `sandbox-configs`' own repository, as before.
 
 ## Out of scope
 
