@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs) and 5 (sandbox-provisioning) done and merged** on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs) and 5 (sandbox-provisioning) done and merged**, and **step 6 (sandbox-terraform) done**, on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -238,6 +238,15 @@ Nothing deleted. In place:
 - Nothing here read these files: the sync rehearsal changes
   `setup-instance.sh` in an original built from this repository's
   history, not in the working tree.
+
+### Step 6, 2026-11-19, on `feature/delete-sandbox-terraform`
+
+- **Deleted:** `sandbox-terraform`'s 23 original files: the 22 of
+  `terraform/`, and `images/AWS-Key-pairs-screen.png`, which its
+  `DEPLOYMENT.md` shows. The other image, `images/sandbox-stack.png`, is
+  the umbrella's, for step 8. No untracked or ignored file was left in
+  `terraform/` (no state, no settings).
+- **`sandbox-terraform.map` says `owned`.** Nothing else changed.
 
 ## Out of scope
 
