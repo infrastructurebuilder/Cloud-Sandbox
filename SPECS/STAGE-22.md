@@ -4,8 +4,8 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18 ([Outcome](#outcome)); each further step runs on its own
-`do 22.<n>`. Nothing is
+on 2026-11-18, **step 1 (cloudflow) done** on 2026-11-19, not yet merged
+([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
 Moving day carried out steps 1 to 3 of the plan of 2026-11-14 for every
@@ -156,6 +156,36 @@ Nothing deleted. In place:
   **`test_model_units.py`** reads the unit's launchers.
 - **The parity watch** in PLAN.md no longer merges `main`; a sync alone
   carries changes.
+
+### Step 1, 2026-11-18 and 19, on `feature/delete-cloudflow`
+
+- **Deleted:** cloudflow's 375 original files: `cloudflow/` (195),
+  `docs/` (175: the sources cloudflow copied, the built HTML and
+  `docs/save/` it dropped), `setup.py`, `setup-plotting.sh`,
+  `CLOUDFLOW.md`, `PREFECTv3.md` and the Miniforge guide. No other unit
+  had a file in any of those places.
+- **`cloudflow.map` says `owned`.** The baseline check passes cloudflow
+  by; its lineage still holds.
+- **Shared constitution 2.0.0** in all fifteen units, on
+  `feature/constitution-2` in each. **A departure from decision 5,**
+  which said S3 would be written to each unit at its step: the shared
+  part has to be the same in every unit for its drift check, so S3 now
+  says what holds in both states, before and after a unit is `owned`,
+  and every unit has it at once. No later step needs a constitution
+  change. Each unit's constitution is at version 2.0.0.
+- **cloudflow's own principles I and III** no longer send corrections
+  to Cloud-Sandbox as patches: a difference from the original is now a
+  commit in cloudflow that says what it corrects, and restyling copied
+  code needs a spec of its own, since it would make later syncs
+  conflict.
+- **The collection's pin moved to 0.0.1** in `sandbox-provisioning`'s
+  `requirements.yml` and the umbrella's `units.toml`, a change made in
+  the collection's workspace and committed here on the operator's word:
+  the collection withdrew its tags 0.1.0 to 0.3.1 on 2026-11-19 and
+  released all they held as 0.0.1, on Ansible Galaxy as well. The
+  container test then installs from Galaxy, which
+  `feature/collection-from-galaxy`, cut from this branch, puts in place;
+  the full test is run once for the two.
 
 ## Out of scope
 
