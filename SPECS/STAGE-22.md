@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common) and 3 (the eight models) done and merged**, and **step 4 (sandbox-configs) done**, on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models) and 4 (sandbox-configs) done and merged** on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
