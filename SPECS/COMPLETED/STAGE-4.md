@@ -7,7 +7,7 @@ result is under [Outcome](#outcome).
 
 ## Why
 
-[terraform/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform) creates the network, the EFS volume, the
+[terraform/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform) creates the network, the EFS volume, the
 IAM role and the head node. It is tied to the rest of the repository
 by one thing: the head node's first boot clones the monorepo from
 `ioos/Cloud-Sandbox` and runs a script inside it (C5 in
@@ -21,8 +21,8 @@ by hand.
 `variables.tf`, `outputs.tf`), two first-boot templates (RHEL 10 and
 RHEL 8), a remote-state module, a pipeline sketch, IAM policy files,
 one site's settings in
-[mysettings.tfvars](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/mysettings.tfvars) and
-[config.s3.tfbackend](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/config.s3.tfbackend), saved older
+[mysettings.tfvars\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/mysettings.tfvars) and
+[config.s3.tfbackend\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/config.s3.tfbackend), saved older
 copies, and notes.
 
 ## Items
@@ -33,7 +33,7 @@ copies, and notes.
    `Justfile` (`test` = `fmt -check` and `validate`, with no AWS
    call).
 3. Describe, in the map, the first-boot template that would replace
-   [init_template.tpl](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/init_template.tpl): the
+   [init_template.tpl\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/terraform/init_template.tpl): the
    `ansible-pull` form from [stage 3](STAGE-3.md), with the
    provisioning repository and version as Terraform variables instead
    of a literal URL.
@@ -104,3 +104,12 @@ section is complete.
 
 22 files copied, 9 written, 1 moved. Branch `feature/stage-4-terraform`,
 cut from `feature/stage-3-ansible`; commits local.
+
+---
+
+\* A link marked with an asterisk opens the file or directory as it was at
+commit [`ca0604a`](https://github.com/infrastructurebuilder/Cloud-Sandbox/commit/ca0604a4a27355b330353c7ded8a1ae00a7e24a6)
+of this repository: the original project, from which every unit was made,
+and every unit's baseline. These files are no longer on `develop`, because
+[stage 22](STAGE-22.md) deleted the originals on 2026-11-19 once
+each unit owned its copies.

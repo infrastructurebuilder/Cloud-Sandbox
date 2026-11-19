@@ -16,21 +16,21 @@ without a live sandbox (couplings C1 to C4 and defects F1 to F5 in
 
 ## What exists
 
-- [cloudflow/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cloudflow): 195 tracked files. About 12,000 lines
+- [cloudflow/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cloudflow): 195 tracked files. About 12,000 lines
   of Python in six sub-packages (`cluster`, `job`, `services`,
   `utils`, `workflows`, `plotting`), 3,000 lines of shell launchers
   and helper scripts, 44 model input templates (the largest files),
   22 notebook files, notes, two cron scripts, and seven script-style
   "tests" that need a running sandbox.
-- At the repository root: [setup.py](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/setup.py),
-  [setup-plotting.sh](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/setup-plotting.sh),
-  [CLOUDFLOW.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/CLOUDFLOW.md), [PREFECTv3.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/PREFECTv3.md)
+- At the repository root: [setup.py\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/setup.py),
+  [setup-plotting.sh\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/setup-plotting.sh),
+  [CLOUDFLOW.md\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/CLOUDFLOW.md), [PREFECTv3.md\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/PREFECTv3.md)
   and
-  [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md).
+  [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md).
 - What the code imports from outside the standard library: `boto3`,
   `botocore`, `prefect`, `dask`, `distributed` everywhere; `numpy`,
   `matplotlib`, `netCDF4`, `pyproj`, `PIL` and others in `plotting`,
-  which [job_tasks.py](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cloudflow/workflows/job_tasks.py#L21)
+  which [job_tasks.py\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cloudflow/workflows/job_tasks.py#L21)
   imports when it is loaded; `xarray`, `pandas`, `s3fs` in the Dask
   examples; the Jupyter libraries in `utils/notebook.py`.
 
@@ -163,3 +163,12 @@ Asked one at a time on 2026-11-12, before execution.
 198 files copied, 41 written. Branch `feature/stage-2-cloudflow`, cut
 from `feature/stage-1-analysis` because stage 1 is not merged yet;
 commits local.
+
+---
+
+\* A link marked with an asterisk opens the file or directory as it was at
+commit [`ca0604a`](https://github.com/infrastructurebuilder/Cloud-Sandbox/commit/ca0604a4a27355b330353c7ded8a1ae00a7e24a6)
+of this repository: the original project, from which every unit was made,
+and every unit's baseline. These files are no longer on `develop`, because
+[stage 22](STAGE-22.md) deleted the originals on 2026-11-19 once
+each unit owned its copies.

@@ -12,16 +12,16 @@ Cloud-Sandbox itself is afterwards.
 
 ## What exists
 
-- [docs/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/docs): 175 tracked files. `docs/source/` is 35 Sphinx
+- [docs/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/docs): 175 tracked files. `docs/source/` is 35 Sphinx
   source files that document cloudflow's modules through `sys.path` entries
   into `cloudflow/` (C9 in [ANALYSIS.md](../ANALYSIS.md)). The rest is
   the HTML built from them, committed (F11), and an older copy under
   `docs/save/`.
 - Root documents: [README.md](../../README.md),
-  [DEPLOYMENT.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/DEPLOYMENT.md) (304 lines, covering Terraform and
+  [DEPLOYMENT.md\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/DEPLOYMENT.md) (304 lines, covering Terraform and
   provisioning together) and
-  [CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md).
-- [images/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/images), the root `TODO`, `.github/ISSUE_TEMPLATE.md`,
+  [CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md).
+- [images/\*](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/images), the root `TODO`, `.github/ISSUE_TEMPLATE.md`,
   `LICENSE` and `.gitignore`.
 
 ## Items
@@ -97,3 +97,12 @@ About 45 files copied, about 8 written. Branch
 - Found: six broken links in the root README; DEPLOYMENT.md stale
   against the Terraform module; the Terraform version (1.5.7 in the
   documents, 1.9.8 in the tests) left as a choice to make.
+
+---
+
+\* A link marked with an asterisk opens the file or directory as it was at
+commit [`ca0604a`](https://github.com/infrastructurebuilder/Cloud-Sandbox/commit/ca0604a4a27355b330353c7ded8a1ae00a7e24a6)
+of this repository: the original project, from which every unit was made,
+and every unit's baseline. These files are no longer on `develop`, because
+[stage 22](STAGE-22.md) deleted the originals on 2026-11-19 once
+each unit owned its copies.
