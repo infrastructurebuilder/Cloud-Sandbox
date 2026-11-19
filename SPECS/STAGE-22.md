@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **step 1 (cloudflow) done** on 2026-11-19, not yet merged
+on 2026-11-18, **steps 1 (cloudflow) and 2 (model-common) done** on 2026-11-19, step 1 merged
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -191,6 +191,19 @@ Nothing deleted. In place:
   container test then installs from Galaxy, which
   `feature/collection-from-galaxy`, cut from this branch, puts in place;
   the full test is run once for the two.
+
+### Step 2, 2026-11-19, on `feature/delete-model-common`
+
+- **Deleted:** model-common's 6 original files: `models/modulefiles/`
+  (the two Intel module files), `models/utils/readme.makedepf90`,
+  `models/TODO`, `models/compilation.notes` and `models/mpiopts.note`.
+  The rest of `models/` belongs to the eight model units, step 3.
+- **`model-common.map` says `owned`.** Nothing else changed: the shared
+  constitution already says what holds for an owned unit, and no tool
+  here read these files.
+- **The list was read at the baseline,** `ca0604a`: since step 1 the
+  working tree no longer resolves every map (cloudflow's originals are
+  gone), which is why the acceptance tests read the baseline too.
 
 ## Out of scope
 
