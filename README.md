@@ -1,81 +1,90 @@
-# IOOS Cloud Sandbox
+# Cloud-Sandbox: the workshop
 
-The IOOS Cloud Sandbox is a collaborative platform for running regional coastal models in the cloud.
+This repository was the IOOS Cloud Sandbox, in one piece. It has since
+been taken apart into fifteen units, each a private repository of its
+own on `infrastructurebuilder`, and what is left here is the workshop
+where they are held together:
 
-It provides repeatable configurations, model code and required libraries, input data, and analysis of model outputs. The Sandbox provisions Cloud HPC to aid in the development of services and models, and also supports running and validating models. The Sandbox is intended for use across industries and is inclusive to anyone who wants to develop, enhance, and run coastal models.
+- **[exportit/](exportit/)**: the fifteen units, each kept as a git
+  submodule at the path its copy had (`exportit/cloudflow`,
+  `exportit/sandbox-provisioning`, ...); one mapping file per unit
+  (`exportit/<unit>.map`), saying which file of the original went where;
+  cloudflow's corrections (`exportit/cloudflow.patches/`); and the tools
+  that check the units and carry changes into them
+  (`exportit/tools/`).
+- **[exportit/MAP.md](exportit/MAP.md)**: the record of every unit,
+  where its files came from, and how it was made.
+- **[SPECS/](SPECS/)** and **[PLAN.md](PLAN.md)**: the plans of the work
+  that spans units, one stage per file, the completed ones under
+  `SPECS/COMPLETED/`.
+- **[Justfile](Justfile)**: the entry point for everything below.
 
-### Use cases
-- Inter-organization collaboration
-- University graduate courses
-- Hindcasts/Reanalysis
-- Research to Operations (R2O)
-- On-demand HPC capacity
-- Quasi-operational HPC fail-over (natural disasters, data-center problems)
-- AI/ML training
+The original files are no longer on `develop`. They were deleted, one
+unit at a time, by stage 22 (2026-11-18 and 19), once each unit owned
+them. They are still in this repository's history, and on its `main`
+branch, which is a copy of the original project; every unit's baseline,
+the commit of the original it was made from, is `ca0604a`.
 
-### Deployment options
+## The units
 
-- **Self deployed/hosted**: Deploy using your own AWS cloud account
-- **IOOS hosted**: NOAA AWS Government Cloud – Lynker contract
-- **RPS hosted**: Isolated secure Virtual Private Cloud (VPC)
+Which units make a sandbox, at which versions, in which order, is in the
+umbrella's [units.toml](exportit/cloud-sandbox/units.toml): cloudflow
+(the workflow engine), the model recipes (`csis-model-*`),
+`csis-sandbox-configs`, `csis-sandbox-provisioning` (the Ansible that
+builds a head node), `csis-sandbox-terraform` (the OpenTofu that creates
+one), `csis-sandbox-ops`, and the umbrella itself, `csis-cloud-sandbox`.
+The Ansible collection `infrastructurebuilder.csis_spack` has its own
+public repository and is installed from Ansible Galaxy.
 
-### The Cloud Sandbox has been used to run:
+Each unit plans its own work with Spec Kit, under a constitution whose
+shared part is kept here (`exportit/tools/constitution/`). Work that
+spans units is planned here, as a stage.
 
-- Operational versions of the [NOSOFS ROMS and FVCOM Models](https://github.com/ioos/nosofs-NCO)
-- [LiveOcean model](https://comt.ioos.us/projects/liveocean) from the University of Washington
-- WRF/ROMS ESMF Coupled (Hurricane Irene test case)
-- WRF/ROMS/SWAN
-- ADCIRC (Hurricane Florence test case)
-- [CORA ADCIRC](https://registry.opendata.aws/noaa-nos-cora/) model
-- [SCHISM](https://ccrm.vims.edu/schismweb/)
-- [National Water Model](https://water.noaa.gov/about/nwm)
-- [UCLA-ROMS](https://github.com/CESR-lab/ucla-roms)
-- [UFS-Coastal](https://github.com/oceanmodeling/ufs-coastal-app)
-- [ECCOFS](https://registry.opendata.aws/noaa-nos-eccofs/)
-- [SECOFS](https://link.springer.com/article/10.1007/s10236-026-01794-8)
-- [NECOFS](https://comt.ioos.us/projects/necofs_transition)
+## Getting started
 
+You need `git`, `just` and `uv`, and access to the fifteen private
+repositories. Clone with the submodules, then set up every unit:
 
-## Documentation
+```sh
+git clone --recurse-submodules git@github.com:infrastructurebuilder/Cloud-Sandbox.git
+cd Cloud-Sandbox
+just init
+```
 
-Comprehensive guides and instructions for provisioning, configuring, and executing workflows on the Cloud Sandbox:
+A clone made without `--recurse-submodules` gets its units with
+`just init` too.
 
-* **[Infrastructure Deployment Guide](DEPLOYMENT.md)**: Instructions for deploying and hosting a Cloud Sandbox instance on AWS using Terraform.
-* **[Cloudflow Workflow System Overview](CLOUDFLOW.md)**: An architectural overview of the Cloudflow orchestration framework and Prefect server setup.
-* **[Prefect v3 Setup & Troubleshooting Guide](PREFECTV3.md)**: Configuration details for running the local Prefect v3 server in the background, persisting results, establishing SSH tunnels to the dashboard UI (`http://localhost:4200/dashboard`), and managing active flow runs via CLI.
-* **[Local Python Miniforge3 Installation Guide](LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md)**: Step-by-step instructions for installing a isolated Miniforge3 package manager and compiling a Cloudflow-compatible Python environment under your personal directory on the EFS volume of a given head node.
-* **[Zombie Job Checklist](ZOMBIE_JOB_CHECKLIST.md)**: Operational protocols, environment flag standards (`I_MPI`), Python deadlock hooks (`mpi4py`), Dask fast-fail configurations, and health-check steps to detect, prevent, and terminate hung or silent "zombie" processes on AWS EC2 instances.
+## The acceptance tests
 
-## I want to...
+| Target | What it checks |
+| --- | --- |
+| `just test` | every unit is checked out; every unit not yet owned is the original at its baseline plus its patches (all are owned now); the shared constitution is the same in every unit; each unit's own lint, type-check and fast tests |
+| `just full-test` | everything in `just test`; each unit's history holds the original at its baseline (what a sync depends on); a rehearsal of a sync of each kind; each unit's own slow tests, the container test of `sandbox-provisioning` among them |
 
-- Run a model in an existing cloud sandbox
-    - [NOS OFS Models](models/nosofs/NOSOFS-MODELS.md)
-    - [LiveOcean Model](models/liveocean/LIVEOCEAN-MODEL.md)
-    - [CORA](models/adcirc-cora/README.md)
-    - [UCLA-ROMS](models/ucla-roms/README.md)
-    - [UFS-Coastal](models/ufscoastal/README.md)
-    - [NECOFS](models/necofs/README.md)
-    - [SECOFS](models/secofs/README.md)
-    - [ECCOFS](models/eccofs/README.md)
-    - [PYTHON](cloudflow/CLOUDFLOW_PYTHON_MODEL_EXECUTION_INSTRUCTIONS.md)
-    - [Basic Model Implementation](cloudflow/CLOUDFLOW_MODEL_EXECUTION_INSTRUCTIONS.md)
+## Changing a unit
 
-- [Integrate a new model into the cloud sandbox](CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md)
+A unit is changed in its own repository, in `exportit/<unit>`, on a
+feature branch there. When it is merged into the unit's `develop` and
+pushed, this repository records the new commit (`git add
+exportit/<unit>`), and is pushed after it, never before:
+`just submodules-pushed` says whether every recorded commit is on its
+remote.
 
+## Carrying changes from the original
 
-- [Deploy a new cloud sandbox](DEPLOYMENT.md)
+When the original project changes, a clean local clone of it is given to
+the sync, one unit at a time:
 
+```sh
+just export-sync <unit> <path to the clone> sync-<n>
+```
 
-## Software Stack
+It merges the original's commits since the unit's baseline onto
+`feature/sync-<n>` in the unit's repository, with their authors, and
+moves the unit's baseline. What the mapping files cannot decide (a new
+file no map claims, a deleted file a map names, a conflict with the
+unit's own changes) stops it, and the unit is left as it was. The parity
+watch in [PLAN.md](PLAN.md) says when and how a sync is planned.
 
-The Cloud Sandbox uses [CloudFlow](CLOUDFLOW.md) to orchestrate the execution of the model. CloudFlow is a customized workflow for running models built on [Prefect Workflows](https://docs-v1.prefect.io/api/0.15.13/).
-
-![Modeling Stack](./images/sandbox-stack.png)
-
-## Software Architecture 
-
-The Cloud Sandbox uses [Terraform](https://www.terraform.io/) to deploy resources to the cloud. The sandbox currently only supports the Amazon Web Services (AWS) cloud platform.
-
-- **Head Node**: The head node is the machine that runs the CloudFlow scheduler. Users can SSH into this machine to run CloudFlow tasks.
-- **Preconfigured AMI**: This Amazon Machine Image (AMI) contains all of the necessary code to run the model. This image will run on the worker nodes.
-- **Worker Nodes**: The worker nodes are provisioned by Terraform and run CloudFlow tasks. This runs the preconfigured AMI.
+Nothing from this work goes toward `ioos/Cloud-Sandbox`: no push, no
+pull request, no remote.

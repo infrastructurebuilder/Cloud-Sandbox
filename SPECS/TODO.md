@@ -19,10 +19,12 @@ directory was `INPROGRESS/`.)
   (since moving day, 2026-11-17, replacing "nothing leaves this
   repository", which stood from 2026-11-12). Every unit under
   [exportit/](../exportit/) is a repository of its own on
-  `infrastructurebuilder`, at the path its copy had. The original paths
-  stay untouched, and each unit is still held to them by its mapping
-  file. A change to a unit is a commit in its repository; this
-  repository then records the new commit. See
+  `infrastructurebuilder`, at the path its copy had. Since stage 22
+  (2026-11-19) the original paths are gone from `develop` and every unit
+  owns its copied files; `main` and the history keep the originals, and
+  a later original reaches the units by sync (stage 23). A change to a
+  unit is a commit in its repository; this repository then records the
+  new commit. See
   [exportit/MOVINGDAY.md](../exportit/MOVINGDAY.md).
 - **Never push to `ioos/Cloud-Sandbox`**, and never open a pull
   request against it.

@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs), 5 (sandbox-provisioning), 6 (sandbox-terraform) and 7 (sandbox-ops) done and merged** on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs), 5 (sandbox-provisioning), 6 (sandbox-terraform) and 7 (sandbox-ops) done and merged**, and **step 8 (the umbrella), the last, done**, on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -256,6 +256,29 @@ Nothing deleted. In place:
   What is left of `scripts/` (54) and `misc/` (22) is the attic, which
   the umbrella copies, for step 8.
 - **`sandbox-ops.map` says `owned`.** Nothing else changed.
+
+### Step 8, 2026-11-19, on `feature/delete-umbrella`
+
+- **Deleted:** the umbrella's 82 original files: the attic's 54 in
+  `scripts/` and 22 in `misc/`, `README.md`, `DEPLOYMENT.md`,
+  `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, `TODO`,
+  `images/sandbox-stack.png` and `.github/ISSUE_TEMPLATE.md`.
+- **Kept, by decision 2:** `.gitignore` and `LICENSE`. The umbrella's
+  map still copies them; they are the umbrella's copies' originals and
+  this repository's own files at once.
+- **`cloud-sandbox.map` says `owned`:** every unit is owned now.
+- **A new root `README.md`** says what Cloud-Sandbox is now: the
+  workshop (decision 4). It is this repository's own; no map names it,
+  because the original has a `README.md` of its own, which goes to the
+  umbrella in a sync.
+- **The root `Justfile`'s header** no longer describes the original
+  tree; `export-check` says it needs a clone of the original now.
+- **Records:** MAP.md's introduction, the state *owned*, step 6 of the
+  method; SPECS/TODO.md's standing decision; REMINDERS.md's item on the
+  deletion, closed.
+- **Afterwards,** `git ls-files` outside `exportit/` and `SPECS/` lists
+  `.gitignore`, `.gitmodules`, `Justfile`, `LICENSE`, `PLAN.md` and
+  `README.md`: this repository's own files, and the two decision 2 keeps.
 
 ## Out of scope
 

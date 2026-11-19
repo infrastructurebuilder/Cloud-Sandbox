@@ -5,11 +5,15 @@ repositories of their own, and since **moving day, 2026-11-17**, each of
 them does: every unit below is a private repository on
 `infrastructurebuilder`, and is kept here as a git submodule at the path
 its copy had ([MOVINGDAY.md](MOVINGDAY.md) is the plan and its record).
-The original paths are untouched: `cloudflow/`, `scripts/`, `terraform/`,
-`models/` and the rest are still in this repository, and each unit is
-still held to them by its mapping file. Deleting the originals is the
-step that has not been taken. This page says, for each unit, where its
-files come from, where the unit is, and what is left to do.
+Since **stage 22, finished 2026-11-19**, the originals are gone from
+this repository's `develop`: `cloudflow/`, `scripts/`, `terraform/`,
+`models/` and the rest were deleted one unit at a time, and every unit
+owns its copied files (its mapping file says `owned`). This repository's
+history and its `main`, the copy of the original, still hold them, at
+`ca0604a`, which is every unit's baseline. The mapping files stay: they
+say where each original file went, and a sync from a later original
+(stage 23) is driven by them. This page says, for each unit, where its
+files came from, where the unit is, and how it was made.
 
 Much of what follows was written before moving day and says how a
 relocation *would* be done; the three sections that describe the method,
@@ -26,9 +30,10 @@ staged in [SPECS/TODO.md](../SPECS/TODO.md).
 (the unit's files are checked against their sources), *translated*
 (rewritten in another form, with the originals carried beside it and
 tests that hold the two together), *relocated* (a private repository of
-its own on `infrastructurebuilder`, kept here as a submodule; the
-originals stay). Every unit is relocated since 2026-11-17, and still
-copied or translated as before: the check goes on.
+its own on `infrastructurebuilder`, kept here as a submodule),
+*owned* (its originals deleted here; its copies are its own, and its
+lineage alone holds it to the original). Every unit was relocated on
+2026-11-17 and is owned since 2026-11-19.
 
 | Unit | Copy | Source paths | Stage | State |
 | --- | --- | --- | ---: | --- |
@@ -126,10 +131,11 @@ here, and what was done:
    **Done:** `main`, `develop` and the first tag, by name; the rewritten
    copies of this repository's other branches and tags stayed behind.
 6. In Cloud-Sandbox, on a feature branch, delete the relocated paths
-   and leave a pointer to the new repository. **Not done, on purpose.**
-   The original paths are all still here. What replaced the *copy*,
-   under `exportit/`, is a submodule; what will replace the *originals*
-   is still [stage 22](../SPECS/STAGE-22.md)'s to do.
+   and leave a pointer to the new repository. **Done by
+   [stage 22](../SPECS/STAGE-22.md), one unit at a time,
+   2026-11-18 and 19,** after moving day had replaced each copy under
+   `exportit/` with a submodule. The pointer is the submodule, and the
+   root `README.md`.
 7. The units that depend on it refer to it by version from then on.
    **Not yet:** no unit installs another from its repository.
    `units.toml` names each repository and its version.
@@ -1465,7 +1471,7 @@ step is done.
 | 5 | `sandbox-provisioning` (**originals deleted, stage 22 step 5, 2026-11-19**) | `ansible-collection-csis-spack`, which is in its own repository already | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
 | 6 | `sandbox-terraform` (**originals deleted, stage 22 step 6, 2026-11-19**) | `sandbox-provisioning` (the first-boot template names its repository and version) | `terraform/` gone. Make the two-variable change in its README at this step, pointing at step 5's repository |
 | 7 | `sandbox-ops` (**originals deleted, stage 22 step 7, 2026-11-19**) | `sandbox-provisioning` (its tools read the versions there) | the attic's 76 files moved to `attic/`, which stays; the rest of `scripts/` and `misc/` gone |
-| 8 | `cloud-sandbox` | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |
+| 8 | `cloud-sandbox` (**originals deleted, stage 22 step 8, 2026-11-19**) | every unit | the repository itself becomes the umbrella: what is left is replaced by the umbrella's files, on a branch, and `units.toml` is filled with the repositories made in steps 1–7 |
 
 The machinery of this work does not move: `exportit/`, `SPECS/`,
 `PLAN.md` and the root `Justfile` are deleted in step 8, and the
