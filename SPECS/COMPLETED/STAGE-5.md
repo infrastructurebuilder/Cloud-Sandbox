@@ -6,7 +6,7 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[models/](../../models/) holds the recipes that fetch, patch and build
+[models/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/models) holds the recipes that fetch, patch and build
 each ocean model on a sandbox. They are not used by any code in the
 repository; they are run by hand, and they leave executables and
 module files at paths that the cloudflow launchers then assume (C3 in
@@ -18,7 +18,7 @@ is written down nowhere.
 147 tracked files: eight model directories (`adcirc-cora` with 55
 files is the largest; then `necofs`, `ufscoastal`, `secofs`, `eccofs`,
 `liveocean`, `nosofs` and `ucla-roms`), shared `modulefiles` and
-`utils`, and three notes. Two scripts under [patches/](../../patches/)
+`utils`, and three notes. Two scripts under [patches/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/patches)
 belong to `adcirc-cora`. The recipes were read only as a file list.
 
 ## Items

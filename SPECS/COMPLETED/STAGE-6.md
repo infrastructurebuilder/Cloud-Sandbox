@@ -6,8 +6,8 @@ under [Decisions taken](#decisions-taken); the result under
 
 ## Why
 
-[job.configs/](../../job.configs/) and
-[cluster.configs/](../../cluster.configs/) are data, not code. cloudflow
+[job.configs/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/job.configs) and
+[cluster.configs/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cluster.configs) are data, not code. cloudflow
 reads them by a path given on the command line. Many of them carry
 one site's AWS identifiers (image id, security groups, subnet, key
 name), so they are that site's configuration and have a different

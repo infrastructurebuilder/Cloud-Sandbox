@@ -16,21 +16,21 @@ without a live sandbox (couplings C1 to C4 and defects F1 to F5 in
 
 ## What exists
 
-- [cloudflow/](../../cloudflow/): 195 tracked files. About 12,000 lines
+- [cloudflow/](https://github.com/infrastructurebuilder/Cloud-Sandbox/tree/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cloudflow): 195 tracked files. About 12,000 lines
   of Python in six sub-packages (`cluster`, `job`, `services`,
   `utils`, `workflows`, `plotting`), 3,000 lines of shell launchers
   and helper scripts, 44 model input templates (the largest files),
   22 notebook files, notes, two cron scripts, and seven script-style
   "tests" that need a running sandbox.
-- At the repository root: [setup.py](../../setup.py),
-  [setup-plotting.sh](../../setup-plotting.sh),
-  [CLOUDFLOW.md](../../CLOUDFLOW.md), [PREFECTv3.md](../../PREFECTv3.md)
+- At the repository root: [setup.py](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/setup.py),
+  [setup-plotting.sh](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/setup-plotting.sh),
+  [CLOUDFLOW.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/CLOUDFLOW.md), [PREFECTv3.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/PREFECTv3.md)
   and
-  [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](../../LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md).
+  [LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/LOCAL_PYTHON_MINIFORGE3_INSTALLATION_CLOUD_SANDBOX_INSTRUCTIONS.md).
 - What the code imports from outside the standard library: `boto3`,
   `botocore`, `prefect`, `dask`, `distributed` everywhere; `numpy`,
   `matplotlib`, `netCDF4`, `pyproj`, `PIL` and others in `plotting`,
-  which [job_tasks.py](../../cloudflow/workflows/job_tasks.py#L21)
+  which [job_tasks.py](https://github.com/infrastructurebuilder/Cloud-Sandbox/blob/ca0604a4a27355b330353c7ded8a1ae00a7e24a6/cloudflow/workflows/job_tasks.py#L21)
   imports when it is loaded; `xarray`, `pandas`, `s3fs` in the Dask
   examples; the Jupyter libraries in `utils/notebook.py`.
 
