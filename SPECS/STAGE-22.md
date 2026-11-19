@@ -4,7 +4,7 @@
 of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
 at the operator's request; **its five decisions asked and answered on
 "do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow) and 2 (model-common) done and merged** on 2026-11-19
+on 2026-11-18, **steps 1 (cloudflow) and 2 (model-common) done and merged**, and **step 3 (the eight models) done**, on 2026-11-19
 ([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
 ever pushed to `ioos`.
 
@@ -204,6 +204,14 @@ Nothing deleted. In place:
 - **The list was read at the baseline,** `ca0604a`: since step 1 the
   working tree no longer resolves every map (cloudflow's originals are
   gone), which is why the acceptance tests read the baseline too.
+
+### Step 3, 2026-11-19, on `feature/delete-models`
+
+- **Deleted:** the eight model units' 143 original files, the rest of
+  `models/` (141) and `patches/` (2): `adcirc-cora` 57, `eccofs` 13,
+  `liveocean` 10, `necofs` 17, `nosofs` 9, `secofs` 16, `ucla-roms` 4,
+  `ufscoastal` 17. Nothing of anyone else's was in either place.
+- **The eight maps say `owned`.** Nothing else changed.
 
 ## Out of scope
 
