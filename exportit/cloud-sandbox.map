@@ -111,7 +111,11 @@ copy scripts/upgrade-mpi.sh                                      attic/dead/scri
 # Not relocated: the records and the entry point of this reconstruction,
 # which go when the work is done. They are this repository's own, never the
 # original's (stage 23): a given original that had one would be a problem.
-local SPECS/
+local specs/        # since 2026-11-19, Spec Kit's specs (until then SPECS/, stage plans)
+local ATTIC/        # the plans retired when Spec Kit came, PLAN.md and SPECS/ among them
+local .specify/
+local .claude/
+local CLAUDE.md
 local .gitmodules   # names the units kept as submodules under exportit/ (MOVINGDAY.md)
 local PLAN.md
 local Justfile

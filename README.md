@@ -14,9 +14,14 @@ where they are held together:
   (`exportit/tools/`).
 - **[exportit/MAP.md](exportit/MAP.md)**: the record of every unit,
   where its files came from, and how it was made.
-- **[SPECS/](SPECS/)** and **[PLAN.md](PLAN.md)**: the plans of the work
-  that spans units, one stage per file, the completed ones under
-  `SPECS/COMPLETED/`.
+- **[specs/](specs/)**: the work that spans units, planned with Spec Kit,
+  one directory per spec; [specs/README.md](specs/README.md) lists them in
+  the order they are to be taken up. This repository's rules are its
+  constitution, [.specify/memory/constitution.md](.specify/memory/constitution.md).
+- **[ATTIC/](ATTIC/)**: what was retired when the planning moved to Spec Kit
+  on 2026-11-19: `PLAN.md`, and the stage plans that came before, with the
+  analysis of the original repository (`ATTIC/SPECS/`). History for a person
+  reading; nothing there is a rule.
 - **[Justfile](Justfile)**: the entry point for everything below.
 
 The original files are no longer on `develop`. They were deleted, one
@@ -84,7 +89,8 @@ It merges the original's commits since the unit's baseline onto
 moves the unit's baseline. What the mapping files cannot decide (a new
 file no map claims, a deleted file a map names, a conflict with the
 unit's own changes) stops it, and the unit is left as it was. The parity
-watch in [PLAN.md](PLAN.md) says when and how a sync is planned.
+watch, in the constitution's principle II, says when and how a sync is
+planned: as a spec.
 
 Nothing from this work goes toward `ioos/Cloud-Sandbox`: no push, no
 pull request, no remote.

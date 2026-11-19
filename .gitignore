@@ -42,3 +42,6 @@ out.*
 terraform/deployment.info
 terraform/deployment_info.txt
 .venv/
+
+# Per-machine agent settings; the shared Spec Kit skills under .claude/skills are tracked.
+.claude/settings.local.json
