@@ -179,8 +179,13 @@ Nothing deleted. In place:
   code needs a spec of its own, since it would make later syncs
   conflict.
 - **The collection's pin moved to 0.0.1** in `sandbox-provisioning`'s
-  `requirements.yml` and the umbrella's `units.toml`, a change made in
-  the collection's workspace and committed here on the operator's word:
+  `requirements.yml` and the umbrella's `units.toml`, a change found
+  uncommitted in the two units' working trees on 2026-11-18, made outside
+  this session (not by the collection's session either, which says it
+  only read those files), and committed here on the operator's word.
+  The two units' commit messages say it came from the collection's
+  workspace; that is wrong, and is left as it is because the commits are
+  the ones the container test ran on. The reason for the move:
   the collection withdrew its tags 0.1.0 to 0.3.1 on 2026-11-19 and
   released all they held as 0.0.1, on Ansible Galaxy as well. The
   container test then installs from Galaxy, which

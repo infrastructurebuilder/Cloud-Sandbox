@@ -101,7 +101,7 @@ with nothing to change.
   with a `config` step of state `absent` in the user scope, and reports
   the chosen. Three tasks and the file, each with its `# New:` comment and
   when they can go.
-- The pin is 0.3.1, in `requirements.yml` and `units.toml`.
+- The pin is 0.0.1, in `requirements.yml` and `units.toml`.
 - `tests/test_user_scope.py` applies the task file alone against scope
   files it writes (8 tests); the parity test holds the removal to the
   stage 11 dump's two paths; traceability reads the new step.

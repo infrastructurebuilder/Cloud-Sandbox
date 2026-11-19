@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import configparser
+import operator
 import re
 import tomllib
+from collections.abc import Callable
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 EXPORT = ROOT / "exportit"
@@ -58,13 +62,67 @@ def test_an_external_unit_is_not_copied_here() -> None:
             assert not (EXPORT / name).exists(), name
 
 
-def test_the_collection_is_pinned_where_it_is_used_at_its_manifest_version() -> None:
+COLLECTION = "infrastructurebuilder.csis_spack"
+REPOSITORY = "https://github.com/infrastructurebuilder/ansible-collection-csis-spack.git"
+Release = tuple[int, ...]
+COMPARISONS: dict[str, Callable[[Release, Release], bool]] = {
+    ">=": operator.ge,
+    "<=": operator.le,
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    "<": operator.lt,
+}
+
+
+def release(text: str) -> Release:
+    return tuple(int(part) for part in text.split("."))
+
+
+def satisfies(version: str, spec: str) -> bool:
+    """Say whether a version is inside a range as ansible-galaxy writes one (">=0.0.1,<0.1.0", or "0.0.1")."""
+    for part in (item.strip() for item in spec.split(",")):
+        found = re.fullmatch(r"(>=|<=|==|!=|>|<)?\s*(\d+(?:\.\d+)*)", part)
+        assert found, f"cannot read the version requirement {part!r}"
+        if not COMPARISONS[found.group(1) or "=="](release(version), release(found.group(2))):
+            return False
+    return True
+
+
+def collection_requirement() -> tuple[str, str]:
+    """Give how sandbox-provisioning's requirements.yml names the collection, and its version requirement."""
     requirements = (EXPORT / "sandbox-provisioning" / "requirements.yml").read_text()
-    pinned = re.search(
-        r"ansible-collection-csis-spack\.git\n\s+type: git\n\s+version: \"([^\"]+)\"", requirements
+    entry = re.search(
+        rf"- name: ({re.escape(COLLECTION)}|{re.escape(REPOSITORY)})\n((?:\s{{4}}\w+: .*\n)+)", requirements
     )
-    assert pinned, "sandbox-provisioning/requirements.yml does not pin the collection"
-    assert pinned.group(1) == manifest()["ansible-collection-csis-spack"]["version"]
+    assert entry, "sandbox-provisioning/requirements.yml does not name the collection"
+    fields = dict(re.findall(r"(\w+): \"?([^\"\n]+)\"?", entry.group(2)))
+    return entry.group(1), fields["version"]
+
+
+def test_the_collection_is_pinned_where_it_is_used_at_its_manifest_version() -> None:
+    """The manifest's version is inside the range requirements.yml gives, or is the tag it names."""
+    source, wanted = collection_requirement()
+    version = str(manifest()["ansible-collection-csis-spack"]["version"])
+    if source == REPOSITORY:
+        assert wanted == version, f"requirements.yml names the tag {wanted}, units.toml {version}"
+    else:
+        assert satisfies(version, wanted), f"units.toml's {version} is not within {wanted!r}"
+
+
+@pytest.mark.parametrize(
+    ("version", "spec", "inside"),
+    [
+        ("0.0.1", ">=0.0.1,<0.1.0", True),
+        ("0.0.9", ">=0.0.1,<0.1.0", True),
+        ("0.1.0", ">=0.0.1,<0.1.0", False),
+        ("0.0.0", ">=0.0.1,<0.1.0", False),
+        ("0.0.1", "0.0.1", True),
+        ("0.0.2", "==0.0.1", False),
+    ],
+)
+def test_a_version_is_inside_a_range_as_galaxy_reads_it(version: str, spec: str, inside: bool) -> None:
+    assert satisfies(version, spec) is inside
 
 
 def test_a_unit_with_a_pyproject_has_that_version_in_the_manifest() -> None:
