@@ -132,7 +132,7 @@ here, and what was done:
    copies of this repository's other branches and tags stayed behind.
 6. In Cloud-Sandbox, on a feature branch, delete the relocated paths
    and leave a pointer to the new repository. **Done by
-   [stage 22](../SPECS/STAGE-22.md), one unit at a time,
+   [stage 22](../SPECS/COMPLETED/STAGE-22.md), one unit at a time,
    2026-11-18 and 19,** after moving day had replaced each copy under
    `exportit/` with a submodule. The pointer is the submodule, and the
    root `README.md`.
@@ -1403,7 +1403,7 @@ this file's copy check covers it.
 
 ## Syncing from the original
 
-Added by [stage 23](../SPECS/STAGE-23.md), 2026-11-18, so that the
+Added by [stage 23](../SPECS/COMPLETED/STAGE-23.md), 2026-11-18, so that the
 original repository's later changes can still reach the units once
 their originals are deleted from Cloud-Sandbox.
 

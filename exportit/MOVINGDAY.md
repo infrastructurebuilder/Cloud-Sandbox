@@ -49,8 +49,8 @@ accident.
 | Standing | What moving day does |
 | --- | --- |
 | "Nothing leaves this repository" ([SPECS/TODO.md](../SPECS/TODO.md), since 2026-11-12) | Replaced: the units' copies leave, into repositories of their own. The originals stay |
-| [Stage 19](../SPECS/STAGE-19.md): decide whether to relocate, after stages 12 to 18, the live proof, and the collection's stages | Decided ahead of that, by the operator: relocate all. Stage 15 (the live proof) is waiting for an AWS account, 16 to 18 are not done, and collection stage 5 is waiting for its Galaxy namespace |
-| [Stage 22](../SPECS/STAGE-22.md): private or public asked for each unit; the original paths deleted in the same step | Private, all of them. The original paths are **not** deleted, and Cloud-Sandbox holds a submodule where the copy was. Stage 22 is left with only its step 4, the deletion, when the operator wants it |
+| [Stage 19](../SPECS/COMPLETED/STAGE-19.md): decide whether to relocate, after stages 12 to 18, the live proof, and the collection's stages | Decided ahead of that, by the operator: relocate all. Stage 15 (the live proof) is waiting for an AWS account, 16 to 18 are not done, and collection stage 5 is waiting for its Galaxy namespace |
+| [Stage 22](../SPECS/COMPLETED/STAGE-22.md): private or public asked for each unit; the original paths deleted in the same step | Private, all of them. The original paths are **not** deleted, and Cloud-Sandbox holds a submodule where the copy was. Stage 22 is left with only its step 4, the deletion, when the operator wants it |
 | [Stage 20](../SPECS/STAGE-20.md): `sandbox-configs` is split by owner before it moves | Decision 4 below: it moves whole unless you say otherwise |
 | [Stage 21](../SPECS/STAGE-21.md): the first boot runs the playbooks | Unchanged, and easier afterwards: `sandbox-provisioning` will have a URL to name. A private repository needs a deploy key on the node |
 | The parity watch on `main` ([PLAN.md](../PLAN.md)) | Unchanged. A change carried from `main` is committed in the unit's repository, and the submodule here is moved to it |
@@ -421,7 +421,7 @@ unit.
    order section.
 3. [SPECS/TODO.md](../SPECS/TODO.md): the standing decision "nothing
    leaves this repository" replaced; stage 19 marked decided, with what
-   was decided; [stage 22](../SPECS/STAGE-22.md) left with its deletion
+   was decided; [stage 22](../SPECS/COMPLETED/STAGE-22.md) left with its deletion
    step. [REMINDERS.md](REMINDERS.md): "whether to relocate at all"
    closed; new items for the links (decision 5) and for stage 20 if
    `sandbox-configs` moved whole.
@@ -443,9 +443,9 @@ the records":
    units' own sections are left as the record of how each was made.
 3. [SPECS/TODO.md](../SPECS/TODO.md): the standing decision replaced,
    the table and "Landed" brought up to date;
-   [stage 19](../SPECS/STAGE-19.md) decided, with the conditions it set
+   [stage 19](../SPECS/COMPLETED/STAGE-19.md) decided, with the conditions it set
    that were not met, as the operator's choice;
-   [stage 22](../SPECS/STAGE-22.md) left with the deletion.
+   [stage 22](../SPECS/COMPLETED/STAGE-22.md) left with the deletion.
    [REMINDERS.md](REMINDERS.md): "whether to relocate at all" closed;
    new items for the deletion, the links, the configs, releasing, and
    this working directory. The last was closed the same day, when the

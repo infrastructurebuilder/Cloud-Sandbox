@@ -30,12 +30,12 @@ history unchanged and the new upstream commits on top of it.
 
 Two things are missing, and one has never been tried:
 
-1. **[export.py](../exportit/tools/export.py) reads the originals from
+1. **[export.py](../../exportit/tools/export.py) reads the originals from
    the repository it lives in.** After the deletion that repository has
    none. It needs to read them from another checkout, the changed
    original, while the maps and patches stay here.
 2. **Nothing records which upstream commit each unit was made from.**
-   [PLAN.md](../PLAN.md)'s parity watch keeps one baseline for the
+   [PLAN.md](../../PLAN.md)'s parity watch keeps one baseline for the
    repository (`ca0604a`). Without a baseline for each unit, "what has
    changed for this unit since" cannot be worked out, and after a first
    sync the units will no longer share one.
@@ -72,7 +72,7 @@ Two things are missing, and one has never been tried:
    existing tests run both ways, and a throw-away "original" beside a
    throw-away Cloud-Sandbox with no originals of its own.
 
-2. **Each unit's baseline in [units.toml](../exportit/cloud-sandbox/units.toml).**
+2. **Each unit's baseline in [units.toml](../../exportit/cloud-sandbox/units.toml).**
    A field `baseline`: the commit of the original repository the unit's
    copied files are (with its patches). `ca0604a` for all fifteen today,
    which the tests prove: a check that every unit's copied files equal
@@ -124,7 +124,7 @@ Two things are missing, and one has never been tried:
 6. **Records:** MAP.md gains "Syncing from the original" (what the maps
    decide, what they leave to the operator); [stage 22](STAGE-22.md)
    says that its deletion waits for this stage;
-   [REMINDERS.md](../exportit/REMINDERS.md) says so as well.
+   [REMINDERS.md](../../exportit/REMINDERS.md) says so as well.
 
 ## Decisions
 
@@ -164,7 +164,7 @@ Asked on 2026-11-18, one at a time; every answer was the default:
   unit at its own baseline; `sync <unit> --source <clone> --branch <name>`
   carries the original's commits. A new directive, `local`, marks
   `SPECS/`, `PLAN.md`, the `Justfile` and `.gitmodules` as this
-  repository's own in [cloud-sandbox.map](../exportit/cloud-sandbox.map).
+  repository's own in [cloud-sandbox.map](../../exportit/cloud-sandbox.map).
 - **The sync refuses**, leaving the unit as it was, when: the maps do not
   resolve against the original; the original does not descend from the
   baseline; the filtered original brings a different number of new
@@ -173,13 +173,13 @@ Asked on 2026-11-18, one at a time; every answer was the default:
   after carrying, the originals that changed, and for
   `sandbox-provisioning` that its translation must be checked.
 - **Baselines** are in the umbrella's
-  [units.toml](../exportit/cloud-sandbox/units.toml), `ca0604a` for every
+  [units.toml](../../exportit/cloud-sandbox/units.toml), `ca0604a` for every
   unit and for the umbrella; its check requires a full commit for every
   copied unit and none for an external one. `just export-baselines`
   passes: every unit is `ca0604a`'s files plus its patches.
 - **Tests:** 14 in `tools/tests/test_sync.py`, on small repositories made
   as moving day made the real ones (81 in the tool in all).
-- **The rehearsal**, [rehearse_sync.py](../exportit/tools/rehearse_sync.py),
+- **The rehearsal**, [rehearse_sync.py](../../exportit/tools/rehearse_sync.py),
   `just sync-rehearse`, in `just full-test`: seven scenarios against
   throw-away clones of the real `model-common`, `cloudflow` and
   `sandbox-provisioning`, from a made-up original built on `ca0604a`'s

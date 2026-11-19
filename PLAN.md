@@ -52,11 +52,11 @@ are not in it.
 | 7 | [collection 5](../ansible-collection-csis-spack/COLL-INPROGRESS/COLL-STAGE-5.md) | Ansible Galaxy, or the git tag (a decision, then its work) | nothing; before 22, so the source is named once | medium if published |
 | 8 | [17](SPECS/STAGE-17.md) | The Lambda functions: an owner, a module, tests (a decision, then its work) | nothing; before 22, step 1 | medium to large |
 | 9 | [18](SPECS/STAGE-18.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 15: a head node to build on | large |
-| 10 | [19](SPECS/STAGE-19.md) | Relocate all, some, or none (a decision). **Decided 2026-11-17 by moving day: all** | 1 to 9, as "a good commit tree" (not all met: the operator's choice) | done |
+| 10 | [19](SPECS/COMPLETED/STAGE-19.md) | Relocate all, some, or none (a decision). **Decided 2026-11-17 by moving day: all** | 1 to 9, as "a good commit tree" (not all met: the operator's choice) | done |
 | 11 | [20](SPECS/STAGE-20.md) | `sandbox-configs` split by owner | 19 relocates it | medium |
 | 12 | [21](SPECS/STAGE-21.md) | The first boot runs the playbooks (`main.tf`'s two values) | 19 relocates both units; put into use at 22, step 6 | small |
-| 13 | [23](SPECS/STAGE-23.md) | Syncing from the original after its paths are deleted: `export.py --source`, a baseline per unit, `export.py sync`, and a rehearsal | moving day (done) | medium |
-| 14 | [22](SPECS/STAGE-22.md) | The real relocations, eight steps in MAP.md's order. **The repositories made by moving day**; left: deleting the original paths, planned 2026-11-18 in nine steps (step 0 puts the replacement checks in place) | 23 (done) | medium |
+| 13 | [23](SPECS/COMPLETED/STAGE-23.md) | Syncing from the original after its paths are deleted: `export.py --source`, a baseline per unit, `export.py sync`, and a rehearsal. **Done 2026-11-18** | moving day (done) | done |
+| 14 | [22](SPECS/COMPLETED/STAGE-22.md) | The real relocations: the repositories made by moving day; the original paths deleted in nine steps. **Done 2026-11-19** | 23 (done) | done |
 
 Standing beside all of them: the parity watch on `main` (the next
 section), which, while it lasts, comes before any of these whenever
@@ -93,7 +93,7 @@ copy or translation of what is in the repository.
    sync-<n>`, which merges the upstream commits since the unit's baseline
    onto `feature/sync-<n>` in the unit's repository, with their authors,
    and moves its baseline. The clone of `main` is one the operator gives
-   by its path ([stage 23](SPECS/STAGE-23.md), decision 1). Update
+   by its path ([stage 23](SPECS/COMPLETED/STAGE-23.md), decision 1). Update
    [exportit/MAP.md](exportit/MAP.md) and the affected pages, pass each
    unit's acceptance tests and the root `just test` and `just full-test`.
    Commit locally; finish the units' branches, merge here and push, units

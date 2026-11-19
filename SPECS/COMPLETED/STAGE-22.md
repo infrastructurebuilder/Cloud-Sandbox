@@ -1,18 +1,20 @@
 # Stage 22: the real relocations
 
-*Status:* **half done by moving day, 2026-11-17;** the rest, the deletion
-of the original paths, **planned 2026-11-18** on `feature/deletion-plan`
-at the operator's request; **its five decisions asked and answered on
-"do 22", 2026-11-18** ([Decisions taken](#decisions-taken)). **Step 0 done**
-on 2026-11-18, **steps 1 (cloudflow), 2 (model-common), 3 (the eight models), 4 (sandbox-configs), 5 (sandbox-provisioning), 6 (sandbox-terraform) and 7 (sandbox-ops) done and merged**, and **step 8 (the umbrella), the last, done**, on 2026-11-19
-([Outcome](#outcome)); each further step runs on its own `do 22.<n>`. Nothing is
-ever pushed to `ioos`.
+*Status:* **done, 2026-11-19.** Moving day (2026-11-17) gave every unit
+its repository; the deletion of the original paths, planned 2026-11-18
+at the operator's request, with its five decisions answered on "do 22"
+([Decisions taken](#decisions-taken)), was carried out in nine steps,
+0 to 8, each on its own branch, each passing the root `just test` and
+`just full-test`, and each merged into `develop` and pushed on the
+operator's word ([Outcome](#outcome)). The originals are gone from
+`develop`; `main` and the history keep them. Nothing was pushed to
+`ioos`.
 
 Moving day carried out steps 1 to 3 of the plan of 2026-11-14 for every
 unit (kept below, under [As planned on 2026-11-14](#as-planned-on-2026-11-14)):
 each unit is a private repository on `infrastructurebuilder`, with its
 history and its first tag, kept here as a submodule at its old path under
-`exportit/` ([MOVINGDAY.md](../exportit/MOVINGDAY.md)). The deletion
+`exportit/` ([MOVINGDAY.md](../../exportit/MOVINGDAY.md)). The deletion
 waited for [stage 23](STAGE-23.md), which since 2026-11-18 lets a later
 original reach the units without the originals here.
 
@@ -33,9 +35,9 @@ Found by reading what in this repository reads an original path
 | --- | --- |
 | `just export-check`, in `just test`: every copied file against the original in the working tree | `just export-baselines`, already in `just full-test`: every unit against its baseline, read from this repository's history, which keeps `ca0604a` after the deletion. It moves into `just test`, and `export-check` is kept for a given clone (`source=`) only |
 | `just export-prove <unit>`, in `just full-test`: the extraction from this repository's HEAD | a **lineage check**: the original at the unit's baseline (this repository's history, or a given clone), filtered with the unit's directives, gives a commit that is in the unit's own history. That is what a sync depends on, and stays true when the unit changes its own files |
-| [tools/configs_schema.py](../exportit/tools/configs_schema.py), which writes `sandbox-configs`' schema from `cloudflow/job/` and `cloudflow/cluster/` | the same code, read from the unit: `exportit/cloudflow/src/cloudflow/job/` and `.../cluster/` |
-| [tools/tests/test_model_units.py](../exportit/tools/tests/test_model_units.py), which reads the launchers in `cloudflow/workflows/` against the install contract | the launchers in `exportit/cloudflow/src/cloudflow/workflows/` |
-| The parity watch's step 2 ([PLAN.md](../PLAN.md)): `git merge origin/main` here. After the deletion, a merge of `main` would bring back every original `main` changes, and conflict on the rest | the sync alone: `just export-sync <unit> <clone of main> sync-<n>`, one unit at a time, as stage 23 built it. `main` is never merged into `develop` again |
+| [tools/configs_schema.py](../../exportit/tools/configs_schema.py), which writes `sandbox-configs`' schema from `cloudflow/job/` and `cloudflow/cluster/` | the same code, read from the unit: `exportit/cloudflow/src/cloudflow/job/` and `.../cluster/` |
+| [tools/tests/test_model_units.py](../../exportit/tools/tests/test_model_units.py), which reads the launchers in `cloudflow/workflows/` against the install contract | the launchers in `exportit/cloudflow/src/cloudflow/workflows/` |
+| The parity watch's step 2 ([PLAN.md](../../PLAN.md)): `git merge origin/main` here. After the deletion, a merge of `main` would bring back every original `main` changes, and conflict on the rest | the sync alone: `just export-sync <unit> <clone of main> sync-<n>`, one unit at a time, as stage 23 built it. `main` is never merged into `develop` again |
 | The shared constitution's principle S3: "a copied file is changed in Cloud-Sandbox" | amended by decision 5 |
 
 Nothing in the units reads an original path in Cloud-Sandbox: each
