@@ -89,10 +89,12 @@ empty workspace, with the guard on and off.
   module, applied after `csis-sandbox-terraform` (one more repository, which
   is the operator's to create); or they stay in cloudflow, outside the
   package, deployed by hand, and documented as such.]
-- **FR-002**: Moving them out of cloudflow moves files between units:
-  [NEEDS CLARIFICATION: how their mapping lines move (cloudflow's map drops
-  the two files and `lambda.env`, the new owner's map takes them) and both
-  units' lineage is kept (constitution, principle I).]
+- **FR-002**: Moving them out of cloudflow moves files between units: [NEEDS
+  CLARIFICATION: first, whether both units need them, in which case they go to
+  a common unit or a single source instead (constitution 1.1.0, principle I);
+  if only one does, how their mapping lines move (cloudflow's map drops the
+  two files and `lambda.env`, the new owner's map takes them) and both units'
+  lineage is kept (constitution, principle I).]
 - **FR-003**: Deploying now: [NEEDS CLARIFICATION: with either of the first
   two owners, write the module and test it with `tofu validate` and `tofu plan`
   against a workspace with no resources (default); or also apply it in the

@@ -11,7 +11,9 @@ two markers::
     <!-- csis-shared: end -->
 
 Every unit's ``CLAUDE.md`` is shared whole: ``constitution/CLAUDE.md`` with the
-repository's and the unit's names put in.
+repository's and the unit's names put in. Every unit's ``LICENSE`` is
+Cloud-Sandbox's own ``LICENSE``, the project's licence (Cloud-Sandbox's
+constitution, principle I: a file more than one unit needs lives in one place).
 
 Commands::
 
@@ -85,8 +87,13 @@ def units_of(export: Path) -> list[str]:
     return sorted(path.stem for path in export.glob("*.map"))
 
 
+def licence(export: Path) -> bytes:
+    """Give the licence every unit carries: the one at the root of the repository ``export`` is in."""
+    return (export.parent / "LICENSE").read_bytes()
+
+
 def problems(export: Path, source: Path = SOURCE) -> list[str]:
-    """Say where a unit's shared part or CLAUDE.md differs from the source."""
+    """Say where a unit's shared part, CLAUDE.md or LICENSE differs from its source."""
     found: list[str] = []
     block = shared_block(source)
     names = repositories(export)
@@ -104,11 +111,14 @@ def problems(export: Path, source: Path = SOURCE) -> list[str]:
         guide = export / unit / "CLAUDE.md"
         if not guide.is_file() or guide.read_text() != claude_md(names[unit], unit, source):
             found.append(f"{unit}: CLAUDE.md differs from the shared one")
+        copy = export / unit / "LICENSE"
+        if not copy.is_file() or copy.read_bytes() != licence(export):
+            found.append(f"{unit}: LICENSE differs from Cloud-Sandbox's")
     return found
 
 
 def write(export: Path, names: list[str], source: Path = SOURCE) -> list[str]:
-    """Write the shared part and CLAUDE.md into the named units (all when none is named)."""
+    """Write the shared part, CLAUDE.md and LICENSE into the named units (all when none is named)."""
     block = shared_block(source)
     repos = repositories(export)
     written: list[str] = []
@@ -124,6 +134,10 @@ def write(export: Path, names: list[str], source: Path = SOURCE) -> list[str]:
         if not guide.is_file() or guide.read_text() != wanted:
             guide.write_text(wanted)
             written.append(f"{unit}: CLAUDE.md")
+        copy = export / unit / "LICENSE"
+        if not copy.is_file() or copy.read_bytes() != licence(export):
+            copy.write_bytes(licence(export))
+            written.append(f"{unit}: LICENSE")
     return written
 
 
@@ -148,7 +162,8 @@ def main(argv: list[str] | None = None) -> int:
     for problem in found:
         print(f"PROBLEM {problem}", file=sys.stderr)
     if not found:
-        print(f"constitutions: the shared part (version {SHARED_VERSION}) and CLAUDE.md agree in every unit")
+        agree = f"the shared part (version {SHARED_VERSION}), CLAUDE.md and LICENSE"
+        print(f"constitutions: {agree} agree in every unit")
     return 1 if found else 0
 
 

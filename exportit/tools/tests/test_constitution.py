@@ -50,6 +50,7 @@ def export(tmp_path: Path) -> Path:
         memory.mkdir(parents=True)
         (memory / "constitution.md").write_text(OWN.format(name=unit))
     (root / "cloud-sandbox" / "units.toml").write_text(UNITS_TOML)
+    (tmp_path / "LICENSE").write_text("The project's licence.\n")
     return root
 
 
@@ -131,3 +132,14 @@ def test_writing_again_changes_nothing(export: Path, capsys: pytest.CaptureFixtu
 def test_the_real_units_agree_with_the_source() -> None:
     """Every unit of this repository carries the shared part and CLAUDE.md as the source has them."""
     assert constitution.problems(constitution.HERE.parent) == []
+
+
+def test_every_unit_carries_the_projects_licence(export: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    run(export, "write")
+    assert (export / "alpha" / "LICENSE").read_text() == "The project's licence.\n"
+    assert run(export, "check") == 0
+    (export / "flow" / "LICENSE").write_text("Another licence.\n")
+    assert run(export, "check") == 1
+    assert "flow: LICENSE differs from Cloud-Sandbox's" in capsys.readouterr().err
+    assert run(export, "write") == 0
+    assert (export / "flow" / "LICENSE").read_text() == "The project's licence.\n"

@@ -105,8 +105,10 @@ point where it has found its dependencies.
 - **FR-005**: `add-ufs-setup.sh` and `ufs-envars.sh` are files of
   `csis-sandbox-ops`; moving them beside their replacement in
   `csis-sandbox-provisioning` moves them between units: [NEEDS CLARIFICATION:
-  how their mapping lines move and both units' lineage is kept (constitution,
-  principle I), or whether they stay in `csis-sandbox-ops`, marked replaced.]
+  first, whether both units need them, in which case they go to a common unit
+  or a single source instead (constitution 1.1.0, principle I); if only one
+  does, how their mapping lines move and both units' lineage is kept, or
+  whether they stay in `csis-sandbox-ops`, marked replaced.]
 - **FR-006**: `csis-model-ufscoastal`'s README MUST be corrected in that unit,
   which owns its copied files since 2026-11-19.
 - **FR-007**: Where it is proved: [NEEDS CLARIFICATION: a head node of its own

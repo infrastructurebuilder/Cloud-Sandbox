@@ -29,10 +29,20 @@ standing decisions of the stages that came before (now in the ATTIC).
   `just submodules-pushed` passes before every push.
 - A file moves from one unit to another only by a spec that says how its
   mapping line, its history and the two units' lineage are kept (see II).
+- **A file that more than one unit needs lives in one place**, never copied
+  by hand into several: either in a common unit that the others depend on,
+  as `csis-model-common` holds what the model recipes share, or as a single
+  source in this repository that a `Justfile` target writes into each unit
+  and a check in `just test` holds there, as `just constitution` does for the
+  units' shared constitution, their `CLAUDE.md` and their `LICENSE`. Before a
+  file is moved from one unit to another, the spec that moves it says whether
+  both units need it; if they do, it goes to one of those two places instead.
 
 **Why:** this repository is where the units are checked side by side; it
 can only do that if what it records is what the units hold, and if each
-unit's history stays its own.
+unit's history stays its own. A file kept in several units by hand drifts,
+and a file several units need, moved into one of them, makes the others
+depend on a unit for something that is not its own.
 
 ### II. The Original Reaches the Units Only by Sync
 
@@ -231,4 +241,13 @@ This repository uses Spec Kit, and nothing else, to plan and track work.
 - **Guidance for a session** is in [CLAUDE.md](../../CLAUDE.md), which points
   here and adds nothing of its own.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-19 | **Last Amended**: 2026-11-19
+**Version**: 1.1.0 | **Ratified**: 2026-11-19 | **Last Amended**: 2026-11-19
+
+**Amendments:**
+
+- **1.1.0 (2026-11-19), on the operator's word:** principle I gains the rule
+  that a file more than one unit needs lives in one place, a common unit or a
+  single source here written out and checked; `LICENSE` joins the files
+  `just constitution` writes into every unit and checks. The open specs that
+  move files between units (002 to 005) now ask first whether both units need
+  the file.

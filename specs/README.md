@@ -41,6 +41,13 @@ breaking either unit's lineage, or a later sync, is not settled; each of
 those specs carries it as a `[NEEDS CLARIFICATION]`. It may want a spec of
 its own, taken up before the first of them.
 
+Before any of those moves, each spec asks whether both units need the file
+(constitution 1.1.0, principle I): a file more than one unit needs lives in
+one place, a common unit such as `csis-model-common`, or a single source in
+this repository written into each unit and checked, as the units' shared
+constitution, `CLAUDE.md` and `LICENSE` are. Only a file that belongs to one
+unit moves.
+
 ## Standing beside them
 
 - **The parity watch on `main`** (the constitution's principle II): when

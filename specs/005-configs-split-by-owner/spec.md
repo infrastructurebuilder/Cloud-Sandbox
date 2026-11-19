@@ -86,8 +86,10 @@ against the schema cloudflow publishes.
   kept by hand: [NEEDS CLARIFICATION: replaced by what `csis-sandbox-terraform`
   writes, an output carrying a complete cluster-description fragment,
   `table_name` included, which this spec adds (default); or left.]
-- **FR-005**: The move is between two units: [NEEDS CLARIFICATION: how the
-  moved files' mapping lines move from `sandbox-configs.map` to
+- **FR-005**: The move is between two units: [NEEDS CLARIFICATION: first,
+  whether both units need them, in which case they go to a common unit or a
+  single source instead (constitution 1.1.0, principle I); if only one does,
+  how the moved files' mapping lines move from `sandbox-configs.map` to
   `cloudflow.map`, and both units' lineage is kept, given that their history
   will not follow them across (constitution, principle I).]
 - **FR-006**: The catalogue and the schema check MUST follow the files;

@@ -113,9 +113,11 @@ catalogue.
   `spack_site_mirror: true`.]
 - **FR-005**: The three scripts are files of `csis-sandbox-ops`. Moving them
   to `csis-sandbox-provisioning` (its `legacy/`, as the stage proposed) moves
-  them between units: [NEEDS CLARIFICATION: how their mapping lines move and
-  the two units' lineage is kept (constitution, principle I), or whether they
-  stay in `csis-sandbox-ops`, marked as replaced.]
+  them between units: [NEEDS CLARIFICATION: first, whether both units need
+  them, in which case they go to a common unit or a single source instead
+  (constitution 1.1.0, principle I); if only one does, how their mapping lines
+  move and the two units' lineage is kept (constitution, principle I), or
+  whether they stay in `csis-sandbox-ops`, marked as replaced.]
 - **FR-006**: Tests MUST hold the playbook's mirror, key and environment to
   the variables the scripts read (parity), check its syntax and lint, and prove
   its push against a mirror in a directory in the container, unsigned. The
