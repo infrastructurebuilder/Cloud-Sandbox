@@ -1459,7 +1459,7 @@ step is done.
 | Step | Unit | What it needs first | Cloud-Sandbox after |
 | ---: | --- | --- | --- |
 | 1 | `cloudflow` (**originals deleted, stage 22 step 1, 2026-11-19**) | nothing | `cloudflow/`, the root `setup.py`, `setup-plotting.sh`, `CLOUDFLOW.md`, `PREFECTv3.md`, the Miniforge guide and `docs/` gone. The launchers no longer sit next to `models/`; the job descriptions that name `/save/<user>/Cloud-Sandbox/...` paths have to change (step 4) |
-| 2 | `model-common` | nothing | `models/modulefiles/`, `models/utils/` and the three notes gone; `adcirc-cora`'s `../modulefiles` no longer resolves in the original |
+| 2 | `model-common` (**originals deleted, stage 22 step 2, 2026-11-19**) | nothing | `models/modulefiles/`, `models/utils/` and the three notes gone; `adcirc-cora`'s `../modulefiles` no longer resolves in the original |
 | 3 | the eight `model-<name>` units | `model-common` (ADCIRC only) | `models/` and `patches/` gone |
 | 4 | `sandbox-configs` | `cloudflow` (its schema is cloudflow's) | `job.configs/` and `cluster.configs/` gone. Before it moves, split it by owner, as its section says: templates and examples to cloudflow, site data to the site |
 | 5 | `sandbox-provisioning` | `ansible-collection-csis-spack`, which is in its own repository already | `scripts/setup-instance.sh`, its library, `environment-vars.sh`, `create_image.*`, the user and JupyterHub scripts and their `scripts/system/` files, and `jupyterhub/` gone. The original's `terraform/` still boots the old way |
