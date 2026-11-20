@@ -1,12 +1,12 @@
 # Feature Specification: The Lambda functions, owned and deployable
 
-**Feature Branch**: none yet; `feature/lambda-functions-owner` when it is
-taken up
+**Feature Branch**: `feature/lambda-functions-owner` (since 2026-11-20)
 
 **Created**: 2026-11-14, as stage 17; carried into this spec 2026-11-19
 
-**Status**: Draft. Needs nothing first: no AWS account is needed to write and
-test it.
+**Status**: Clarified 2026-11-20 (five questions, every one of the spec's
+open questions settled); ready for `/speckit-plan`. Needs nothing first: no
+AWS account is needed to write and test it.
 
 **Input**: the stage plan of 2026-11-14 (the reminder "who owns the Lambda
 functions", put aside 2026-11-13), carried from the ATTIC on the operator's
@@ -31,8 +31,27 @@ sandbox's guard against paying for nodes nobody stops.
 
 ## Clarifications
 
-None asked yet. The questions are the `[NEEDS CLARIFICATION]` markers below,
-each with the default the stage proposed.
+### Session 2026-11-20
+
+- Q: Which repository should own the two Lambda functions and deploy them? →
+  A: `csis-sandbox-terraform` (the stage's default).
+- Q: When the functions and `lambda.env` move from cloudflow to
+  `csis-sandbox-terraform`, how do both units stay checkable against the
+  original? → A: a `moved` directive in the maps, built in `export.py` with
+  tests as part of this spec: lineage and syncs keep using each map as the
+  unit was made, and a sync carries an upstream change to a moved file into
+  its new unit as a patch. (Only `csis-sandbox-terraform` needs the files:
+  cloudflow never imports them.)
+- Q: Should this spec stop at writing and testing the module, or also apply
+  it in an account? → A: write and test only; nothing is created in any
+  account. Switching the guard on (`enable_reaper`) is the operator's, later.
+- Q: Which compute nodes may the role let the terminating function stop? →
+  A: only instances carrying a dedicated tag that cloudflow adds to every
+  compute node it launches (for example `csis:launched-by = cloudflow`); the
+  sites' `Project` tags are too varied to rely on.
+- Q: Where should the identifying function write its report? → A: to the
+  bucket named by an environment setting, `REPORT_BUCKET`, which the module
+  sets from `report_bucket`, defaulting to today's `ioos-transfers`.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -78,39 +97,67 @@ empty workspace, with the guard on and off.
 
 - Applying the module starts terminating nodes past their limit: it is the
   operator's to switch on, never a test's.
+- A node cloudflow started before FR-008's tag existed carries no tag: the
+  role cannot terminate it, and the function reports the failure and goes on
+  (User Story 1, scenario 4). Such nodes are stopped by hand, as today.
+- The original changes a function after the move: the sync carries the change
+  into `csis-sandbox-terraform` as a patch; if the patch does not apply there
+  (the unit changed the same lines), the sync stops and leaves both units as
+  they were.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Who owns them: [NEEDS CLARIFICATION: `csis-sandbox-terraform`,
-  as infrastructure of the account beside the table they read (default); a
-  unit of their own, `csis-sandbox-reaper`, with its own tests and OpenTofu
-  module, applied after `csis-sandbox-terraform` (one more repository, which
-  is the operator's to create); or they stay in cloudflow, outside the
-  package, deployed by hand, and documented as such.]
-- **FR-002**: Moving them out of cloudflow moves files between units: [NEEDS
-  CLARIFICATION: first, whether both units need them, in which case they go to
-  a common unit or a single source instead (constitution 1.1.0, principle I);
-  if only one does, how their mapping lines move (cloudflow's map drops the
-  two files and `lambda.env`, the new owner's map takes them) and both units'
-  lineage is kept (constitution, principle I).]
-- **FR-003**: Deploying now: [NEEDS CLARIFICATION: with either of the first
-  two owners, write the module and test it with `tofu validate` and `tofu plan`
-  against a workspace with no resources (default); or also apply it in the
-  account.]
+- **FR-001**: The functions MUST be owned by `csis-sandbox-terraform`, as
+  infrastructure of the account beside the table they read: their source,
+  their tests and their OpenTofu module live there.
+- **FR-002**: The two functions and `lambda.env` MUST move from cloudflow to
+  `csis-sandbox-terraform` by a new mapping directive, `moved`. Only
+  `csis-sandbox-terraform` needs them (cloudflow never imports them), so they
+  move rather than going to a common place (constitution 1.1.0, principle I).
+- **FR-003**: The module MUST be written and tested only: `tofu validate`,
+  and `tofu plan` against a workspace with no resources, with `enable_reaper`
+  true and false. Nothing MUST be created in any AWS account by this spec;
+  switching the guard on is the operator's, later, in an account they choose.
 - **FR-004**: Tests MUST cover the cases of User Story 1, with the AWS calls
   replaced; no test reaches AWS.
-- **FR-005**: The module (with the default owner) MUST hold the two functions,
-  their packaging, an EventBridge schedule, a role allowed exactly the table,
-  `ec2:DescribeInstances` and `ec2:TerminateInstances` on instances the
-  sandbox tagged, and the report's bucket; variables `lambda_max_minutes`,
+- **FR-005**: The module MUST hold the two functions, their packaging, an
+  EventBridge schedule, and a role allowed exactly the table,
+  `ec2:DescribeInstances`, `ec2:TerminateInstances` only on instances that
+  carry the tag of FR-008 (an `aws:ResourceTag` condition), and the report's
+  bucket; variables `lambda_max_minutes`,
   `table_name` and `report_bucket`; off unless `enable_reaper` is true.
 - **FR-006**: cloudflow's import test MUST lose the two skipped modules once
   they leave its package.
 - **FR-007**: `exportit/MAP.md`, the owner's `DEPLOYMENT.md` and
   `exportit/REMINDERS.md` (which loses the item) MUST say where the functions
   are and how they are switched on.
+- **FR-008**: cloudflow MUST add one fixed tag to every compute node it
+  launches (for example `csis:launched-by = cloudflow`), beside the tags a
+  cluster description gives, whatever the site's `Project` value. The tag's
+  key and value MUST be one constant, which `csis-sandbox-terraform`'s module
+  takes as a variable defaulting to it. This is a change in cloudflow, which
+  owns its copied files since 2026-11-19; its tests MUST show the tag on a
+  launch request.
+- **FR-009**: The identifying function MUST read its report's bucket from
+  the environment setting `REPORT_BUCKET` in place of the bucket written into
+  its code (`ioos-transfers`, line 140). The module MUST set it from
+  `report_bucket`, whose default is `ioos-transfers`, and the role MUST be
+  allowed to write report objects there and nowhere else. A test MUST show the
+  report written to the bucket the setting names. `lambda.env` gains the
+  setting.
+- **FR-010**: `exportit/tools/export.py` MUST support `moved`:
+  - the lineage check MUST keep filtering each unit with its map as the unit
+    was made, so that both units' histories stay valid;
+  - a sync MUST carry an upstream change to a moved file into the unit it
+    moved to, as a patch on that sync's branch (without the file's upstream
+    history), and MUST NOT bring the file back into the unit it left;
+  - a moved file that both the old and the new unit's maps claim MUST be a
+    problem the check reports;
+  - tests MUST prove each of these on throw-away repositories, and the sync
+    rehearsal MUST gain a scenario for a change to a moved file.
+  The directive is reusable by specs 002, 004 and 005.
 
 ## Success Criteria *(mandatory)*
 
@@ -120,19 +167,33 @@ empty workspace, with the guard on and off.
 - **SC-002**: `tofu validate` and `tofu plan` succeed with `enable_reaper`
   true and false.
 - **SC-003**: The root `just test` and `just full-test` pass, the lineage
-  check among them.
+  check among them, for both cloudflow and `csis-sandbox-terraform` after the
+  move.
+- **SC-005**: A plan with `enable_reaper` true shows the role's
+  `ec2:TerminateInstances` limited by the tag condition, and no statement
+  allowing it on other instances.
+- **SC-004**: The sync rehearsal's new scenario, a change to a moved file,
+  lands in the unit it moved to and nowhere else.
 
 ## Assumptions
 
-- What the functions do does not change, beyond what a test finds broken.
+- What the functions do does not change, beyond what a test finds broken,
+  the report's bucket becoming a setting (FR-009), and the role's limit to
+  tagged nodes (FR-005, FR-008).
 
 ## Dependencies
 
-None.
+None outside this repository and its units. It changes three repositories:
+`csis-sandbox-terraform` (the functions, their tests, the module), cloudflow
+(the functions leave; the tag is added) and Cloud-Sandbox (the maps,
+`export.py`'s `moved`, the records), merged and pushed in that order of units
+first.
 
 ## Out of Scope
 
-Changing what the functions do, beyond what a test finds broken.
+- Changing what the functions do, beyond what a test finds broken and
+  FR-008 and FR-009.
+- Creating anything in an AWS account (FR-003).
 
 ## Carried From
 
