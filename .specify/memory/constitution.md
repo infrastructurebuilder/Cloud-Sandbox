@@ -283,6 +283,8 @@ This repository uses Spec Kit, and nothing else, to plan and track work.
   `specs/README.md` saying **complete**. The states **in progress** and
   **merged** are named. It reaches every spec. MINOR: a section materially
   widened.
+  The units' shared part, kept here, took the same six conditions at its
+  2.1.0, on the operator's word the same day.
 
 - **1.1.0 (2026-11-19), on the operator's word:** principle I gains the rule
   that a file more than one unit needs lives in one place, a common unit or a

@@ -31,7 +31,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-SHARED_VERSION = "2.0.1"
+SHARED_VERSION = "2.1.0"
 """The shared part's version. Raise it with every change to ``shared.md``, as its Governance says."""
 
 HERE = Path(__file__).resolve().parent
