@@ -4,8 +4,9 @@
 
 **Created**: 2026-11-14, as stage 16; carried into this spec 2026-11-19
 
-**Status**: Draft. **Needs spec 001 first:** it needs a real build to push,
-and the access the live proof shows a head node has.
+**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
+spec 001 first:** it needs a real build to push, and the access the live
+proof shows a head node has.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -28,8 +29,22 @@ operator's instruction of 2026-11-19.
 
 ## Clarifications
 
-None asked yet. The questions are the `[NEEDS CLARIFICATION]` markers below,
-each with the default the stage proposed.
+### Session 2026-11-21
+
+- Q: Where should the new RHEL 10 build cache go? → A: a new bucket of the
+  sandbox's own, made by its Terraform; the existing `ioos-cloud-sandbox`
+  bucket and its RHEL 8 cache are not touched (the standing rule: only new
+  resources in us-east-2).
+- Q: What should be allowed to write to the new cache bucket? → A: the head
+  node's new role, made by the sandbox's Terraform, with a policy for the new
+  bucket only; the existing role is not touched.
+- Q: What should new builds use by default once the RHEL 10 cache exists?
+  → A: the defaults stay `spack_cache_only: -1` and `spack_site_mirror: false`
+  until SC-003 holds; then, as this spec's last step, they become
+  `spack_cache_only: 0` and `spack_site_mirror: true`, at the new bucket.
+- Q: Once the playbook has pushed, what happens to `spack-update-mirror.sh`?
+  → A: it stays in `csis-sandbox-ops`, marked as replaced; no file moves
+  between units, and its mapping line is unchanged.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -49,7 +64,7 @@ container, unsigned; then the real push from a head node.
 1. **Given** a built environment, **When** `push-build-cache.yml` runs in check
    mode, **Then** it lists what would be pushed and pushes nothing.
 2. **Given** a built environment, **When** it runs, **Then** the cache at the
-   chosen prefix lists this sandbox's packages for RHEL 10, signed with the key
+   new bucket lists this sandbox's packages for RHEL 10, signed with the key
    `spack_key_fingerprint` names.
 3. **Given** a push just made, **When** it runs again, **Then** it reports
    nothing new.
@@ -76,19 +91,21 @@ what replaced them.
 
 **Why this priority**: tidying, once the playbook has done a real push.
 
-**Independent Test**: the scripts' new place, and `csis-sandbox-ops`'
+**Independent Test**: the script's header and `csis-sandbox-ops`'
 catalogue.
 
 **Acceptance Scenarios**:
 
-1. **Given** the playbook has pushed, **When** the scripts are retired,
-   **Then** each is either kept beside its replacement with the replacement
-   named, or left for spec 004 (the two spack-stack ones).
+1. **Given** the playbook has pushed, **When** `spack-update-mirror.sh` is
+   retired, **Then** it is still in `csis-sandbox-ops`, its header and
+   `CATALOGUE.tsv` name `push-build-cache.yml` as its replacement, and the two
+   spack-stack scripts are left for spec 004.
 
 ### Edge Cases
 
 - The private key is never in a repository or a variable; it is put in place
-  by hand, as today (`scp-secret.sh` stays).
+  by hand, as today (`scp-secret.sh` stays). The signing key is the only
+  secret on the node; S3 access comes from the role (FR-003).
 - A push interrupted part-way: running it again pushes what is missing, and
   only that.
 
@@ -100,24 +117,29 @@ catalogue.
   `push-build-cache.yml`, run by hand after a build and not by `site.yml`:
   `spack_buildcache_push` for the environment, signed with the key
   `spack_key_fingerprint` names, to `spack_mirror`, with `update_index: true`.
-- **FR-002**: Where the new cache goes: [NEEDS CLARIFICATION: a new prefix
-  beside the old one, for example `public/spack/mirror-rhel10/`, so the old
-  cache stays for any RHEL 8 node still running (default); or the same prefix,
-  replacing it.]
-- **FR-003**: Who may write: [NEEDS CLARIFICATION: the head node, with a
-  policy for that prefix added to the IAM role in `csis-sandbox-terraform`
-  (default); or the operator's own credentials, passed for the one run.]
-- **FR-004**: The default for new builds: [NEEDS CLARIFICATION: leave
-  `spack_cache_only: -1` and `spack_site_mirror: false` until the cache has
-  been shown to work (default); or `spack_cache_only: 0` and
-  `spack_site_mirror: true`.]
-- **FR-005**: The three scripts are files of `csis-sandbox-ops`. Moving them
-  to `csis-sandbox-provisioning` (its `legacy/`, as the stage proposed) moves
-  them between units: [NEEDS CLARIFICATION: first, whether both units need
-  them, in which case they go to a common unit or a single source instead
-  (constitution 1.1.0, principle I); if only one does, how their mapping lines
-  move and the two units' lineage is kept (constitution, principle I), or
-  whether they stay in `csis-sandbox-ops`, marked as replaced.]
+- **FR-002**: The cache MUST go to a new S3 bucket in us-east-2, made by
+  `csis-sandbox-terraform` and named with the sandbox's prefix, holding only
+  the RHEL 10 cache. `spack_mirror` MUST point at it. The existing
+  `ioos-cloud-sandbox` bucket and its RHEL 8 cache MUST NOT be written to or
+  changed. The bucket lasts beyond spec 001's proof: it is not among what that
+  proof removes at its end, and its own removal is a step asked for by name.
+- **FR-003**: The head node MUST write through its new role, the one the
+  sandbox's Terraform makes (spec 001), with a policy allowing object writes
+  and lists on the new bucket only. No credential is put on the node for the
+  push. The existing IAM role (`csis-sandbox-terraform`'s `main.tf`, lines 52
+  to 59, as deployed) MUST NOT be changed.
+- **FR-004**: The defaults for new builds MUST stay `spack_cache_only: -1` and
+  `spack_site_mirror: false` until a build has installed from the new cache
+  (SC-003). Then, as this spec's last step, they MUST become
+  `spack_cache_only: 0` and `spack_site_mirror: true`, with `spack_mirror` at
+  the new bucket, and the tests that hold the defaults MUST change with them.
+- **FR-005**: `spack-update-mirror.sh` MUST stay in `csis-sandbox-ops`,
+  marked as replaced: its header and `CATALOGUE.tsv` name
+  `push-build-cache.yml` in `csis-sandbox-provisioning`. Only that unit needs
+  it, so nothing moves between units and its mapping line is unchanged
+  (constitution, principle I). `spack-stack-update-mirror.sh` and
+  `spack-stack-mirror-create.sh` are spec 004's; `scp-secret.sh` stays as it
+  is.
 - **FR-006**: Tests MUST hold the playbook's mirror, key and environment to
   the variables the scripts read (parity), check its syntax and lint, and prove
   its push against a mirror in a directory in the container, unsigned. The
@@ -127,14 +149,17 @@ catalogue.
 
 ### Measurable Outcomes
 
-- **SC-001**: The cache at the chosen prefix lists this sandbox's packages for
-  RHEL 10.
+- **SC-001**: The new bucket's cache lists this sandbox's packages for RHEL 10,
+  and `ioos-cloud-sandbox` is as it was.
 - **SC-002**: A second push reports nothing new.
 - **SC-003**: A build with the cache turned on installs from it.
+- **SC-004**: After SC-003, a build with the defaults alone installs from the
+  new cache.
 
 ## Assumptions
 
 - A head node from spec 001, or one like it, is there to push from.
+- The new bucket is private; the sandbox's nodes read it through their role.
 
 ## Dependencies
 
