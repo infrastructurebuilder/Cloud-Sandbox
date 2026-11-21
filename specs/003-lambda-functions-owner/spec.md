@@ -91,7 +91,7 @@ empty workspace, with the guard on and off.
 1. **Given** `enable_reaper` false, **When** the plan is made, **Then** it
    creates nothing of the functions.
 2. **Given** `enable_reaper` true, **When** the plan is made, **Then** it shows
-   the two functions, their schedule, their role and its policy.
+   the two functions, their schedule, and a role and policy for each.
 
 ### Edge Cases
 
@@ -123,11 +123,15 @@ empty workspace, with the guard on and off.
 - **FR-004**: Tests MUST cover the cases of User Story 1, with the AWS calls
   replaced; no test reaches AWS.
 - **FR-005**: The module MUST hold the two functions, their packaging, an
-  EventBridge schedule, and a role allowed exactly the table,
-  `ec2:DescribeInstances`, `ec2:TerminateInstances` only on instances that
-  carry the tag of FR-008 (an `aws:ResourceTag` condition), and the report's
-  bucket; variables `lambda_max_minutes`,
-  `table_name` and `report_bucket`; off unless `enable_reaper` is true.
+  EventBridge schedule, and one role for each function, allowed exactly what
+  it calls (research R3): `dynamodb:Scan` and `dynamodb:BatchWriteItem` on
+  the table and its logs for both; `s3:PutObject` on the report's bucket for
+  the identifying function; `ec2:TerminateInstances` only on instances that
+  carry the tag of FR-008 (an `ec2:ResourceTag` condition) for the
+  terminating function. Variables `lambda_max_minutes`, `table_name` and
+  `report_bucket`; off unless `enable_reaper` is true. (Corrected
+  2026-11-20 while planning: the stage named `ec2:DescribeInstances`, which
+  neither function calls.)
 - **FR-006**: cloudflow's import test MUST lose the two skipped modules once
   they leave its package.
 - **FR-007**: `exportit/MAP.md`, the owner's `DEPLOYMENT.md` and
