@@ -221,8 +221,36 @@ This repository uses Spec Kit, and nothing else, to plan and track work.
   numbered branches are not used. When the units' submodules change, the
   squash is made from the branch's tree (`git commit-tree`), so that `develop`
   is never checked out with the submodules out of step.
-- **A spec is done** when its tasks are ticked, `just full-test` passes, and
-  its `spec.md` says so in its Status line. It stays in `specs/`.
+- **A spec is done** when all of the following hold, each shown by a
+  command or a record, not by a reading:
+  1. Every task in its `tasks.md` is checked, and each has a record of what
+     was done and the evidence (a commit, a run, a count).
+  2. `/speckit-converge` was run after the last implementation and appended
+     nothing, or every task it appended is itself done.
+  3. The acceptance it ends in (principle IV) was run at the end and passed:
+     its quickstart walked step by step, each result recorded, and the root
+     `just full-test` passing.
+  4. Its branch is squash-merged into `develop`, the branch kept, here and in
+     every unit it touched, the units first, and all of them pushed.
+  5. When its plan names a release (of a unit, or of the collection), that
+     release is cut and tagged, every run it started passed, and what pins it
+     here (the umbrella's `units.toml`, a unit's `requirements.yml`) has taken
+     it with `just test` green. When the plan names none, a release that
+     carries the spec is still preferred where one is possible; if none is
+     cut, the records say why.
+  6. Its `spec.md` Status line and its row in `specs/README.md` say
+     **complete**, with the date.
+
+  This holds for every spec, those written before it included. Until all six
+  hold, a spec is **in progress**; one that is merged but not yet done is
+  **merged**. A step that does not apply is named as not applying in its
+  tasks' records rather than left out. A spec stays in `specs/` when it is
+  complete.
+
+  **Why:** a merge proves the code moved, not that the operator was served.
+  Taken on 2026-11-21 from the constitution of `cs-image-system-3` (its
+  1.2.0), where a spec had been called complete without convergence, the one
+  step its workflow listed that no command enforced.
 
 ## Governance
 
@@ -241,9 +269,22 @@ This repository uses Spec Kit, and nothing else, to plan and track work.
 - **Guidance for a session** is in [CLAUDE.md](../../CLAUDE.md), which points
   here and adds nothing of its own.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-19 | **Last Amended**: 2026-11-19
+**Version**: 1.2.0 | **Ratified**: 2026-11-19 | **Last Amended**: 2026-11-21
 
 **Amendments:**
+
+- **1.2.0 (2026-11-21), on the operator's word:** the Development Workflow's
+  definition of done is widened from three conditions to six, copied from the
+  constitution of `cs-image-system-3` (its 1.2.0) and fitted to this
+  repository (the units merged first; a release is what pins it here taking
+  it): every task recorded with evidence; `/speckit-converge` run with nothing
+  left; the quickstart walked and `just full-test` passing at the end; merged
+  and pushed, units first; the release, if any, taken; the spec and its row in
+  `specs/README.md` saying **complete**. The states **in progress** and
+  **merged** are named. It reaches every spec. MINOR: a section materially
+  widened.
+  The units' shared part, kept here, took the same six conditions at its
+  2.1.0, on the operator's word the same day.
 
 - **1.1.0 (2026-11-19), on the operator's word:** principle I gains the rule
   that a file more than one unit needs lives in one place, a common unit or a

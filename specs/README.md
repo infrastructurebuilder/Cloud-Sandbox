@@ -16,6 +16,10 @@ on 2026-11-21, from one of those answers. The stage plans themselves, and the fi
 
 ## In the order they are to be taken up
 
+A spec's state is **in progress** until the six conditions of done in the
+constitution (Development Workflow) all hold; **merged** once its branch is
+merged but not all six hold yet; **complete**, with the date, when they do.
+
 | # | Spec | What | Needs first | Size |
 | ---: | --- | --- | --- | --- |
 | 1 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by the playbooks, an image, and nothing left behind | nothing: it runs in the `noaa` account, in the existing IOOS VPC, creating only new resources (2026-11-21) | large: hours of a head node |
