@@ -5,9 +5,10 @@ taken up
 
 **Created**: 2026-11-14, as stage 21; carried into this spec 2026-11-19
 
-**Status**: Draft. Needs nothing first: it is written and tested without AWS,
-and put into use by the first head node built after it (spec 001 can be that
-node).
+**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. Needs
+nothing first but cloudflow's repository made public (FR-002): it is written
+and tested without AWS, and put into use by the first head node built after
+it (spec 001 can be that node).
 
 **Input**: the stage plan of 2026-11-14 ("the two-variable change"), carried
 from the ATTIC on the operator's instruction of 2026-11-19.
@@ -22,12 +23,21 @@ The new template, `init_template.ansible.tpl`, runs the playbooks with
 `csis-sandbox-provisioning` has a repository whose URL can be named, and
 since 2026-11-19 `csis-sandbox-terraform` owns its copied files, so the
 change is made in the unit itself, not as a patch here. That repository is
-private, which the first boot has to be able to clone.
+public since 2026-11-21, so the first boot clones it with no credential.
 
 ## Clarifications
 
-None asked yet. The questions are the `[NEEDS CLARIFICATION]` markers below,
-each with the default the stage proposed.
+### Session 2026-11-21
+
+- Q: How should a new head node's first boot get read access to the private
+  `csis-sandbox-provisioning`? → A: the repository is made public (done by the
+  operator's word, 2026-11-21, its history first checked for secrets), so the
+  first boot clones it anonymously; a deploy key or fine-grained token, for
+  whoever wants one later, is a spec of its own (spec 007).
+- Q: Where should a new head node's first boot get cloudflow from? → A: from
+  `infrastructurebuilder/cloudflow` at a tag, the repository made public after
+  its history is checked, so the boot needs no credential and runs the unit's
+  corrections (patches 01 to 09), not the original's cloudflow.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -54,9 +64,13 @@ AWS; then a node's first boot, in spec 001.
 
 ### Edge Cases
 
-- The playbooks' repository is private: a node without a way to authenticate
-  cannot clone it, and the first boot must fail visibly, not quietly build
-  nothing.
+- Something on the node still names the old checkout's path
+  (`/save/<user>/Cloud-Sandbox`): every such reference, in the template, the
+  playbooks and the cluster descriptions, is found and changed with FR-002,
+  or the spec lists why it stays.
+- The playbooks' repository cannot be cloned (the network, a wrong URL or
+  version, or a repository made private again): the first boot must fail
+  visibly, not quietly build nothing.
 
 ## Requirements *(mandatory)*
 
@@ -65,19 +79,20 @@ AWS; then a node's first boot, in spec 001.
 - **FR-001**: `main.tf` MUST render `init_template.ansible.tpl` and pass
   `provisioning_repo` and `provisioning_version`; `variables.tf` MUST gain
   them, with no default for `provisioning_repo`, so a plan without it fails.
-  `sandbox_version` stays while the template still clones a repository for
-  cloudflow.
-- **FR-002**: cloudflow at first boot: [NEEDS CLARIFICATION: keep cloning the
-  original `ioos/Cloud-Sandbox`, read only, for cloudflow, as now (default:
-  this repository no longer holds cloudflow, and cloudflow's own repository is
-  private); or install cloudflow from its own repository at a tag, which needs
-  the node to authenticate to it and a line in the template.]
-- **FR-003**: How the node authenticates to the private
-  `csis-sandbox-provisioning`: [NEEDS CLARIFICATION: a read-only deploy key on
-  that repository, its private half put in place outside the repository (for
-  example from a secret store the node's role can read); a token; or the
-  repository made public. No default: it is the operator's to choose, and the
-  key is never in a repository or a variable.]
+  `sandbox_version`, which named the original's branch for cloudflow, is
+  removed with that clone (FR-002).
+- **FR-002**: The first boot MUST install cloudflow from its own repository,
+  `infrastructurebuilder/cloudflow`, at a tag, over HTTPS with no credential,
+  in place of the clone of `ioos/Cloud-Sandbox`; `variables.tf` MUST gain
+  `cloudflow_repo` and `cloudflow_version` for it. Before that, the cloudflow
+  repository MUST be made public, on the operator's word at that step, once a
+  search of its whole history has found no secret and no personal data. No
+  repository of the original is cloned at first boot any longer.
+- **FR-003**: The first boot MUST clone `csis-sandbox-provisioning` over
+  HTTPS with no credential: the repository is public since 2026-11-21. No key,
+  token or secret is created, passed or put on the node for it. Reading a
+  private playbooks' repository with a read-only deploy key or a fine-grained
+  GitHub token is spec 007's.
 - **FR-004**: `test_template.py` MUST render the main module with the two
   values and hold the rendered user data to the template; `tofu validate` MUST
   pass; a plan in an empty workspace MUST show the user data naming the
@@ -99,7 +114,7 @@ AWS; then a node's first boot, in spec 001.
 
 - `init_template.ansible.tpl` already does the checkout, the collections from
   `requirements.yml` (from Ansible Galaxy) and the plays; only `main.tf` and
-  `variables.tf` change, and the authentication FR-003 chooses.
+  `variables.tf` change.
 
 ## Dependencies
 

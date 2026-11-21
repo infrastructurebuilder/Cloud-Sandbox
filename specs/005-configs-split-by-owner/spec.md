@@ -5,9 +5,10 @@ taken up
 
 **Created**: 2026-11-14, as stage 20; carried into this spec 2026-11-19
 
-**Status**: Draft. Needs nothing first. `csis-sandbox-configs` moved whole on
-moving day (2026-11-17, its decision 4), so this split is now a move between
-two repositories.
+**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
+spec 003 first,** for its `moved` directive. `csis-sandbox-configs` moved
+whole on moving day (2026-11-17, its decision 4), so this split is now a move
+between two repositories.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -22,8 +23,22 @@ today's cloudflow, the template a new site copies among them (it has no
 
 ## Clarifications
 
-None asked yet. The questions are the `[NEEDS CLARIFICATION]` markers below,
-each with the default the stage proposed.
+### Session 2026-11-21
+
+- Q: Where should the IOOS deployment's 71 site descriptions live? → A: kept
+  as the unit `csis-sandbox-configs`, with its catalogue and a schema check
+  against cloudflow's published schema.
+- Q: What should happen to the 23 descriptions cloudflow cannot read? → A:
+  before the move, in `csis-sandbox-configs`, repair what can be repaired,
+  the template's `table_name` first; retire the rest to its attic with the
+  reason.
+- Q: What should replace `current.system` and `current.image_id`? → A: an
+  output of `csis-sandbox-terraform` carrying a complete cluster-description
+  fragment, `table_name` included, checked against cloudflow's schema; the
+  two files retire to the attic, naming it.
+- Q: How should the 51 templates and examples move to cloudflow without
+  breaking lineage? → A: with spec 003's `moved` directive, one line per file
+  in `sandbox-configs.map`; this spec waits for spec 003's implementation.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -63,7 +78,8 @@ against the schema cloudflow publishes.
 ### Edge Cases
 
 - A description that can be repaired and one that cannot: the first is
-  repaired, the second retired with its reason (FR-003).
+  repaired, the second retired with its reason, both before the move
+  (FR-003).
 
 ## Requirements *(mandatory)*
 
@@ -74,24 +90,27 @@ against the schema cloudflow publishes.
   (`exportit/tools/configs_schema.py`) into cloudflow, so that the schema is
   published with the code that reads it. `csis-sandbox-configs` keeps the
   site's files and the schema check, against cloudflow's published schema.
-- **FR-002**: The site's files: [NEEDS CLARIFICATION: kept as one unit,
-  `csis-sandbox-configs`, for the IOOS deployment (default); or not kept as a
-  unit at all, returned to the site.]
-- **FR-003**: The 23 that cannot be read: [NEEDS CLARIFICATION: repair what
-  can be repaired (the trailing commas, the missing `table_name` in the
-  template, the missing keys) in the unit, which owns its files since
-  2026-11-19, and retire the rest to its attic with the reason (default); or
-  leave them, recorded, for the site.]
-- **FR-004**: `current.system` and `current.image_id`, read by nothing and
-  kept by hand: [NEEDS CLARIFICATION: replaced by what `csis-sandbox-terraform`
-  writes, an output carrying a complete cluster-description fragment,
-  `table_name` included, which this spec adds (default); or left.]
-- **FR-005**: The move is between two units: [NEEDS CLARIFICATION: first,
-  whether both units need them, in which case they go to a common unit or a
-  single source instead (constitution 1.1.0, principle I); if only one does,
-  how the moved files' mapping lines move from `sandbox-configs.map` to
-  `cloudflow.map`, and both units' lineage is kept, given that their history
-  will not follow them across (constitution, principle I).]
+- **FR-002**: The site's 71 descriptions MUST stay in `csis-sandbox-configs`,
+  which remains a unit for the IOOS deployment: its mapping file, its
+  catalogue, and a schema check against the schema cloudflow publishes.
+- **FR-003**: Before anything moves, the 23 descriptions today's cloudflow
+  cannot read MUST be dealt with in `csis-sandbox-configs`, which owns them
+  since 2026-11-19: each repairable one repaired (trailing commas, missing
+  keys, and first the template's missing `table_name`), each other retired to
+  the unit's attic with its reason in the catalogue. Cloudflow then receives
+  only files its schema reads.
+- **FR-004**: `csis-sandbox-terraform` MUST gain an output carrying a
+  complete cluster-description fragment (the image ID, region, subnet,
+  security groups and `table_name`), and a test MUST check that fragment
+  against cloudflow's published schema. `cluster.configs/IOOS/current.system`
+  and `current.image_id`, read by nothing and kept by hand, MUST then retire
+  to `csis-sandbox-configs`' attic, their catalogue reason naming the output.
+- **FR-005**: Each of the 51 templates and examples has one owner after the
+  split, cloudflow, so it MUST move with spec 003's `moved` directive: one
+  line per file in `sandbox-configs.map`,
+  `moved <source> cloudflow examples/configs/<name>`. `just export-lineage`
+  MUST stay green for both units, and `just export-sync` MUST carry an
+  upstream change to a moved file into cloudflow (constitution, principle I).
 - **FR-006**: The catalogue and the schema check MUST follow the files;
   cloudflow's tests MUST check the examples it carries against its schema.
 
@@ -110,7 +129,9 @@ against the schema cloudflow publishes.
 
 ## Dependencies
 
-None.
+- Spec 003: its `moved` directive, implemented and merged first (FR-005).
+- `csis-sandbox-terraform` gains the output of FR-004, changed and pushed in
+  its own repository first.
 
 ## Out of Scope
 
