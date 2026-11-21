@@ -9,6 +9,11 @@ description: "Task list for the Lambda functions, owned and deployable"
 
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md)
 
+**Done**: by the six conditions of the constitution's Development Workflow
+(1.2.0, 2026-11-21): T036 to T040 are those conditions' tasks. Each task, when
+checked, gets a record under it: what was done, and the evidence (a commit, a
+run, a count).
+
 **Tests**: included, written first and seen to fail before the code they test;
 the constitution asks for them (principle IV), and FR-004, FR-008, FR-009 and
 FR-010 name them.
@@ -115,8 +120,11 @@ repository.
 - [ ] T033 [P] In `exportit/REMINDERS.md`, close the item "Who owns the Lambda functions"
 - [ ] T034 [P] In `specs/README.md`, mark 003 done; in specs 002, 004 and 005, note under their move question that the `moved` directive now exists ([contracts/moved-directive.md](contracts/moved-directive.md)), without answering their questions
 - [ ] T035 Commit each unit's work on its `feature/lambda-functions-owner` (cloudflow, `csis-sandbox-terraform`); record both submodules here (`git add exportit/cloudflow exportit/sandbox-terraform`); run `just constitution-check`
-- [ ] T036 Run the root `just test` and `just full-test` (quickstart.md, steps 1 to 4); then mark this spec's Status done in `specs/003-lambda-functions-owner/spec.md` and tick this file
-- [ ] T037 On the operator's word only, in `exportit/cloudflow/`, `exportit/sandbox-terraform/` and the Cloud-Sandbox root: finish each unit's branch into its `develop` and push (cloudflow, `csis-sandbox-terraform`), record their `develop` commits here, then squash `feature/lambda-functions-owner` into Cloud-Sandbox's `develop` from its tree and push, with `just submodules-pushed` first
+- [ ] T036 Run `/speckit-converge` on `specs/003-lambda-functions-owner/` after the last implementation task; record under this task that it appended nothing, or carry out every task it appended before going on (constitution 1.2.0, done condition 2)
+- [ ] T037 Walk `specs/003-lambda-functions-owner/quickstart.md` step by step, recording each step's command and result under this task, the root `just test` and `just full-test` among them, all passing (done condition 3)
+- [ ] T038 On the operator's word only, in `exportit/cloudflow/`, `exportit/sandbox-terraform/` and the Cloud-Sandbox root: finish each unit's branch into its `develop` and push (cloudflow, `csis-sandbox-terraform`), record their `develop` commits here, then squash `feature/lambda-functions-owner` into Cloud-Sandbox's `develop` from its tree and push, with `just submodules-pushed` first; until then the spec is **in progress**, and once merged, **merged** (done condition 4)
+- [ ] T039 Record under this task, in `specs/003-lambda-functions-owner/tasks.md`, that no release applies: the plan names none, and neither unit has a release step yet (its `release` target says so, and `exportit/REMINDERS.md` keeps "Releasing from a unit's own repository" open); unless the operator asks for one, which would then be cut, tagged and taken by `units.toml` (done condition 5)
+- [ ] T040 Mark the spec **complete**, with the date, in its Status line in `specs/003-lambda-functions-owner/spec.md` and in its row in `specs/README.md`, only when T001 to T039 are checked, each with its record (done conditions 1 and 6)
 
 ---
 
@@ -128,7 +136,7 @@ repository.
 - **Foundational (Phase 2)**: after Setup; blocks US1's T019 to T021, which need `moved`.
 - **US1 (Phase 3)**: T012 to T018 can start after Setup; T019 to T021 need Phase 2.
 - **US2 (Phase 4)**: needs T015 (the functions in `reaper/functions/`, which the module packages); independent of Phase 2.
-- **Polish (Phase 5)**: after US1 and US2.
+- **Polish (Phase 5)**: after US1 and US2; T036 (converge) after the last implementation task, then T037, T038 (on the operator's word), T039 and T040 in that order.
 
 ### User Story Dependencies
 

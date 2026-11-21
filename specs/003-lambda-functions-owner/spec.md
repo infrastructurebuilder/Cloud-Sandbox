@@ -4,8 +4,9 @@
 
 **Created**: 2026-11-14, as stage 17; carried into this spec 2026-11-19
 
-**Status**: Clarified 2026-11-20 (five questions, every one of the spec's
-open questions settled); ready for `/speckit-plan`. Needs nothing first: no
+**Status**: In progress. Clarified 2026-11-20 (five questions, every open
+question settled), planned and broken into 40 tasks the same day; not yet
+implemented. Needs nothing first: no
 AWS account is needed to write and test it.
 
 **Input**: the stage plan of 2026-11-14 (the reminder "who owns the Lambda
