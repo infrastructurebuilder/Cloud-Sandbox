@@ -91,13 +91,20 @@ What was found while planning, and still holds:
   image and snapshot? → A: all removed, each step asked first; then a check
   shows nothing with the proof's prefix remains and the plan shows the IOOS
   VPC unchanged.
+- Q: Now that spec 006 is built before this one, how does the proof's head
+  node get its playbooks? → A: by spec 006's real first boot (asked while
+  planning, 2026-11-21): the unit's template, with the playbooks' and
+  cloudflow's repositories and tags set; the second apply, check mode and the
+  comparisons are then run by hand; `node-image.yml` waits for the operator's
+  word. This replaces the earlier answer to FR-010 (boot with the old
+  template, its last step removed, and the playbooks run by hand).
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - A head node built by the playbooks on AWS (Priority: P1)
 
-The operator creates a head node with `csis-sandbox-terraform`, and builds it
-with `csis-sandbox-provisioning`'s `site.yml`, as the first boot would, and
+The operator creates a head node with `csis-sandbox-terraform`, whose first
+boot (spec 006) builds it with `csis-sandbox-provisioning`'s `site.yml`, and
 sees it built, built again with nothing changed, and previewed in check mode
 with nothing to change.
 
@@ -179,11 +186,12 @@ with the operator's word at each, and the account shows nothing else of it.
   `csis-sandbox-terraform` and its pinned OpenTofu, in a workspace and a
   settings file of its own, with state kept locally, never in a shared
   bucket; and MUST stop unless the plan shows only additions.
-- **FR-004**: Stage B MUST end with exactly what the first-boot template does:
-  the checkout, `ansible-galaxy collection install -r requirements.yml` (from
-  Ansible Galaxy), then the plays; then a second apply, check mode, the Spack
-  configuration comparison, and the module-file check (every module file
-  under the environment's root has the time it had after the first apply).
+- **FR-004**: Stage B MUST start from what the first boot did (the checkout,
+  `ansible-galaxy collection install -r requirements.yml` from Ansible Galaxy,
+  then `site.yml`, read from the boot's log), then run by hand a second apply,
+  check mode, the Spack configuration comparison, and the module-file check
+  (every module file under the environment's root has the time it had after
+  the first apply).
 - **FR-005**: Nothing MUST be created, changed or removed on AWS without the
   operator's word at that step (`tofu apply`, `tofu destroy`,
   `node-image.yml`, image and snapshot removal). Existing resources in
@@ -215,13 +223,15 @@ with the operator's word at each, and the account shows nothing else of it.
   processors or more, for example `c6i.8xlarge`, set in the working copy's
   settings file, so that `spack_jobs` is 31 and the build takes as few hours
   as it can. It can be made smaller afterwards, as `DEPLOYMENT.md` describes.
-- **FR-010**: The playbooks MUST reach the node by hand, as the first boot
-  would: the node boots with the old template, its last step removed; the
-  unit is copied to it as a git repository over the SSM session (FR-017); and
-  the three commands of `init_template.ansible.tpl` (the checkout, the
-  collections from `requirements.yml`, the plays) are run there. No
-  credential for `csis-sandbox-provisioning` is put on the node. The real
-  first boot is proved by spec 006.
+- **FR-010**: The playbooks MUST reach the node by spec 006's first boot: the
+  unit's `init_template.ansible.tpl`, rendered with `provisioning_repo`,
+  `provisioning_version`, `cloudflow_repo` and `cloudflow_version`, clones
+  both public repositories with no credential and applies `site.yml`. The
+  proof's working copy changes the rendered boot in two ways only: the SSM
+  agent installed first (FR-017), and the node image left out, so that
+  `node-image.yml` runs by hand on the operator's word (FR-005). The second
+  apply, check mode and the comparisons (FR-004) run by hand on the node. This
+  node is the first real use of spec 006's first boot, and proves it.
 - **FR-011**: The Spack build MUST compile everything, `spack_cache_only: -1`,
   as the script does: it is the only way to prove the build, and the site's
   own cache holds only RHEL 8 packages.
@@ -295,6 +305,8 @@ with the operator's word at each, and the account shows nothing else of it.
 
 - Done: the units and their repositories (moving day); the collection on
   Galaxy; JupyterHub kept as an option (stage 13).
+- Spec 006 (the first boot runs the playbooks), merged first: its first boot
+  is the one this node runs (FR-010).
 - Specs 002 (the RHEL 10 build cache) and 004 (spack-stack) need this one's
   head node, or one like it.
 
