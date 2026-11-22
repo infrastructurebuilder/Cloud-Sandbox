@@ -483,14 +483,16 @@ mount; everything else through the node image.
 ### The first-boot script
 
 [init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl)
-(written in stage 3, moved to the Terraform unit in stage 4) is
-`terraform/init_template.tpl` with its last step replaced. It
-installs `ansible-core`, runs `ansible-pull` against the provisioning
-repository at a version, then runs `node-image.yml`. It stops before
-the image if the playbook fails. Terraform would have to pass two more
-values, `provisioning_repo` and `provisioning_version`;
-[stage 4](../ATTIC/SPECS/COMPLETED/STAGE-4.md) owns that change. It still clones
-Cloud-Sandbox, because cloudflow runs from that checkout.
+(written in stage 3, moved to the Terraform unit in stage 4) was
+`terraform/init_template.tpl` with its last step replaced. Since spec 006
+(2026-11-22) it is the first boot `csis-sandbox-terraform`'s `main.tf`
+renders, with four required values: it clones cloudflow from its own
+repository at `cloudflow_version`, installs `ansible-core`, runs
+`ansible-pull` against the provisioning repository at
+`provisioning_version`, installs cloudflow for `ec2-user`, then runs
+`node-image.yml`, stopping before the image if any step fails. Nothing of
+the original is cloned any more. See [the `sandbox-terraform` section's
+first-boot template](#the-first-boot-template).
 
 ### Found while testing
 
