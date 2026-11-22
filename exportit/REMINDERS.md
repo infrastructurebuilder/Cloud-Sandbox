@@ -23,6 +23,14 @@ aside and why, and where the details are.
   4). [Spec 005](../specs/005-configs-split-by-owner/spec.md)'s split, templates and examples to
   cloudflow, is still possible; the files that move will not bring their
   history from `csis-sandbox-configs` into `cloudflow`.
+- **Remove the link at `/save/$RUNUSER/Cloud-Sandbox/cloudflow`**
+  (2026-11-22, spec 006). The first boot links the old checkout's path to
+  cloudflow's new place, because about twenty of `csis-sandbox-configs`'
+  job descriptions (`CONFIGTMPL`) and some of cloudflow's scripts and
+  examples (`run_liveocean.sh`, `liveocean_fallback.sh`, `examples/cron/`)
+  name it; [spec 006's research R3](../specs/006-first-boot-runs-playbooks/research.md)
+  lists them. Once they name the new place, each in its own unit, the
+  template's link goes.
 - **Releasing from a unit's own repository** (2026-11-17). Each unit's
   `release` target still says "nothing to release from exportit/". How a
   unit is released, now that it has a repository and a first tag, is not
