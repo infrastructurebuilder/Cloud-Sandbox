@@ -26,7 +26,7 @@ Every spec below is planned and tasked and none is started, so every one is
 
 | # | Spec | What | Needs first | Branch | Tasks | AWS |
 | ---: | --- | --- | --- | --- | ---: | --- |
-| 1 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: an owner, tests, an OpenTofu module, and the `moved` directive | nothing | `feature/lambda-functions-owner` (not yet pushed) | 40 | none: nothing applied |
+| 1 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: an owner, tests, an OpenTofu module, and the `moved` directive. **Complete**, 2026-11-22 | nothing | `feature/lambda-functions-owner` | 40 | none: nothing applied |
 | 2 | [006](006-first-boot-runs-playbooks/spec.md) | The first boot runs the playbooks: four required values, the playbooks and cloudflow cloned from their own public repositories | nothing | `feature/first-boot-runs-playbooks` | 28 | none: proved by a mocked plan |
 | 3 | [005](005-configs-split-by-owner/spec.md) | `csis-sandbox-configs` split: the 23 unreadable repaired or retired, then 51 examples and the schema to cloudflow | 003 (`moved`) | `feature/configs-split-by-owner` | 44 | none |
 | 4 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by 006's first boot, an image, and nothing left behind | 006 (its first boot) | `feature/live-proof` | 47 | **yes**: hours of a head node in `noaa`, us-east-2 |
@@ -59,7 +59,9 @@ word, and remove what they made at their end (002's bucket stays).
 Specs 002, 004 and 005 each found that the files they would move belong to
 one unit only. 002 and 004 leave theirs in `csis-sandbox-ops`, marked as
 replaced; 005 moves cloudflow's examples with the `moved` mapping directive
-that spec 003 designs, which keeps both units' lineage and a later sync.
+that spec 003 built ([its contract](003-lambda-functions-owner/contracts/moved-directive.md)),
+which keeps both units' lineage and carries a later sync's changes to a
+moved file where it went.
 
 Before any of those moves, each spec asks whether both units need the file
 (constitution 1.1.0, principle I): a file more than one unit needs lives in

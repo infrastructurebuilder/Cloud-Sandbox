@@ -153,3 +153,28 @@ def test_the_site_mirror_keys_fingerprint_is_the_key_sandbox_ops_keeps() -> None
     variables = (EXPORT / "sandbox-provisioning" / "group_vars" / "all.yml").read_text()
     (fingerprint,) = re.findall(r"^spack_key_fingerprint: ([0-9A-F]{40})$", variables, re.MULTILINE)
     assert (EXPORT / "sandbox-ops" / "keys" / f"{fingerprint}.pub").is_file()
+
+
+LAUNCH_TAG = re.compile(
+    r'^LAUNCH_TAG = \{"Key": "(?P<key>[^"]+)", "Value": "(?P<value>[^"]+)"\}$', re.MULTILINE
+)
+
+
+def reaper_default(name: str) -> str:
+    text = (EXPORT / "sandbox-terraform" / "reaper" / "variables.tf").read_text()
+    block = re.search(r'variable "' + name + r'" \{(?P<body>.*?)\n\}', text, re.DOTALL)
+    assert block, f"reaper/variables.tf has no variable {name}"
+    default = re.search(r'default\s*=\s*"(?P<value>[^"]*)"', block["body"])
+    assert default, f"{name} has no default"
+    return default["value"]
+
+
+def test_the_launch_tag_cloudflow_adds_is_the_one_the_reaper_requires() -> None:
+    # A check between two units, kept here, where both are checked out (spec 003).
+    source = (EXPORT / "cloudflow" / "src" / "cloudflow" / "cluster" / "AWSCluster.py").read_text()
+    tag = LAUNCH_TAG.search(source)
+    assert tag, "cloudflow's AWSCluster.py has no LAUNCH_TAG constant"
+    assert (tag["key"], tag["value"]) == (
+        reaper_default("launch_tag_key"),
+        reaper_default("launch_tag_value"),
+    )
