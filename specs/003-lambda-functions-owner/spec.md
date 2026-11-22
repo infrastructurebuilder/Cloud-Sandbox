@@ -162,7 +162,9 @@ empty workspace, with the guard on and off.
     problem the check reports;
   - tests MUST prove each of these on throw-away repositories, and the sync
     rehearsal MUST gain a scenario for a change to a moved file.
-  The directive is reusable by specs 002, 004 and 005.
+  Spec 005 uses the directive for the 51 templates and examples it moves to
+  cloudflow (its FR-005); specs 002 and 004 found their files belong to one
+  unit and move nothing (clarified 2026-11-21).
 
 ## Success Criteria *(mandatory)*
 

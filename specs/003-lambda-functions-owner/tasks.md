@@ -10,7 +10,10 @@ description: "Task list for the Lambda functions, owned and deployable"
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md)
 
 **Done**: by the six conditions of the constitution's Development Workflow
-(1.2.0, 2026-11-21): T036 to T040 are those conditions' tasks. Each task, when
+(1.2.0, 2026-11-21): T036 to T040 are those conditions' tasks. Brought up to
+date on 2026-11-22, after specs 001, 002 and 004 to 007 were clarified,
+planned and tasked: 003 is first in the build order ([../README.md](../README.md)),
+and spec 005 waits for its `moved` directive. Each task, when
 checked, gets a record under it: what was done, and the evidence (a commit, a
 run, a count).
 
@@ -118,7 +121,7 @@ repository.
 
 - [ ] T032 In `exportit/MAP.md`, say where the functions are now (cloudflow's section and `sandbox-terraform`'s), the `moved` directive under "How a copy is made and checked" and "Syncing from the original", and that `reaper/` uses a newer AWS provider than the main module (research R1)
 - [ ] T033 [P] In `exportit/REMINDERS.md`, close the item "Who owns the Lambda functions"
-- [ ] T034 [P] In `specs/README.md`, mark 003 done; in specs 002, 004 and 005, note under their move question that the `moved` directive now exists ([contracts/moved-directive.md](contracts/moved-directive.md)), without answering their questions
+- [ ] T034 [P] In `specs/README.md`, set 003's state in its row of the build-order table (**merged** after T038, **complete** at T040), and say in its "How a file moves between units" section that the `moved` directive exists ([contracts/moved-directive.md](contracts/moved-directive.md)), which spec 005, next in the order, uses for its 51 files
 - [ ] T035 Commit each unit's work on its `feature/lambda-functions-owner` (cloudflow, `csis-sandbox-terraform`); record both submodules here (`git add exportit/cloudflow exportit/sandbox-terraform`); run `just constitution-check`
 - [ ] T036 Run `/speckit-converge` on `specs/003-lambda-functions-owner/` after the last implementation task; record under this task that it appended nothing, or carry out every task it appended before going on (constitution 1.2.0, done condition 2)
 - [ ] T037 Walk `specs/003-lambda-functions-owner/quickstart.md` step by step, recording each step's command and result under this task, the root `just test` and `just full-test` among them, all passing (done condition 3)

@@ -19,7 +19,7 @@ up. The stage plans themselves, and the finished ones, are in the
 | ---: | --- | --- | --- | --- |
 | 1 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by the playbooks, an image, and nothing left behind | **an AWS account that can create a network** (the `noaa` profile cannot) | large: hours of a head node |
 | 2 | [002](002-rhel10-build-cache/spec.md) | A build cache for RHEL 10, pushed by the collection, not by scripts | 001: a real build to push | medium |
-| 3 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: owned by `csis-sandbox-terraform`, tested, an OpenTofu module; the `moved` directive. **In progress**: clarified, planned and broken into tasks 2026-11-20 ([plan](003-lambda-functions-owner/plan.md)) | nothing | medium to large |
+| 3 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: an owner, tests, an OpenTofu module (a decision, then its work) | nothing | medium to large |
 | 4 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001: a head node to build on | large |
 | 5 | [005](005-configs-split-by-owner/spec.md) | `csis-sandbox-configs` split: examples and schema to cloudflow, the site's files kept | nothing | medium |
 | 6 | [006](006-first-boot-runs-playbooks/spec.md) | The first boot runs the playbooks: `main.tf`'s two values, and how the node reaches a private repository | nothing | small |
