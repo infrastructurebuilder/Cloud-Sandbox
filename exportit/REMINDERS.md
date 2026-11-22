@@ -5,13 +5,6 @@ aside and why, and where the details are.
 
 ## Open
 
-- **Who owns the Lambda functions** (put aside 2026-11-13; planned as
-  [spec 003](../specs/003-lambda-functions-owner/spec.md)). The two
-  zombie-node functions stay inside cloudflow's package
-  (`src/cloudflow/cluster/`), where they are today, by stage 2's
-  decision 5. Whether cloudflow, `sandbox-ops` or someone else should own
-  them is not decided. See [MAP.md](MAP.md#cloudflow) and
-  [STAGE-2.md](../ATTIC/SPECS/COMPLETED/STAGE-2.md#decisions-taken).
 - **The live proof on AWS** (planned as
   [spec 001](../specs/001-live-proof-on-aws/spec.md); put aside 2026-11-13; it will come
   shortly). Every unit is tested locally, and `site.yml`, `users.yml` and

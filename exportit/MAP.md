@@ -102,6 +102,16 @@ deleted carries `owned` in its map: it owns its copied files, the
 baseline check passes it by, and the lineage check alone holds it to the
 original.
 
+A file can move from one unit to another (spec 003, 2026-11-22) with
+`moved <source> <unit> <destination>` in the map of the unit it leaves.
+That map keeps the `copy` rule that took the file, so both units' lineage
+is as it was made; the leaving unit no longer expects the file, and the
+arriving unit holds it as its own. The check reports a moved file its own
+map does not copy, one another unit's map also takes, one moved twice,
+one sent to no unit or to its own, and a destination the arriving unit
+copies or that two lines share. The first use: cloudflow's two Lambda
+functions and `lambda.env`, to `csis-sandbox-terraform`.
+
 Some originals are tracked although `.gitignore` excludes them (the
 notebooks). Their copies have to be added with `git add -f`; the check
 says so when one is missing from the index.
@@ -214,8 +224,13 @@ imports; the lower bounds are the versions in
 - **Plotting is part of the package**, as `cloudflow.plotting`, the way
   the code imports it. Stage 2 made it a second distribution sharing a
   `cloudflow` namespace; the operator folded it back on 2026-11-13.
-- **The Lambda functions stay in the package**, in
-  `src/cloudflow/cluster/`, as today.
+- **The Lambda functions stayed in the package**, in
+  `src/cloudflow/cluster/`, until spec 003 (2026-11-22) moved them to
+  `csis-sandbox-terraform`'s `reaper/functions/`, which packages and
+  deploys them; `cloudflow.map` records the move with three `moved`
+  lines. Every node cloudflow launches now carries the tag
+  `csis:launched-by = cloudflow`, which the terminating function's role
+  requires.
 
 ### Corrections made in the copy
 
@@ -246,7 +261,8 @@ recorded so that the real relocation can deal with them.
 2. Four modules cannot be imported. `utils/testutils.py` imports
    `modelUtil` as a top-level module; `workflows/scripts/random_ofs.py`
    reads `/com/nos/current.fcst` when loaded; the two Lambda functions
-   read their settings from the environment when loaded. The list and
+   read their settings from the environment when loaded (they have
+   since left for `csis-sandbox-terraform`, spec 003). The list and
    the reasons are in
    [cloudflow/tests/test_modules.py](cloudflow/tests/test_modules.py).
 3. Both cron scripts start `./workflows/nosofs_qops.py`, which exists
@@ -292,7 +308,8 @@ counts every such place per file, and a test fails if one is added.
   placement group that a cluster description names.
 - **AWS:** credentials, and a DynamoDB table named in the cluster
   description. `AWSCluster` refuses to start without it; the two
-  Lambda functions and `scripts/weekly_summary.nu` read the same
+  Lambda functions (`csis-sandbox-terraform`'s `reaper/` since spec 003)
+  and `scripts/weekly_summary.nu` read the same
   table. The table is made by hand and its name is configuration
   (operator, 2026-11-12).
 
@@ -782,8 +799,17 @@ passes its name in, the same way as `key_name`. What a real split
 should add is a variable for the table name, so that the IAM policy
 can be narrowed from `AmazonDynamoDBFullAccess_v2` to that one table,
 and an output that carries the name into the cluster description
-beside the other four values. The Lambda functions still have no
-owner.
+beside the other four values.
+
+**The Lambda functions are this unit's** since spec 003 (2026-11-22):
+`reaper/` is a root module of its own that packages them from
+`reaper/functions/`, schedules them and gives each a role allowed
+exactly what it calls, the terminating role only on nodes tagged
+`csis:launched-by = cloudflow`; nothing is created unless
+`enable_reaper` is true. Its providers (`aws ~> 6.0`, `archive ~> 2.0`)
+are newer than the main module's `~> 3.47`, which cannot create a
+Lambda function on a runtime AWS still supports. A `tofu test` with
+mocked providers holds it to its contract.
 
 It expects nothing from the other units. `sandbox-provisioning` runs on
 the node it creates.
@@ -1442,11 +1468,12 @@ What the maps decide, and what they leave:
 | A change to a patched file that the patch does not survive | stops on the merge's conflict, the unit left as it was; the patch is written again here |
 | A changed original that a unit translates (`sandbox-provisioning`) | carried, and reported: its parity tests say where the translation no longer holds |
 | A file only this repository may have (`local`) | stops |
+| A change to a file a map declares `moved` | merged into the leaving unit without the file (a modify/delete conflict on it is resolved by keeping it deleted), and carried into the unit it moved to, on the same `feature/<branch>`, as one commit naming the upstream commits; checked before anything changes, and stops if the change does not apply there or that unit is not clean on `develop` |
 
 `just sync-rehearse`, part of `just full-test`, runs one sync of each
 kind against throw-away clones of the real units: on 2026-11-18 all
 seven did as the table says, with the carried commits keeping their
-author.
+author. Spec 003 added an eighth, a change to a moved file.
 
 ## The order of the real relocations
 
