@@ -4,9 +4,10 @@
 
 **Created**: 2026-11-14, as stage 15; carried into this spec 2026-11-19
 
-**Status**: Draft. **Blocked:** it needs an AWS account in which a VPC and a
-subnet can be created. The `noaa` profile's role denies both (checked
-2026-11-15, read-only), and the operator is finding another account.
+**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. It runs in the `noaa`
+account in us-east-2, inside the existing IOOS VPC, creating only new
+resources (the operator's answer, 2026-11-21); the role there cannot create
+a network, so the module is given one.
 
 **Input**: the stage plan of 2026-11-14 ("Make a plan for the live proof"),
 carried from the ATTIC on the operator's instruction of 2026-11-19.
@@ -53,15 +54,57 @@ What was found while planning, and still holds:
 
 ## Clarifications
 
-None asked yet. The questions are the `[NEEDS CLARIFICATION]` markers below,
-each with the default the stage proposed.
+### Session 2026-11-21
+
+- Q: In which AWS account and region does the proof build its head node, and
+  does OpenTofu create its network or use an existing one? → A: the `noaa`
+  account in us-east-2, the module given the existing IOOS VPC and a private
+  subnet by ID, read only, creating only new resources inside them.
+- Q: How does the agent reach the head node in the private subnet? → A: AWS
+  Systems Manager Session Manager: the proof's own new role gets
+  `AmazonSSMManagedInstanceCore`, the SSM agent is installed at first boot,
+  and the agent connects with `aws ssm start-session` (and `ssh` through it);
+  nothing is added to the existing bastion. (So the agent runs the boxes:
+  FR-007 follows.)
+- Q: What size of instance does the head node build on? → A: a
+  compute-optimized type with 32 processors or more, for example
+  `c6i.8xlarge`, so `spack_jobs` is 31 (first answered 16 processors, changed
+  by the operator the same day).
+- Q: How do the playbooks reach the head node? → A: by hand, as the first
+  boot would: the node boots with the old template minus its last step, the
+  unit is copied to it as a git repository over the SSM session, and the
+  template's three commands are run there. The real first boot is spec 006's
+  to prove.
+- Q: Does the build compile everything, or take what Spack's public binary
+  cache has? → A: compile everything, `spack_cache_only: -1`, as the script
+  does.
+- Q: Does the proof apply the site mirror's settings? → A: yes,
+  `spack_site_mirror: true` on the proof's node.
+- Q: Does the proof also build a second head node the old way, to compare?
+  → A: make it a flag, `compare_with_script`, default `false`, which skips it;
+  set to `true`, the proof builds the second node with the original methods
+  and compares the two. The comparison is to be attempted later.
+- Q: Does the proof start a compute node from the image and run a model job?
+  → A: no, out of scope: the image's `available` state is the proof; a
+  compute-node run becomes a spec of its own later.
+- Q: When the proof is over, what happens to the node, its EFS volume, and the
+  image and snapshot? → A: all removed, each step asked first; then a check
+  shows nothing with the proof's prefix remains and the plan shows the IOOS
+  VPC unchanged.
+- Q: Now that spec 006 is built before this one, how does the proof's head
+  node get its playbooks? → A: by spec 006's real first boot (asked while
+  planning, 2026-11-21): the unit's template, with the playbooks' and
+  cloudflow's repositories and tags set; the second apply, check mode and the
+  comparisons are then run by hand; `node-image.yml` waits for the operator's
+  word. This replaces the earlier answer to FR-010 (boot with the old
+  template, its last step removed, and the playbooks run by hand).
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - A head node built by the playbooks on AWS (Priority: P1)
 
-The operator creates a head node with `csis-sandbox-terraform`, and builds it
-with `csis-sandbox-provisioning`'s `site.yml`, as the first boot would, and
+The operator creates a head node with `csis-sandbox-terraform`, whose first
+boot (spec 006) builds it with `csis-sandbox-provisioning`'s `site.yml`, and
 sees it built, built again with nothing changed, and previewed in check mode
 with nothing to change.
 
@@ -101,8 +144,8 @@ container cannot take at all.
 
 ### User Story 3 - Nothing left behind (Priority: P2)
 
-When the proof is over, everything it created is removed, or kept by the
-operator's choice, and the account shows nothing else of it.
+When the proof is over, everything it created is removed, one step at a time
+with the operator's word at each, and the account shows nothing else of it.
 
 **Why this priority**: a forgotten node or image is a bill.
 
@@ -112,13 +155,16 @@ operator's choice, and the account shows nothing else of it.
 
 1. **Given** the proof's resources, **When** they are removed, **Then** no
    instance, volume, image, snapshot, security group or role of the proof
-   remains, unless kept by decision.
+   remains, and the existing IOOS VPC and its subnets are unchanged.
 
 ### Edge Cases
 
 - The session expires during the hours of a build: the build must be
   resumable, or the session refreshed between stages of the procedure.
 - The plan shows a change or a destruction: stop; nothing is applied.
+- The private subnet has no public address and no internet gateway: the head
+  node is reached only through a way in that already exists, and gets its
+  packages through the subnet's NAT.
 - A second apply changes something because a package was released upstream
   in the meantime (botocore has done it in the container): recorded, and the
   apply repeated, before it is called a finding.
@@ -140,51 +186,85 @@ operator's choice, and the account shows nothing else of it.
   `csis-sandbox-terraform` and its pinned OpenTofu, in a workspace and a
   settings file of its own, with state kept locally, never in a shared
   bucket; and MUST stop unless the plan shows only additions.
-- **FR-004**: Stage B MUST end with exactly what the first-boot template does:
-  the checkout, `ansible-galaxy collection install -r requirements.yml` (from
-  Ansible Galaxy), then the plays; then a second apply, check mode, the Spack
-  configuration comparison, and the module-file check (every module file
-  under the environment's root has the time it had after the first apply).
+- **FR-004**: Stage B MUST start from what the first boot did (the checkout,
+  `ansible-galaxy collection install -r requirements.yml` from Ansible Galaxy,
+  then `site.yml`, read from the boot's log), then run by hand a second apply,
+  check mode, the Spack configuration comparison, and the module-file check
+  (every module file under the environment's root has the time it had after
+  the first apply).
 - **FR-005**: Nothing MUST be created, changed or removed on AWS without the
   operator's word at that step (`tofu apply`, `tofu destroy`,
   `node-image.yml`, image and snapshot removal). Existing resources in
   `us-east-2` MUST NOT be changed.
 - **FR-006**: The logs MUST NOT be committed: they hold the node's addresses
   and the account's identifiers. Their summary goes in this spec's outcome.
-- **FR-007**: Who runs the boxes: [NEEDS CLARIFICATION: the agent runs them,
-  the local machine's in its shell and the head node's over `ssh`, stopping at
-  every gate, decision and AWS change (default); or the operator runs them from
-  the page and brings back the logs.]
-- **FR-008**: The account and its network: [NEEDS CLARIFICATION: which account
-  and region; whether the module creates its network there, or is given an
-  existing VPC and subnet by ID, read only. No default: the `noaa` account
-  cannot create a network.]
-- **FR-009**: The instance type for the build: [NEEDS CLARIFICATION: a
-  compute-optimised type with sixteen processors or more, so `spack_jobs` is
-  fifteen and the build takes hours, not a day (default); or the settings
-  file's own type.]
-- **FR-010**: How the playbooks reach the node: [NEEDS CLARIFICATION: by hand,
-  as the first boot would: the node boots with the old template, its last step
-  removed, and the three commands of `init_template.ansible.tpl` are run by
-  hand (default); or by the real first boot, with `provisioning_repo` naming
-  `csis-sandbox-provisioning`, which is private and needs a deploy key or a
-  token on the node (see spec 006).]
-- **FR-011**: The Spack build: [NEEDS CLARIFICATION: `spack_cache_only: -1`,
-  compiling everything, as the script does (default); or `0`, taking what
-  Spack's public binary cache has.]
-- **FR-012**: The site mirror's list: [NEEDS CLARIFICATION: applied on the
-  proof's node, `spack_site_mirror: true` (default); or left off.]
-- **FR-013**: A second node built the old way: [NEEDS CLARIFICATION: skipped
-  (default: the container already holds Spack's configuration to the
-  script's); or built, the only direct evidence for the last row of the table
-  above.]
-- **FR-014**: A compute node from the image: [NEEDS CLARIFICATION: out of
-  scope (default: it needs a cluster description, the DynamoDB table and
-  cloudflow); or one compute node started with cloudflow and the smallest
-  model job run.]
-- **FR-015**: At the end: [NEEDS CLARIFICATION: the node, the EFS volume, the
-  image and its snapshot removed, each step asked first (default); or the node
-  kept for a look, billed while it stands.]
+- **FR-007**: The agent MUST run the boxes: the local machine's in its shell,
+  the head node's over an SSM session (FR-017), reading each result before the
+  next, and stopping to ask at every gate, every decision box, and every box
+  that creates, changes or removes something on AWS.
+- **FR-017**: The head node MUST be reached only through AWS Systems Manager
+  Session Manager: the proof's new IAM role carries the managed policy
+  `AmazonSSMManagedInstanceCore`; the SSM agent is installed at first boot if
+  the image lacks it; the node reaches SSM's endpoints through the subnet's
+  NAT; the procedure uses `aws ssm start-session`, and `ssh` and `scp` through
+  it. Your local machine MUST have the Session Manager plugin, and the
+  procedure checks for it first. No inbound rule is opened, and nothing is
+  added to the existing bastion.
+- **FR-008**: The proof MUST run in the `noaa` account, region us-east-2. The
+  working copy's settings MUST give the module the existing "IOOS Cloud
+  Sandbox VPC" and one of its private subnets (the ones that reach the
+  internet through the NAT) by ID, as `vpc_id` and `subnet_id`, so the module
+  reads them and creates no network. Every resource the proof creates (its
+  security groups, EFS volume and mount target, network interface, instance,
+  IAM role, key pair, image and snapshot) MUST be new, carry the proof's name
+  prefix, and be the only thing it changes; the plan MUST show no change and
+  no destruction of anything that exists.
+- **FR-009**: The head node MUST be a compute-optimized instance with 32
+  processors or more, for example `c6i.8xlarge`, set in the working copy's
+  settings file, so that `spack_jobs` is 31 and the build takes as few hours
+  as it can. It can be made smaller afterwards, as `DEPLOYMENT.md` describes.
+- **FR-010**: The playbooks MUST reach the node by spec 006's first boot: the
+  unit's `init_template.ansible.tpl`, rendered with `provisioning_repo`,
+  `provisioning_version`, `cloudflow_repo` and `cloudflow_version`, clones
+  both public repositories with no credential and applies `site.yml`. The
+  proof's working copy changes the rendered boot in two ways only: the SSM
+  agent installed first (FR-017), and the node image left out, so that
+  `node-image.yml` runs by hand on the operator's word (FR-005). The second
+  apply, check mode and the comparisons (FR-004) run by hand on the node. This
+  node is the first real use of spec 006's first boot, and proves it.
+- **FR-011**: The Spack build MUST compile everything, `spack_cache_only: -1`,
+  as the script does: it is the only way to prove the build, and the site's
+  own cache holds only RHEL 8 packages.
+- **FR-012**: The proof MUST apply the site mirror's settings,
+  `spack_site_mirror: true`: the key trusted by the fingerprint
+  `spack_key_fingerprint` names, and the mirror added. With FR-011 the build
+  reads no binary cache, so the mirror cannot change what is built.
+- **FR-013**: The proof MUST have a flag, `compare_with_script`, in its
+  settings (the working copy's settings file, read by the procedure), whose
+  default is `false`:
+  - `false` (now): stage D is skipped, and the last row of the "Not proved"
+    table stays not proved, recorded as deferred by this flag;
+  - `true` (later): stage D builds a second head node in the same way as the
+    first (same type, subnet, SSM access), but set up by the original methods:
+    the original `setup-instance.sh` and its library at `ca0604a`, taken from
+    this repository's history, run as the old first-boot template ran them;
+    then the two nodes are compared (installed packages, users, services,
+    Spack's configuration and environment, module files), each difference a
+    finding; the second node is removed with the first (FR-015).
+  The procedure MUST say what the flag does, and that it is off by default.
+- **FR-018**: `exportit/REMINDERS.md` MUST gain an item: the comparison with a
+  node built the old way, deferred by `compare_with_script` defaulting to
+  `false`, to be attempted later by setting it to `true`.
+- **FR-014**: The proof MUST NOT start a compute node from the image or run a
+  model: the image AWS reports `available` is the proof of `node-image.yml`. A
+  compute node started by cloudflow from the image, running a model job, is a
+  spec of its own, to be written later.
+- **FR-015**: At the end, everything the proof created MUST be removed, each
+  step asked first (FR-005): the node (and the second node, if
+  `compare_with_script` was `true`), the EFS volume, and the image and its
+  snapshot, with the security group and role it made. Nothing is kept for a
+  look. A check MUST then list what carries the proof's prefix and find
+  nothing, and a plan of the existing IOOS VPC MUST show no change.
 - **FR-016**: JupyterHub, kept as an option (stage 13), MUST be applied and
   checked on the node as the container test checks it, the hub answering on
   its port.
@@ -208,13 +288,16 @@ operator's choice, and the account shows nothing else of it.
 - **SC-003**: Every row of the "Not proved" table is marked proved, with the
   date and what was seen, or left not proved with the reason, in
   `exportit/MAP.md`.
-- **SC-004**: After removal, nothing of the proof remains in the account but
-  what the operator chose to keep.
+- **SC-004**: After removal, nothing carrying the proof's prefix remains in the
+  account, and the existing IOOS VPC and its subnets are as they were.
+- **SC-005**: With `compare_with_script` left `false`, the procedure skips
+  stage D and records the last row as deferred; with it `true`, stage D runs
+  and every difference between the two nodes is listed.
 
 ## Assumptions
 
-- An account that can create a network, or a VPC and subnet the operator
-  names, will be available; nothing here starts until it is.
+- The `noaa` session is fresh when the proof starts, and lasts or is refreshed
+  between its stages.
 - The build cache is no help (the site's holds only RHEL 8 packages), so the
   build is from source unless FR-011 says otherwise.
 
@@ -222,6 +305,8 @@ operator's choice, and the account shows nothing else of it.
 
 - Done: the units and their repositories (moving day); the collection on
   Galaxy; JupyterHub kept as an option (stage 13).
+- Spec 006 (the first boot runs the playbooks), merged first: its first boot
+  is the one this node runs (FR-010).
 - Specs 002 (the RHEL 10 build cache) and 004 (spack-stack) need this one's
   head node, or one like it.
 
@@ -229,7 +314,7 @@ operator's choice, and the account shows nothing else of it.
 
 - Changing `main.tf` of `csis-sandbox-terraform` in the unit itself: the
   working copy is edited, never the unit (spec 006 changes the unit).
-- Running a model, unless FR-014 says so.
+- Running a model, or starting a compute node from the image (FR-014).
 - Fixing what the proof finds: a finding becomes a spec of its own, in the
   unit it concerns.
 

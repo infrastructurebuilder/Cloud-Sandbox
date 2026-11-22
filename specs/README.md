@@ -7,39 +7,59 @@ are in the [constitution](../.specify/memory/constitution.md). Work inside a
 single unit is planned in that unit's own `specs/`.
 
 Specs 001 to 006 were carried on 2026-11-19 from the stage plans that were
-open then (stages 15, 16, 17, 18, 20 and 21). Each is a Draft: the stage's
-open questions are its `[NEEDS CLARIFICATION]` markers, each with the
-stage's default, to be asked with `/speckit-clarify` when the spec is taken
-up. The stage plans themselves, and the finished ones, are in the
-[ATTIC](../ATTIC/), as history.
+open then (stages 15, 16, 17, 18, 20 and 21), each a Draft whose open
+questions were its `[NEEDS CLARIFICATION]` markers. All of them were answered
+with `/speckit-clarify`, spec 003's on 2026-11-20 and the rest on 2026-11-21;
+each spec's Clarifications section records the answers. Spec 007 was written
+on 2026-11-21, from one of those answers. Every spec was then planned
+(`plan.md` and its design documents) and tasked (`tasks.md`), on its own
+branch, by 2026-11-22. The stage plans themselves, and the finished ones,
+are in the [ATTIC](../ATTIC/), as history.
 
-## In the order they are to be taken up
+## In the order they are to be built
 
-| # | Spec | What | Needs first | Size |
-| ---: | --- | --- | --- | --- |
-| 1 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by the playbooks, an image, and nothing left behind | **an AWS account that can create a network** (the `noaa` profile cannot) | large: hours of a head node |
-| 2 | [002](002-rhel10-build-cache/spec.md) | A build cache for RHEL 10, pushed by the collection, not by scripts | 001: a real build to push | medium |
-| 3 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: an owner, tests, an OpenTofu module (a decision, then its work) | nothing | medium to large |
-| 4 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001: a head node to build on | large |
-| 5 | [005](005-configs-split-by-owner/spec.md) | `csis-sandbox-configs` split: examples and schema to cloudflow, the site's files kept | nothing | medium |
-| 6 | [006](006-first-boot-runs-playbooks/spec.md) | The first boot runs the playbooks: `main.tf`'s two values, and how the node reaches a private repository | nothing | small |
+A spec's state is **in progress** until the six conditions of done in the
+constitution (Development Workflow) all hold; **merged** once its branch is
+merged but not all six hold yet; **complete**, with the date, when they do.
+Every spec below is planned and tasked and none is started, so every one is
+**in progress**.
 
-The order is by what each needs first; where two need nothing of each
-other, the smaller comes first. While 001 waits for an account, 003, 005
-and 006 can be taken up.
+| # | Spec | What | Needs first | Branch | Tasks | AWS |
+| ---: | --- | --- | --- | --- | ---: | --- |
+| 1 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: an owner, tests, an OpenTofu module, and the `moved` directive | nothing | `feature/lambda-functions-owner` (not yet pushed) | 40 | none: nothing applied |
+| 2 | [006](006-first-boot-runs-playbooks/spec.md) | The first boot runs the playbooks: four required values, the playbooks and cloudflow cloned from their own public repositories | nothing | `feature/first-boot-runs-playbooks` | 28 | none: proved by a mocked plan |
+| 3 | [005](005-configs-split-by-owner/spec.md) | `csis-sandbox-configs` split: the 23 unreadable repaired or retired, then 51 examples and the schema to cloudflow | 003 (`moved`) | `feature/configs-split-by-owner` | 44 | none |
+| 4 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by 006's first boot, an image, and nothing left behind | 006 (its first boot) | `feature/live-proof` | 47 | **yes**: hours of a head node in `noaa`, us-east-2 |
+| 5 | [002](002-rhel10-build-cache/spec.md) | A build cache for RHEL 10 in a bucket of its own, pushed by a playbook | 001 (`proof/`, the procedure) | `feature/rhel10-build-cache` | 44 | **yes**: a bucket that stays, and a head node |
+| 6 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001 (`proof/`); 002 (the catalogue's `superseded_by` rule) | `feature/spack-stack-ufs-coastal` | 40 | **yes**: a head node of its own |
+| 7 | [007](007-private-playbooks-access/spec.md) | The first boot reads a private playbooks' repository, with a deploy key or a fine-grained token | 006 | `feature/private-playbooks-access` | 30 | only for its last proof, when someone wants a private repository |
 
-## A question four of them share
+**Why this order:**
 
-Specs 002, 003, 004 and 005 each move files from one unit to another (push
-scripts out of `csis-sandbox-ops`, the Lambda functions out of cloudflow,
-the examples out of `csis-sandbox-configs`). Every unit is held to the
-original by its lineage: the original at its baseline, filtered with its
-mapping file, must be a commit of the unit's history, which is what a sync
-from a later original depends on. Moving a file changes two mapping files,
-and with them both units' filtered histories. How a file moves without
-breaking either unit's lineage, or a later sync, is not settled; each of
-those specs carries it as a `[NEEDS CLARIFICATION]`. It may want a spec of
-its own, taken up before the first of them.
+1. **003 first**: it needs nothing, and 005 needs its `moved` directive.
+2. **006 next**: it is small, needs nothing, and 001's head node boots with
+   it, which is also its first real use.
+3. **005 before 001**: both can go after their dependency; 005 touches no
+   account and is the smaller, so it does not wait on an AWS session.
+4. **001**: the first AWS work, once 006 is merged; its `proof/` files and
+   procedure are what 002 and 004 build their head nodes with.
+5. **002, then 004**: each builds a head node as 001 does; 004 also uses the
+   catalogue rule 002 adds to `csis-sandbox-ops`. If spec 002's cache is in
+   place by 004, the sandbox's own build on 004's node is shorter.
+6. **007 last**: nothing needs it while the playbooks' repository is public;
+   its code can be built any time after 006, its AWS proof when a private
+   repository is wanted.
+
+Specs 001, 002 and 004 each run a head node of 32 processors for hours
+(about $1.36 an hour for a `c6i.8xlarge`), every AWS step on the operator's
+word, and remove what they made at their end (002's bucket stays).
+
+## How a file moves between units
+
+Specs 002, 004 and 005 each found that the files they would move belong to
+one unit only. 002 and 004 leave theirs in `csis-sandbox-ops`, marked as
+replaced; 005 moves cloudflow's examples with the `moved` mapping directive
+that spec 003 designs, which keeps both units' lineage and a later sync.
 
 Before any of those moves, each spec asks whether both units need the file
 (constitution 1.1.0, principle I): a file more than one unit needs lives in

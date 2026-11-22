@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain (5 remain: the stage's open questions, each with its default, for `/speckit-clarify`)
+- [x] No [NEEDS CLARIFICATION] markers remain (the five were answered by `/speckit-clarify`, 2026-11-21)
 - [x] Requirements are testable and unambiguous, once their questions are answered
 - [x] Success criteria are measurable
 - [x] All acceptance scenarios are defined
@@ -23,4 +23,4 @@
 
 ## Feature Readiness
 
-- [ ] Ready for `/speckit-plan`: not until the markers above are settled
+- [x] Ready for `/speckit-plan`: the markers above are settled
