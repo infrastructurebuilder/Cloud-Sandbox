@@ -483,14 +483,16 @@ mount; everything else through the node image.
 ### The first-boot script
 
 [init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl)
-(written in stage 3, moved to the Terraform unit in stage 4) is
-`terraform/init_template.tpl` with its last step replaced. It
-installs `ansible-core`, runs `ansible-pull` against the provisioning
-repository at a version, then runs `node-image.yml`. It stops before
-the image if the playbook fails. Terraform would have to pass two more
-values, `provisioning_repo` and `provisioning_version`;
-[stage 4](../ATTIC/SPECS/COMPLETED/STAGE-4.md) owns that change. It still clones
-Cloud-Sandbox, because cloudflow runs from that checkout.
+(written in stage 3, moved to the Terraform unit in stage 4) was
+`terraform/init_template.tpl` with its last step replaced. Since spec 006
+(2026-11-22) it is the first boot `csis-sandbox-terraform`'s `main.tf`
+renders, with four required values: it clones cloudflow from its own
+repository at `cloudflow_version`, installs `ansible-core`, runs
+`ansible-pull` against the provisioning repository at
+`provisioning_version`, installs cloudflow for `ec2-user`, then runs
+`node-image.yml`, stopping before the image if any step fails. Nothing of
+the original is cloned any more. See [the `sandbox-terraform` section's
+first-boot template](#the-first-boot-template).
 
 ### Found while testing
 
@@ -756,16 +758,22 @@ the root `DEPLOYMENT.md`, and the screenshot it shows, copied from
 ### The first-boot template
 
 Written in stage 3 and moved here in stage 4, because it is rendered by
-Terraform's `templatefile()`. By the operator's decision it sits beside
-the copied `init_template.tpl` and `main.tf` is not changed. The README
-gives the change that would switch over: two variables,
-`provisioning_repo` and `provisioning_version`, and the new file name
-in the head node's `user_data`.
+Terraform's `templatefile()`. It sat beside the copied `init_template.tpl`
+until spec 006 (2026-11-22) switched `main.tf` to it: the head node's
+user data is now `local.user_data`, `init_template.ansible.tpl` rendered
+with four required variables, `provisioning_repo`, `provisioning_version`,
+`cloudflow_repo` and `cloudflow_version`, in place of `sandbox_version`.
+The first boot clones cloudflow from its own (public) repository at its
+tag into `/save/ec2-user/cloudflow`, links the old checkout's path to it,
+applies the playbooks with `ansible-pull`, installs cloudflow editable
+for `ec2-user`, and makes the image; nothing of the original is cloned.
+`init_template.tpl` is kept, unused, for comparison and for a sync from
+the original to land on.
 [tests/test_template.py](sandbox-terraform/tests/test_template.py)
-renders both templates through `tofu console` (`terraform console` until 2026-11-13): the old one with
-the five values `main.tf` passes, the new one with those five plus the
-two new ones, and it fails if either new value is left out. So the
-change in the README is complete, as far as the template goes.
+renders both templates through `tofu console`; `tests/firstboot.tftest.hcl`
+plans the module with mocked providers and reads the user data;
+`tests/test_plan.py` shows a plan without `provisioning_repo` failing on it.
+`just render-first-boot` prints what a node would be given.
 
 ### What it provides: the interface
 
