@@ -1,0 +1,141 @@
+---
+
+description: "Task list for spack-stack for UFS Coastal"
+---
+
+# Tasks: spack-stack for UFS Coastal
+
+**Input**: Design documents from `specs/004-spack-stack-ufs-coastal/`
+
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md); spec 001 merged (its `proof/`); spec 002's `superseded_by` rule in `csis-sandbox-ops`
+
+**Done**: by the six conditions of the constitution's Development Workflow
+(1.2.0): T036 to T040 are those conditions' tasks. Each task, when checked,
+gets a record under it.
+
+**Tests**: included, written first and seen to fail (principle IV).
+
+**AWS**: tasks marked **(AWS, asked)** wait for the operator's word.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: can run in parallel
+- **[Story]**: US1 (the stack built by a playbook), US2 (UFS Coastal builds against it)
+
+## Path Conventions
+
+From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
+`exportit/model-ufscoastal/` (`csis-model-ufscoastal`),
+`exportit/sandbox-ops/`, each committed in its own repository.
+
+---
+
+## Phase 1: Setup
+
+- [ ] T001 Start `feature/spack-stack-ufs-coastal` with git-flow in `exportit/sandbox-provisioning/`, `exportit/model-ufscoastal/` and `exportit/sandbox-ops/` from their `develop`, each clean and level with its origin
+- [ ] T002 Run `just init` in the three units and the root `just test`
+
+---
+
+## Phase 2: Foundational (which spack-stack, FR-001)
+
+- [ ] T003 Find the spack-stack version UFS Coastal's current tag names, if any (its documentation and its `ufs-weather-model` submodule's), and the supported platforms in the release notes of JCSDA's latest 2.1.x and of 2.0.0; record both under research R1 in `specs/004-spack-stack-ufs-coastal/research.md`
+- [ ] T004 Write the playbook's variables ([data-model.md](data-model.md)) with `ufs_stack_version` set to the candidate T003 points to, and the R6 container run (T009) with `ufs_stack_install: false`, and run it: if the candidate concretizes on the container, record it as FR-001's choice ([data-model.md](data-model.md)'s record); if not, the next candidate; if none does, **stop and ask the operator** for a commit of `asascience-open/spack-stack`, and record the answer
+
+**Checkpoint**: the release is chosen and recorded, or the operator has named the fork's commit.
+
+---
+
+## Phase 3: User Story 1 - spack-stack built on a head node by a playbook (Priority: P1) 🎯 MVP
+
+**Goal**: `ufs-stack.yml` builds the environment and its meta-modules; applied again, nothing changes.
+
+### Tests first
+
+- [ ] T005 [P] [US1] Write `exportit/sandbox-provisioning/tests/test_ufs_stack.py`: every step of `ufs_stack_setup` has a `replaces:` naming a line of `legacy/`'s `setup_spack-stack` or `build_spack-stack-environment` that exists; no step names the `system` scope; `ufs_stack_version` is not a branch name of the repository it names (a tag or a commit, by `git ls-remote`, marked `slow`); the playbook fails before cloning when it is given a branch
+- [ ] T006 [P] [US1] In `exportit/sandbox-provisioning/tests/container/converge.sh`, add `ufs-stack.yml` with `ufs_stack_install: false` after `site.yml`: the environment concretizes; `/etc/spack` in the container is byte for byte as before the playbook
+- [ ] T007 [US1] Run them and see them fail for the right reason, recording which failed
+
+### Implementation
+
+- [ ] T008 [US1] Write `exportit/sandbox-provisioning/ufs-stack.yml` as research R3 and [contracts/ufs-stack-playbook.md](contracts/ufs-stack-playbook.md) say: the ref check; the clone with submodules; the collection's `setup` role with `ufs_stack_setup` (`environment`, `command` with `creates:`, `detect` and `config` into the environment's scope, `spack add sp`); `spack_env` with `refresh_modules: when_needed`, skipped past concretizing when `ufs_stack_install` is false; `spack stack setup-meta-modules` with `creates:`
+- [ ] T009 [US1] Its variables, in the playbook's `vars` or `group_vars/ufs_stack.yml`, with the choice of T004 and its record as a comment; add the playbook to the unit's syntax and lint targets
+- [ ] T010 [US1] Run the unit's `just test` and `just full-test`: T005 and T006 pass
+- [ ] T011 [P] [US1] In `exportit/sandbox-ops/bin/add-ufs-setup.sh` and `bin/ufs-envars.sh`, a header line naming `csis-sandbox-provisioning`'s `ufs-stack.yml`; in `CATALOGUE.tsv`, both rows keep `in-use` with `superseded_by` `csis-sandbox-provisioning: ufs-stack.yml`; `spack-stack-update-mirror.sh` and `spack-stack-mirror-create.sh` unchanged; `tests/shellcheck.counts` if a line moved; `just test` (research R9)
+
+---
+
+## Phase 4: User Story 2 - UFS Coastal builds against it (Priority: P2)
+
+### Implementation (its files, read before a build; corrected after T024)
+
+- [ ] T012 [P] [US2] In `exportit/model-ufscoastal/README`, say that spack-stack is built by `csis-sandbox-provisioning`'s `ufs-stack.yml` on a head node, where, and at which release; remove the pointer to `ufs-setup-instance.sh` (FR-006)
+- [ ] T013 [US2] In `exportit/model-ufscoastal/setup.sh`, source `{{ ufs_stack_dir }}/setup.sh` at its real path for the chosen release, and remove the `gcc-toolset-13` line with a comment saying why (research R5); `just test` (shellcheck as recorded, `tests/shellcheck.counts` updated if a finding moved)
+- [ ] T014 [US2] In `exportit/model-ufscoastal/modulefiles/tcl/ufs_ioossb.intel.tcl` and `modulefiles/lua/ufs_ioossb.intel.lua`, the new environment's `Core` path and each `module load` at the version the chosen release's `unified-dev` template gives, read from its files; `just test`
+
+---
+
+## Phase 5: The proof on a head node
+
+- [ ] T015 Commit the three units' work on their branches; record the submodules here; run the root `just test` and `just full-test`
+- [ ] T016 On the operator's word only: finish the three units' branches into their `develop` and push; record their commits
+- [ ] T017 **(AWS, asked)** A head node of this spec's own, as spec 001's tasks T017 to T022 (its stages A and B)
+- [ ] T018 Before the playbook: `ls -la --time-style=full-iso /etc/spack` and the sandbox environment's `spack concretize --fresh` output saved
+- [ ] T019 [US1] `ufs-stack.yml` applied; its recap and the time it took recorded
+- [ ] T020 [US1] Applied again: `changed=0` (SC-001)
+- [ ] T021 [US1] `module avail` shows the meta-modules (SC-002)
+- [ ] T022 After the playbook: `/etc/spack` and the concretization equal T018's (SC-004)
+- [ ] T023 [US2] `exportit/model-ufscoastal/setup.sh` run on the node up to `build.sh`'s CMake configure: every dependency found (SC-003); if a module's version differed from T014's, correct it and record the difference
+- [ ] T024 [US2] If T023 corrected anything, commit it in `csis-model-ufscoastal` and run its `just test`
+- [ ] T025 **(AWS, asked)** The node removed as spec 001's tasks T031 to T035 (stage E)
+
+---
+
+## Phase 6: Polish & Cross-Cutting Concerns
+
+- [ ] T026 [P] In `exportit/MAP.md`, the `sandbox-provisioning` and `model-ufscoastal` sections: `ufs-stack.yml`, the release, UFS Coastal's files
+- [ ] T027 [P] In `specs/README.md`, set 004's state
+- [ ] T028 [P] In `specs/004-spack-stack-ufs-coastal/spec.md`, an **Outcome** section: the release (or the fork's commit) and why, the build's time, the four criteria's evidence, any finding (the `ar` failure among them, if it came back)
+- [ ] T029 [P] For each finding, a line in `exportit/REMINDERS.md`
+- [ ] T030 Commit the units' last changes; record the submodules; `just constitution-check`
+- [ ] T031 Run the root `just test`
+- [ ] T032 Run the root `just full-test`
+- [ ] T033 Re-read [quickstart.md](quickstart.md) against what was run; correct it if a step differed
+- [ ] T034 [P] In `exportit/sandbox-provisioning/docs/`, a short page on building spack-stack (when, how long, the release, the scopes), linked from the playbook's header
+- [ ] T035 Check that nothing of `add-ufs-setup.sh` is still called by anything in any unit (`git grep` across `exportit/*`); record the result
+- [ ] T036 Run `/speckit-converge` on `specs/004-spack-stack-ufs-coastal/`; record that it appended nothing, or carry out what it appended (done condition 2)
+- [ ] T037 Walk `specs/004-spack-stack-ufs-coastal/quickstart.md`, each step's evidence from the tasks above (done condition 3)
+- [ ] T038 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+- [ ] T039 Record that no release applies, unless the operator asks for one (done condition 5)
+- [ ] T040 Mark the spec **complete**, with the date, only when T001 to T039 are checked (done conditions 1 and 6)
+
+---
+
+## Dependencies & Execution Order
+
+- **Setup**: needs spec 001 merged and spec 002's catalogue rule.
+- **Foundational**: T003, then T004; T004 may stop for the operator (FR-001).
+- **US1 code (T005 to T011)**: after T004.
+- **US2 files (T012 to T014)**: after T004 (the release fixes the paths and versions).
+- **The proof (Phase 5)**: after T016; T017 to T025 in order.
+- **Polish**: after the proof; T036 to T040 in order.
+
+### Parallel Opportunities
+
+- T005 and T006; T011 alongside T008 to T010; T012 alongside T013 and T014; T026 to T029; T034.
+
+---
+
+## Implementation Strategy
+
+1. The release chosen (Phase 2): nothing else is written until it is.
+2. The playbook, concretizing in the container; UFS Coastal's files at the release's versions.
+3. One head node: the build twice, the checks, UFS Coastal's configure; removed.
+
+---
+
+## Notes
+
+- No GCC toolset is installed by any task (FR-002).
+- Nothing is written to `/etc/spack` (FR-004).
+- Nothing in `ATTIC/` is read for any task.
