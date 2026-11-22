@@ -14,6 +14,13 @@ directive::
     owned                     the unit owns its copied files: their originals are
                               deleted here (stage 22), so its copies are no longer
                               checked against them, only its lineage is
+    moved  <source> <unit> <dest>
+                              a file this unit's copy rules take has moved to
+                              another unit, at <dest> there (spec 003): this unit
+                              no longer holds it, the other accepts it as its own,
+                              and a sync of this unit carries the original's
+                              changes to it into the other. The copy rule stays,
+                              so both units' lineage is as it was made
 
 A path that ends in ``/`` stands for everything beneath it; as a destination,
 ``./`` is the root of the unit. When several
@@ -102,6 +109,22 @@ class Rule:
         return self.dest
 
 
+@dataclass(frozen=True)
+class Move:
+    """One ``moved`` directive: a file that left ``unit`` for ``to``, at ``dest`` there."""
+
+    unit: str
+    source: str
+    to: str
+    dest: str
+    line: int
+
+    @property
+    def where(self) -> str:
+        """Give the directive's place, as ``<unit>.map:<line>``."""
+        return f"{self.unit}.map:{self.line}"
+
+
 @dataclass
 class Unit:
     """Everything one mapping file says."""
@@ -112,6 +135,8 @@ class Unit:
     new: list[str] = field(default_factory=list[str])
     owned: bool = False
     """Its originals are deleted here: it owns its copied files (stage 22, decision 5)."""
+    moves: list[Move] = field(default_factory=list[Move])
+    """The files its copy rules take that have moved to other units."""
 
 
 @dataclass
@@ -137,6 +162,15 @@ class Plan:
     dropped: dict[str, list[str]]
     """unit name -> source paths the unit drops"""
     problems: list[str]
+    moved_out: dict[str, dict[str, Move]] = field(default_factory=dict[str, dict[str, Move]])
+    """unit name -> the place a moved file had inside the unit -> its directive"""
+    moved_in: dict[str, dict[str, Move]] = field(default_factory=dict[str, dict[str, Move]])
+    """unit name -> the place a file moved into the unit has -> its directive"""
+
+    def kept(self, name: str) -> dict[str, str]:
+        """Give the files a unit still holds of those its copy rules take: all but the moved."""
+        gone = self.moved_out.get(name, {})
+        return {dest: source for dest, source in self.files[name].items() if dest not in gone}
 
 
 def list_files(root: Path, *args: str) -> list[str]:
@@ -177,6 +211,8 @@ def parse_map(path: Path) -> Unit:
             unit.owned = True
         elif verb == "local" and len(args) == 1:
             unit.rules.append(Rule(unit.name, args[0], None, number, local=True))
+        elif verb == "moved" and len(args) == 3 and not args[0].endswith("/") and not args[2].endswith("/"):  # noqa: PLR2004
+            unit.moves.append(Move(unit.name, args[0], args[1], args[2], number))
         else:
             raise MapError(f"{where}: cannot read '{raw.strip()}'")
     return unit
@@ -282,7 +318,48 @@ def resolve(units: dict[str, Unit], tracked: list[str], *, external: bool = Fals
         for rule in rules
         if rule not in used
     )
+    resolve_moves(units, plan, rules)
     return plan
+
+
+def resolve_moves(units: dict[str, Unit], plan: Plan, rules: list[Rule]) -> None:
+    """Place every ``moved`` file in the unit it arrives in, or say why it cannot be."""
+    plan.moved_out = {name: {} for name in units}
+    plan.moved_in = {name: {} for name in units}
+    moves = [move for unit in units.values() for move in unit.moves]
+    by_source: dict[str, list[Move]] = {}
+    for move in moves:
+        by_source.setdefault(move.source, []).append(move)
+    for source, same in sorted(by_source.items()):
+        if len(same) > 1:
+            places = ", ".join(move.where for move in same)
+            plan.problems.append(f"{same[0].where}: {source} is moved more than once ({places})")
+    for move in moves:
+        if move.to not in units:
+            plan.problems.append(f"{move.where}: moves {move.source} to {move.to}, which is not a unit")
+            continue
+        if move.to == move.unit:
+            plan.problems.append(f"{move.where}: moves {move.source} to its own unit")
+            continue
+        here = [dest for dest, source in plan.files[move.unit].items() if source == move.source]
+        if not here:
+            plan.problems.append(f"{move.where}: not taken by a copy rule of {move.unit}.map: {move.source}")
+        plan.problems.extend(
+            f"{move.where}: {move.source} is also taken by {rule.unit}.map:{rule.line}"
+            for rule in rules
+            if rule.unit != move.unit and rule.dest is not None and rule.matches(move.source)
+        )
+        if move.dest in plan.files[move.to]:
+            plan.problems.append(f"{move.where}: {move.dest} is a file {move.to}.map copies")
+        elif move.dest in plan.moved_in[move.to]:
+            first = plan.moved_in[move.to][move.dest]
+            plan.problems.append(
+                f"{move.to}: {move.dest} is the destination of two moved lines ({first.where}, {move.where})"
+            )
+        else:
+            plan.moved_in[move.to][move.dest] = move
+        for dest in here:
+            plan.moved_out[move.unit][dest] = move
 
 
 def is_executable(path: Path) -> bool:
@@ -368,8 +445,19 @@ def unit_files(root: Path, name: str) -> set[str] | None:
     return {path[len(prefix) :] for path in present if (root / path).is_file()}
 
 
-def check_unit(root: Path, unit: Unit, files: dict[str, str], tree: Path | None = None) -> list[str]:
-    """Compare one unit's directory with what its mapping file promises."""
+def check_unit(
+    root: Path,
+    unit: Unit,
+    files: dict[str, str],
+    tree: Path | None = None,
+    arrived: dict[str, Move] | None = None,
+) -> list[str]:
+    """Compare one unit's directory with what its mapping file promises.
+
+    ``files`` are the copies it must hold; ``arrived``, the files moved into it
+    from other units, which it holds as its own, as if declared new.
+    """
+    arrived = arrived or {}
     problems: list[str] = []
     unit_dir = root / EXPORT_DIR / unit.name
     here = unit_files(root, unit.name)
@@ -382,8 +470,17 @@ def check_unit(root: Path, unit: Unit, files: dict[str, str], tree: Path | None 
             verdict = same_file(expected_dir / dest, unit_dir / dest)
             if verdict:
                 problems.append(f"{unit.name}: {dest}: {verdict} (source {files[dest]})")
-    extra = sorted(path for path in here if path not in files and not is_declared_new(path, unit.new))
+    extra = sorted(
+        path
+        for path in here
+        if path not in files and path not in arrived and not is_declared_new(path, unit.new)
+    )
     problems.extend(f"{unit.name}: {path}: neither copied nor declared new" for path in extra)
+    problems.extend(
+        f"{unit.name}: {dest}: moved here from {move.unit} but absent ({move.where})"
+        for dest, move in sorted(arrived.items())
+        if dest not in here
+    )
     for item in unit.new:
         if not any(path == item or path.startswith(item) for path in here):
             problems.append(f"{unit.name}: declared new but absent: {item}")
@@ -422,7 +519,7 @@ def command_copy(root: Path, names: list[str], source: Source) -> int:
     """Write or refresh the copies of the named units."""
     units, plan = load_plan(root, source)
     for name in pick(units, names):
-        files = plan.files[name]
+        files = plan.kept(name)
         unit_dir = root / EXPORT_DIR / name
         written = 0
         with tempfile.TemporaryDirectory() as scratch:
@@ -443,11 +540,13 @@ def command_check(root: Path, source: Source, names: list[str] | None = None) ->
     problems: list[str] = []
     for name in pick(units, names or []):
         unit = units[name]
-        found = check_unit(root, unit, plan.files[name], source.tree)
+        found = check_unit(root, unit, plan.kept(name), source.tree, plan.moved_in[name])
         problems.extend(found)
         patches = len(patches_of(root, name))
         state = "ok" if not found else f"{len(found)} problems"
-        print(f"{name}: {len(plan.files[name])} files, {patches} patches: {state}")
+        moves = len(plan.moved_out[name]) + len(plan.moved_in[name])
+        note = f", {moves} moved" if moves else ""
+        print(f"{name}: {len(plan.kept(name))} files, {patches} patches{note}: {state}")
     for problem in problems:
         print(f"PROBLEM {problem}", file=sys.stderr)
     return 1 if problems else 0
@@ -615,7 +714,7 @@ def command_check_baselines(root: Path, given: Path | None) -> int:
             for name in sorted(names):
                 if units[name].owned:
                     continue  # its copies are its own now; the lineage check holds it to the original
-                found += check_unit(root, units[name], plan.files[name], source.tree)
+                found += check_unit(root, units[name], plan.kept(name), source.tree, plan.moved_in[name])
         problems += found
         state = "ok" if not found else f"{len(found)} problems"
         owned = sorted(name for name in names if units[name].owned)
@@ -725,8 +824,20 @@ def fetch_filtered(original: Path, directives: list[str], unit_dir: Path, name: 
     return git_output(unit_dir, "rev-parse", "FETCH_HEAD").strip()
 
 
-def merge_or_undo(unit_dir: Path, start: str, target: str, upstream: str, message: str) -> None:
-    """Merge the original's commits onto the new branch; on a conflict, leave the unit as it was."""
+def merge_or_undo(  # noqa: PLR0913 -- the moved files are the sixth, and keyword-only
+    unit_dir: Path,
+    start: str,
+    target: str,
+    upstream: str,
+    message: str,
+    *,
+    gone: frozenset[str] = frozenset(),
+) -> None:
+    """Merge the original's commits onto the new branch; on a conflict, leave the unit as it was.
+
+    A conflict on a file in ``gone``, one that has moved to another unit, is
+    resolved by keeping it deleted: its changes are carried to where it went.
+    """
     name = unit_dir.name
     merged = subprocess.run(
         ["git", "-C", str(unit_dir), "merge", "--no-ff", "--quiet", "-m", message, upstream],
@@ -737,6 +848,11 @@ def merge_or_undo(unit_dir: Path, start: str, target: str, upstream: str, messag
     if merged.returncode == 0:
         return
     conflicts = git_output(unit_dir, "diff", "--name-only", "--diff-filter=U").split()
+    if conflicts and set(conflicts) <= gone:
+        subprocess.run(["git", "-C", str(unit_dir), "rm", "--quiet", "--", *conflicts], check=True)
+        subprocess.run(["git", "-C", str(unit_dir), "commit", "--quiet", "--no-edit"], check=True)
+        return
+    conflicts = [path for path in conflicts if path not in gone] or conflicts
     subprocess.run(["git", "-C", str(unit_dir), "merge", "--abort"], check=False)
     subprocess.run(["git", "-C", str(unit_dir), "switch", "--quiet", start], check=True)
     subprocess.run(["git", "-C", str(unit_dir), "branch", "--quiet", "-D", target], check=True)
@@ -745,6 +861,95 @@ def merge_or_undo(unit_dir: Path, start: str, target: str, upstream: str, messag
         f"{', '.join(conflicts) or 'the merge'}; nothing was carried. A patch there may need "
         "writing again, in this repository"
     )
+
+
+@dataclass
+class Carry:
+    """A moved file's changes in the original, made into a patch for the unit it went to."""
+
+    move: Move
+    patch: str
+    commits: list[str]
+    """Each upstream commit that changed it, as ``<hash> <subject> (<author>)``."""
+
+
+def moved_changes(repo: Path, moves: list[Move], baseline: str, head: str) -> list[Carry]:
+    """Give, for each moved file the original changed since the baseline, its patch at its new place."""
+    carries: list[Carry] = []
+    for move in moves:
+        diff = git_output(repo, "diff", "--no-renames", "--binary", baseline, head, "--", move.source)
+        if not diff:
+            continue
+        lines = diff.splitlines(keepends=True)
+        for index, line in enumerate(lines):
+            if line.startswith(("diff --git ", "--- a/", "+++ b/")):
+                lines[index] = line.replace(f"a/{move.source}", f"a/{move.dest}").replace(
+                    f"b/{move.source}", f"b/{move.dest}"
+                )
+        log = git_output(repo, "log", "--format=%H %s (%an)", f"{baseline}..{head}", "--", move.source)
+        commits = [f"{line[:12]}{line[40:]}" for line in log.splitlines() if line]
+        carries.append(Carry(move, "".join(lines), commits))
+    return carries
+
+
+def check_arrivals(root: Path, carries: list[Carry]) -> None:
+    """Make sure every patch can be applied where its file went, before anything is changed."""
+    for to in sorted({carry.move.to for carry in carries}):
+        arriving = root / EXPORT_DIR / to
+        if not (arriving / ".git").exists():
+            raise MapError(f"{to}: exportit/{to}, where moved files go, is not a checked-out repository")
+        if git_output(arriving, "status", "--porcelain").strip():
+            raise MapError(f"{to}: the arriving unit's repository has changes; nothing was carried")
+        current = git_output(arriving, "rev-parse", "--abbrev-ref", "HEAD").strip()
+        if current != "develop":
+            raise MapError(f"{to}: the arriving unit is on {current}, not develop; nothing was carried")
+    for carry in carries:
+        arriving = root / EXPORT_DIR / carry.move.to
+        done = subprocess.run(
+            ["git", "-C", str(arriving), "apply", "--check", "-"],
+            input=carry.patch,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if done.returncode != 0:
+            raise MapError(
+                f"{carry.move.to}: {carry.move.dest}: the original's change does not apply in "
+                f"{carry.move.to} ({done.stderr.strip()}); nothing was carried"
+            )
+
+
+def carry_moved(  # noqa: PLR0913 -- what, where, and the range, keyword-only
+    root: Path, carries: list[Carry], *, name: str, branch: str, baseline: str, head: str, given: Path
+) -> list[str]:
+    """Apply the moved files' patches where they went, one commit per arriving unit."""
+    report: list[str] = []
+    for to in sorted({carry.move.to for carry in carries}):
+        arriving = root / EXPORT_DIR / to
+        mine = [carry for carry in carries if carry.move.to == to]
+        subprocess.run(
+            ["git", "-C", str(arriving), "switch", "--quiet", "-c", f"feature/{branch}"], check=True
+        )
+        for carry in mine:
+            subprocess.run(
+                ["git", "-C", str(arriving), "apply", "-"], input=carry.patch, text=True, check=True
+            )
+        subprocess.run(["git", "-C", str(arriving), "add", "-A"], check=True)
+        lines = [
+            f"Carry the original's changes to {len(mine)} file(s) moved here from {name}",
+            "",
+            f"The original, {baseline[:12]}..{head[:12]}:",
+        ]
+        for carry in mine:
+            lines.append(f"- {carry.move.dest} (the original's {carry.move.source}):")
+            lines.extend(f"  {commit}" for commit in carry.commits)
+        lines += ["", f"Synced by Cloud-Sandbox's export.py sync {name}, from {given}."]
+        subprocess.run(["git", "-C", str(arriving), "commit", "--quiet", "-m", "\n".join(lines)], check=True)
+        report.append(
+            f"{name}: moved files carried into {to} on feature/{branch}: "
+            + ", ".join(carry.move.dest for carry in mine)
+        )
+    return report
 
 
 def command_sync(root: Path, name: str, given: Path, branch: str) -> int:
@@ -780,6 +985,8 @@ def command_sync(root: Path, name: str, given: Path, branch: str) -> int:
                 f"the maps do not resolve against the original; decide these first:\n{error}"
             ) from error
         directives = filter_directives(units, plan, name, source.files)
+        carries = moved_changes(source.repo, units[name].moves, baseline, head)
+        check_arrivals(root, carries)
         paths = keep_paths(units, name)
         expected = int(
             git_output(source.repo, "rev-list", "--count", "--no-merges", f"{baseline}..{head}", "--", *paths)
@@ -810,9 +1017,14 @@ def command_sync(root: Path, name: str, given: Path, branch: str) -> int:
             f"Carry {len(new)} commits of the original since {baseline[:12]}, to {head[:12]}\n\n"
             f"Synced by Cloud-Sandbox's export.py sync {name}, from {given}."
         )
-        merge_or_undo(unit_dir, start, target, upstream, message)
+        gone = frozenset(plan.moved_out[name])
+        merge_or_undo(unit_dir, start, target, upstream, message, gone=gone)
         # An owned unit's copies are its own (stage 22, decision 5): the merge decided them.
-        problems = [] if units[name].owned else check_unit(root, units[name], plan.files[name], source.tree)
+        problems = (
+            []
+            if units[name].owned
+            else check_unit(root, units[name], plan.kept(name), source.tree, plan.moved_in[name])
+        )
     if problems:
         for problem in problems:
             print(f"PROBLEM {problem}", file=sys.stderr)
@@ -821,8 +1033,11 @@ def command_sync(root: Path, name: str, given: Path, branch: str) -> int:
             file=sys.stderr,
         )
         return 1
+    report = carry_moved(root, carries, name=name, branch=branch, baseline=baseline, head=head, given=given)
     set_baseline(root, name, head)
     print(f"{name}: carried {len(new)} commits onto {target}; the baseline is now {head[:12]}")
+    for line in report:
+        print(line)
     print(f"{name}: originals changed: {', '.join(changed)}")
     if name in TRANSLATED:
         print(
