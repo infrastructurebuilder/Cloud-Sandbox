@@ -166,3 +166,11 @@ One story: deployable, not deployed. Its first real boot is spec 001's.
 - Nothing in any task creates, changes or removes anything in an AWS account.
 - `init_template.tpl` is not edited (research R5).
 - Nothing in `ATTIC/` is read for any task.
+
+---
+
+## Phase 5: Convergence
+
+- [ ] T029 Rewrite `exportit/sandbox-terraform/README.md`'s "Two first-boot scripts" section and the lines that say `main.tf` "stays the same as the original" and that `init_template.tpl` is the one "used": `main.tf` renders `init_template.ansible.tpl` into `local.user_data` with the eight values; `init_template.tpl` is kept, unused, for comparison and sync; remove the "Switching `main.tf` to the second needs two more values" instructions, which describe a change now made, per FR-001 (contradicts)
+- [ ] T030 Update `exportit/MAP.md`'s `sandbox-provisioning` section, "The first-boot script", which says Terraform "would have to pass two more values" and that the first boot "still clones Cloud-Sandbox, because cloudflow runs from that checkout": both are no longer true; say what the first boot does now and point to the `sandbox-terraform` section, per FR-001 and FR-002 (contradicts)
+- [ ] T031 In `exportit/sandbox-provisioning/DEPLOYMENT.md`'s "What happens at first boot", add the steps the first boot now has around the playbooks (cloudflow cloned from its own repository before them, installed after them), committed in `csis-sandbox-provisioning` on a `feature/first-boot-runs-playbooks` branch and recorded here, per FR-002 (partial)
