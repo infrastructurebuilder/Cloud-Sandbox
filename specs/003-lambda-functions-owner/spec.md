@@ -4,10 +4,10 @@
 
 **Created**: 2026-11-14, as stage 17; carried into this spec 2026-11-19
 
-**Status**: In progress. Clarified 2026-11-20 (five questions, every open
-question settled), planned and broken into 40 tasks the same day; not yet
-implemented. Needs nothing first: no
-AWS account is needed to write and test it.
+**Status**: **Complete**, 2026-11-22. Clarified 2026-11-20 (five questions),
+planned and broken into 40 tasks the same day, implemented and merged
+2026-11-22, every one of the six conditions of done held (see
+[tasks.md](tasks.md), T036 to T040). Nothing was applied to any AWS account.
 
 **Input**: the stage plan of 2026-11-14 (the reminder "who owns the Lambda
 functions", put aside 2026-11-13), carried from the ATTIC on the operator's
