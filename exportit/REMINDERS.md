@@ -19,10 +19,6 @@ aside and why, and where the details are.
   `exportit/`; in a unit's own repository on GitHub they lead nowhere.
   Left on purpose; rewrite them when a unit is first used apart from
   Cloud-Sandbox.
-- **`sandbox-configs` moved whole** (2026-11-17, moving day's decision
-  4). [Spec 005](../specs/005-configs-split-by-owner/spec.md)'s split, templates and examples to
-  cloudflow, is still possible; the files that move will not bring their
-  history from `csis-sandbox-configs` into `cloudflow`.
 - **Remove the link at `/save/$RUNUSER/Cloud-Sandbox/cloudflow`**
   (2026-11-22, spec 006). The first boot links the old checkout's path to
   cloudflow's new place, because about twenty of `csis-sandbox-configs`'

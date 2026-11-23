@@ -73,7 +73,7 @@ new Justfile
 new pyproject.toml
 new uv.lock
 new .python-version
-new schema/                # written by exportit/tools/configs_schema.py from cloudflow's code
+new schema/                # a copy of cloudflow's schema, written and checked by exportit/tools/configs_copy.py (spec 005)
 new tests/
 new attic/                 # descriptions that could not be repaired, each with its reason (spec 005)
 new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)
