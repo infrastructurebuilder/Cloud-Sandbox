@@ -9,7 +9,7 @@ description: "Task list for reading a private playbooks' repository at first boo
 
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md); spec 006 merged
 
-**Done**: by the six conditions of the constitution's Development Workflow
+**Done**: (T031 to T034 added 2026-11-23, on the operator's word: the credential noted in every place a deployer reads) By the six conditions of the constitution's Development Workflow
 (1.2.0): T026 to T030 are those conditions' tasks. Each task, when checked,
 gets a record under it: what was done, and the evidence.
 
@@ -108,6 +108,10 @@ Paths are from the Cloud-Sandbox root; `csis-sandbox-terraform` is
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [ ] T022 [P] In `exportit/sandbox-terraform/DEPLOYMENT.md`, for each mode: making the credential (a read-only deploy key; a fine-grained token, the repository only, `Contents: Read-only`, an expiry), keeping it in a new Secrets Manager secret with the sandbox's prefix under the account's default key, naming its ARN, renewing a token (FR-010)
+- [ ] T031 [P] In `exportit/sandbox-terraform/README.md`'s "Two first-boot scripts", say that a private playbooks' repository needs `provisioning_access` and its credential (a read-only deploy key or a fine-grained token, in its own secret), that a public one needs none, and point at `DEPLOYMENT.md` (FR-011)
+- [ ] T032 [P] In `exportit/sandbox-provisioning/DEPLOYMENT.md`'s "What happens at first boot" and `README.md`'s "How it is applied", say that the playbooks' clone needs that credential when their repository is private, and that without it the first boot stops before applying anything (FR-011), committed in `csis-sandbox-provisioning` on this spec's branch and recorded here
+- [ ] T033 [P] In `exportit/MAP.md`'s `sandbox-terraform` first-boot section, the access modes and their credential; in `specs/README.md`, 007's row says a private playbooks' repository needs one (FR-011)
+- [ ] T034 Search the places FR-010 and FR-011 list for "deploy key" and "token": each one says the credential is needed and points at how it is made (SC-006)
 - [ ] T023 [P] In `specs/README.md`, set 007's state
 - [ ] T024 Commit `csis-sandbox-terraform`'s work on its branch; record the submodule here; run `just constitution-check`
 - [ ] T025 Run the root `just test` and `just full-test`
@@ -125,7 +129,7 @@ Paths are from the Cloud-Sandbox root; `csis-sandbox-terraform` is
 - **Foundational (T003, T004)**: before any template change.
 - **US1**: after Phase 2; blocks US2 and US3 (the variables, the frame).
 - **US2 and US3**: after US1; T013 before T015; US3 after US2's T015 (the shared steps).
-- **Polish**: after US3; T026 to T030 in order.
+- **Polish**: after US3; T031 to T034 with T022 and T023, before T024; then T026 to T030 in order.
 
 ### Parallel Opportunities
 

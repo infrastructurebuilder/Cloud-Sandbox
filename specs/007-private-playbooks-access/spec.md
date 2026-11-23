@@ -39,6 +39,8 @@ someone wants to do in the future."
 
 - Q: Which repositories does the choice cover? → A: the playbooks' only:
   cloudflow's is public too, by the operator's answer to spec 006's FR-002.
+- The operator, 2026-11-23: the documentation must note the need for the key
+  (or a token) in all the right places, as spec 008's must → FR-011, SC-006.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -165,6 +167,19 @@ which a deploy key cannot.
   a fine-grained token with read-only access to its contents and nothing
   else), how to keep it in a secret, how to name it, and how to renew a
   token.
+- **FR-011**: Every other document that tells someone how to deploy a sandbox
+  or what its first boot does MUST say that a private playbooks' repository
+  needs a credential, a read-only deploy key or a fine-grained token, made by
+  the operator and kept only in its secret, and that without it the first boot
+  stops before applying anything; and that a public one needs none (the
+  default). The places, each changed in its own repository:
+  - `csis-sandbox-terraform`'s `README.md`, its first-boot section;
+  - `csis-sandbox-provisioning`'s `DEPLOYMENT.md`, "What happens at first
+    boot", and its `README.md`, "How it is applied";
+  - Cloud-Sandbox's `exportit/MAP.md` (the `sandbox-terraform` first-boot
+    section) and `specs/README.md`.
+  Spec 008, which reads `csis-sandbox-configs` with a deploy key of its own,
+  names the same places for that key.
 
 ### Key Entities
 
@@ -187,6 +202,8 @@ which a deploy key cannot.
   the credential's value finds nothing, in both modes.
 - **SC-004**: A first boot with an unreadable secret or a refused credential
   stops before applying anything and says why in its log.
+- **SC-006**: Each place FR-010 and FR-011 list says a private playbooks'
+  repository needs a deploy key or a token, and how it is made and kept.
 - **SC-005**: The root `just test` and `just full-test` pass.
 
 ## Assumptions
