@@ -27,6 +27,13 @@ aside and why, and where the details are.
   name it; [spec 006's research R3](../specs/006-first-boot-runs-playbooks/research.md)
   lists them. Once they name the new place, each in its own unit, the
   template's link goes.
+- **Compare a node built by the playbooks with one built the old way**
+  (2026-11-23, spec 001, FR-018). The live proof's stage D builds a second
+  head node by the original's first boot at the units' baseline and compares
+  the two; it is off by default (`compare_with_script = false` in
+  `csis-sandbox-terraform`'s `proof/proof.tfvars.example`), so the last row of
+  the "Not proved" table stays deferred. To attempt it, set the flag to `true`
+  for a run of `csis-sandbox-provisioning`'s `docs/LIVE-PROOF.md`.
 - **Releasing from a unit's own repository** (2026-11-17). Each unit's
   `release` target still says "nothing to release from exportit/". How a
   unit is released, now that it has a repository and a first tag, is not
