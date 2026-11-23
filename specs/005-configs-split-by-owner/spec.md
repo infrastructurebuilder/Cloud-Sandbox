@@ -151,6 +151,33 @@ against the schema cloudflow publishes.
 
 Changing what cloudflow reads.
 
+## Outcome
+
+Implemented 2026-11-23, nothing on AWS.
+
+- **The 23 unreadable**, dealt with in `csis-sandbox-configs` before anything
+  moved: 17 repaired (2 trailing commas; 6 missing `table_name`; 9 keys a
+  sibling of the same model gave: `GRID` for three CORA reanalyses, `SAVEDIR`
+  for five ROMS forecasts, and three for `local.plots`); 4 retired to `attic/`
+  with their reasons (no sibling gave what they lacked); the new-model template
+  read as one (clarified 2026-11-23); `current.system` retired with
+  `current.image_id` (FR-004).
+- **Moved**: 51 templates and examples (3 and 48) to cloudflow's
+  `examples/configs/`, by 51 `moved` lines; searched first (no secret, account
+  number or real email; two personal paths already public in the original).
+- **Kept**: 66 site descriptions, every one read by cloudflow; 7 helpers,
+  notes and pointers; 6 retired, with their reasons.
+- **The schema** lives in cloudflow (`schema/`, `tools/configs_schema.py`,
+  `tools/schema_check.py`); `csis-sandbox-configs` holds checked copies of the
+  schema and the rules (`just configs-schema-check`).
+- **FR-004**: `csis-sandbox-terraform`'s output `cluster_description`, its
+  keys held to cloudflow's cluster schema; it carries the head node's three
+  security groups (as `current.system` did) and `key_name`, beyond the plan's
+  list. Its finding of the image once `node-image.yml` has made it is proved
+  only by a real deployment (spec 001).
+- **SC-001**: every description, in either place, is read by cloudflow or is
+  in an attic with its reason. **SC-002**: see tasks T034 and T035.
+
 ## Carried From
 
 Stage 20, planned 2026-11-14, now in the ATTIC (`ATTIC/SPECS/STAGE-20.md`),
