@@ -9,6 +9,62 @@ covers job.configs/
 covers cluster.configs/
 copy job.configs/        job.configs/
 copy cluster.configs/    cluster.configs/
+# The templates and examples belong to cloudflow since spec 005: they show how
+# cloudflow is used, and it checks them against the schema it publishes. The
+# copy rules above still take them, so the lineage is as it was made; a sync
+# carries the original's changes to them into cloudflow. Generated from
+# tests/catalogue.json's roles (template, example) on 2026-11-23.
+moved cluster.configs/local.config                                           cloudflow  examples/configs/cluster.configs/local.config
+moved cluster.configs/template.ioos                                          cloudflow  examples/configs/cluster.configs/template.ioos
+moved job.configs/CORA/cora.reanalysis                                       cloudflow  examples/configs/job.configs/CORA/cora.reanalysis
+moved job.configs/CORA/ec2-user.test.hsofs                                   cloudflow  examples/configs/job.configs/CORA/ec2-user.test.hsofs
+moved job.configs/IOOS/adcirc_florence.fcst                                  cloudflow  examples/configs/job.configs/IOOS/adcirc_florence.fcst
+moved job.configs/IOOS/wrfroms.irene.fcst                                    cloudflow  examples/configs/job.configs/IOOS/wrfroms.irene.fcst
+moved job.configs/MODEL_EXPERIMENTS/adcirc.experiment                        cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/adcirc.experiment
+moved job.configs/MODEL_EXPERIMENTS/dflowfm.experiment                       cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/dflowfm.experiment
+moved job.configs/MODEL_EXPERIMENTS/fvcom.experiment                         cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/fvcom.experiment
+moved job.configs/MODEL_EXPERIMENTS/python.experiment                        cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/python.experiment
+moved job.configs/MODEL_EXPERIMENTS/python_dask_data_parallelism.experiment  cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/python_dask_data_parallelism.experiment
+moved job.configs/MODEL_EXPERIMENTS/python_dask_task_parallelism.experiment  cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/python_dask_task_parallelism.experiment
+moved job.configs/MODEL_EXPERIMENTS/python_mpi.experiment                    cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/python_mpi.experiment
+moved job.configs/MODEL_EXPERIMENTS/roms.experiment                          cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/roms.experiment
+moved job.configs/MODEL_EXPERIMENTS/schism.experiment                        cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/schism.experiment
+moved job.configs/MODEL_EXPERIMENTS/wrf_hydro.experiment                     cloudflow  examples/configs/job.configs/MODEL_EXPERIMENTS/wrf_hydro.experiment
+moved job.configs/NOS/liveocean.00z.diffplots                                cloudflow  examples/configs/job.configs/NOS/liveocean.00z.diffplots
+moved job.configs/NOS/liveocean.00z.plots                                    cloudflow  examples/configs/job.configs/NOS/liveocean.00z.plots
+moved job.configs/NOS/liveocean.cas7_t0_x4b.hindcast                         cloudflow  examples/configs/job.configs/NOS/liveocean.cas7_t0_x4b.hindcast
+moved job.configs/NOS/liveocean.cas7_t0_x4b.hindcast.dt25                    cloudflow  examples/configs/job.configs/NOS/liveocean.cas7_t0_x4b.hindcast.dt25
+moved job.configs/NOS/liveocean.cas7_t0_x4b.hindcast.dt30                    cloudflow  examples/configs/job.configs/NOS/liveocean.cas7_t0_x4b.hindcast.dt30
+moved job.configs/NOS/liveocean.diffplots                                    cloudflow  examples/configs/job.configs/NOS/liveocean.diffplots
+moved job.configs/NOS/liveocean.fcst                                         cloudflow  examples/configs/job.configs/NOS/liveocean.fcst
+moved job.configs/OFS/cbofs.00z.diffplots                                    cloudflow  examples/configs/job.configs/OFS/cbofs.00z.diffplots
+moved job.configs/OFS/cbofs.00z.plots                                        cloudflow  examples/configs/job.configs/OFS/cbofs.00z.plots
+moved job.configs/OFS/ciofs.00z.diffplots                                    cloudflow  examples/configs/job.configs/OFS/ciofs.00z.diffplots
+moved job.configs/OFS/ciofs.00z.plots                                        cloudflow  examples/configs/job.configs/OFS/ciofs.00z.plots
+moved job.configs/OFS/dbofs.00z.diffplots                                    cloudflow  examples/configs/job.configs/OFS/dbofs.00z.diffplots
+moved job.configs/OFS/dbofs.00z.plots                                        cloudflow  examples/configs/job.configs/OFS/dbofs.00z.plots
+moved job.configs/OFS/eccofs.coldstart                                       cloudflow  examples/configs/job.configs/OFS/eccofs.coldstart
+moved job.configs/OFS/eccofs.fcst                                            cloudflow  examples/configs/job.configs/OFS/eccofs.fcst
+moved job.configs/OFS/gomofs.00z.diffplots                                   cloudflow  examples/configs/job.configs/OFS/gomofs.00z.diffplots
+moved job.configs/OFS/gomofs.00z.plots                                       cloudflow  examples/configs/job.configs/OFS/gomofs.00z.plots
+moved job.configs/OFS/leofs.00z.diffplots                                    cloudflow  examples/configs/job.configs/OFS/leofs.00z.diffplots
+moved job.configs/OFS/leofs.00z.plots                                        cloudflow  examples/configs/job.configs/OFS/leofs.00z.plots
+moved job.configs/OFS/lmhofs.00z.diffplots                                   cloudflow  examples/configs/job.configs/OFS/lmhofs.00z.diffplots
+moved job.configs/OFS/lmhofs.00z.plots                                       cloudflow  examples/configs/job.configs/OFS/lmhofs.00z.plots
+moved job.configs/OFS/local.plots                                            cloudflow  examples/configs/job.configs/OFS/local.plots
+moved job.configs/OFS/necofs.hindcast                                        cloudflow  examples/configs/job.configs/OFS/necofs.hindcast
+moved job.configs/OFS/ngofs.03z.diffplots                                    cloudflow  examples/configs/job.configs/OFS/ngofs.03z.diffplots
+moved job.configs/OFS/ngofs.03z.plots                                        cloudflow  examples/configs/job.configs/OFS/ngofs.03z.plots
+moved job.configs/OFS/secofs.hotstart                                        cloudflow  examples/configs/job.configs/OFS/secofs.hotstart
+moved job.configs/OFS/sfbofs.03z.diffplots                                   cloudflow  examples/configs/job.configs/OFS/sfbofs.03z.diffplots
+moved job.configs/OFS/sfbofs.03z.plots                                       cloudflow  examples/configs/job.configs/OFS/sfbofs.03z.plots
+moved job.configs/OFS/tbofs.00z.diffplots                                    cloudflow  examples/configs/job.configs/OFS/tbofs.00z.diffplots
+moved job.configs/OFS/tbofs.00z.plots                                        cloudflow  examples/configs/job.configs/OFS/tbofs.00z.plots
+moved job.configs/TT/adnoc.fcst                                              cloudflow  examples/configs/job.configs/TT/adnoc.fcst
+moved job.configs/TT/nyh.hindcast.1996                                       cloudflow  examples/configs/job.configs/TT/nyh.hindcast.1996
+moved job.configs/TT/nyh.hindcast.2020                                       cloudflow  examples/configs/job.configs/TT/nyh.hindcast.2020
+moved job.configs/UCLA_ROMS/ucla-roms.exp                                    cloudflow  examples/configs/job.configs/UCLA_ROMS/ucla-roms.exp
+moved job.configs/cloud_sandbox_experiment.template                          cloudflow  examples/configs/job.configs/cloud_sandbox_experiment.template
 
 # Files that exist only in the unit.
 new README.md

@@ -49,6 +49,8 @@ class Scenario:
     """For a change to a moved file: the unit the file moved to, which the sync must change too."""
     arriving_path: str = ""
     """And the file's path there, which must hold the upstream change afterwards."""
+    leaving_path: str = ""
+    """And its old path in the unit it left, where it must not come back."""
 
 
 def edit(path: str, how: Callable[[str], str]) -> Callable[[Path], None]:
@@ -85,6 +87,7 @@ def remove(path: str) -> Callable[[Path], None]:
 AWS = "cloudflow/cluster/AWSCluster.py"
 MOVED = "cloudflow/cluster/lambda_terminate_zombies.py"
 MOVED_LINE = "# A line added upstream to a moved file.\n"
+MOVED_CONFIG = "job.configs/OFS/cbofs.00z.plots"
 IMPORT = "from botocore.exceptions import ClientError\n"
 
 SCENARIOS = [
@@ -141,6 +144,17 @@ SCENARIOS = [
         says="moved files carried into sandbox-terraform",
         arriving="sandbox-terraform",
         arriving_path="reaper/functions/lambda_terminate_zombies.py",
+        leaving_path="src/cloudflow/cluster/lambda_terminate_zombies.py",
+    ),
+    Scenario(
+        "a change to a description moved to cloudflow",
+        "sandbox-configs",
+        edit(MOVED_CONFIG, lambda text: text + MOVED_LINE),
+        carried=True,
+        says="moved files carried into cloudflow",
+        arriving="cloudflow",
+        arriving_path="examples/configs/" + MOVED_CONFIG,
+        leaving_path=MOVED_CONFIG,
     ),
     Scenario(
         "a change to the script sandbox-provisioning translates",
@@ -203,7 +217,7 @@ def arrived(sandbox: Path, scenario: Scenario) -> list[str]:
         wrong.append(f"{scenario.arriving}'s commit does not name the upstream commit")
     if not (unit / scenario.arriving_path).read_text().endswith(MOVED_LINE):
         wrong.append(f"{scenario.arriving_path} does not hold the upstream change")
-    if (sandbox / export.EXPORT_DIR / scenario.unit / scenario.arriving_path).exists():
+    if (sandbox / export.EXPORT_DIR / scenario.unit / scenario.leaving_path).exists():
         wrong.append(f"the file came back into {scenario.unit}")
     if export.baselines(sandbox)[scenario.arriving] != export.baselines(ROOT)[scenario.arriving]:
         wrong.append(f"moved {scenario.arriving}'s baseline")
