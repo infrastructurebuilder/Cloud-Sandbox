@@ -33,6 +33,7 @@ Every spec below is planned and tasked and none is started, so every one is
 | 5 | [002](002-rhel10-build-cache/spec.md) | A build cache for RHEL 10 in a bucket of its own, pushed by a playbook | 001 (`proof/`, the procedure) | `feature/rhel10-build-cache` | 44 | **yes**: a bucket that stays, and a head node |
 | 6 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001 (`proof/`); 002 (the catalogue's `superseded_by` rule) | `feature/spack-stack-ufs-coastal` | 40 | **yes**: a head node of its own |
 | 7 | [007](007-private-playbooks-access/spec.md) | The first boot reads a private playbooks' repository, with a deploy key or a fine-grained token | 006 | `feature/private-playbooks-access` | 30 | only for its last proof, when someone wants a private repository |
+| 8 | [008](008-site-configs-at-first-boot/spec.md) | The first boot puts the site's private descriptions (`csis-sandbox-configs`) on the head node, with spec 007's credential | 006, 007 | `feature/site-configs-at-first-boot` | (not yet tasked) | for its proof, a head node |
 
 **Why this order:**
 
