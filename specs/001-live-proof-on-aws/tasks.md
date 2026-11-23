@@ -79,7 +79,8 @@ proof's working copy is outside every repository, on your local machine.
   - Done 2026-11-23: `exportit/sandbox-terraform.map` gains `new proof/`; `exportit/REMINDERS.md` gains the deferred comparison with a node built the old way (FR-018). Recorded in `935e098`.
 - [X] T015 Commit both units' work on their branches; record both submodules here; run the root `just test` and `just full-test`
   - Done 2026-11-23: the units' work committed on their branches and recorded (`935e098`); the root `just test` and `just full-test` passed, 16 targets each, the rehearsal 9 of 9.
-- [ ] T016 On the operator's word only: finish both units' branches into their `develop` and push; record their commits; the run uses those tags or commits
+- [X] T016 On the operator's word only: finish both units' branches into their `develop` and push; record their commits; the run uses those tags or commits
+  - Done 2026-11-23, on the operator's word ("merge, A"): both units' branches squashed into their `develop` and pushed, kept: `csis-sandbox-terraform` `6e3b071`, `csis-sandbox-provisioning` `422f896`. With option A, the first boot's code tagged as it is now: `csis-sandbox-provisioning` `0.0.2` (`b6ab891`) and cloudflow `1.6.0b1` (`4f02034`), each version raised in its `pyproject.toml` (and lock) on a branch of its own, squashed into `develop`, tagged and pushed; `units.toml` records both (`csis-cloud-sandbox` `d7606ad`). The run's `proof.tfvars` takes `provisioning_version = "0.0.2"` and `cloudflow_version = "1.6.0b1"`.
 
 **Checkpoint**: everything the run needs is merged and tested; no AWS call yet.
 
