@@ -187,3 +187,10 @@ maps, the tools and the Justfile are Cloud-Sandbox's.
 - Nothing in any task touches AWS; the output is read from a plan.
 - A repair with no sibling's evidence is a retirement, never a guess.
 - Nothing in `ATTIC/` is read for any task.
+
+---
+
+## Phase 6: Convergence
+
+- [ ] T045 In `exportit/cloud-sandbox/CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md`, steps 3 and 4 tell a reader to copy `cloud_sandbox_experiment.template` from `Cloud-Sandbox/job.configs` and `template.ioos` from `Cloud-Sandbox/cluster.configs`; both are cloudflow's now, in `examples/configs/job.configs/` and `examples/configs/cluster.configs/`, and the new model's description belongs in the site's own repository (`csis-sandbox-configs`): say so, committed in `csis-cloud-sandbox` on a `feature/configs-split-by-owner` branch and recorded here, per US1/AC2 (contradicts)
+- [ ] T046 In `exportit/model-nosofs/NOSOFS-MODELS.md`, the examples it names (`./Cloud-Sandbox/job.configs/cbofs.00z.fcst`, `cbofs.00z.plots`, and `cluster.configs/ioos.config`, `post.config`) are at paths that no longer exist: point them at cloudflow's `examples/configs/` for the examples (`job.configs/OFS/cbofs.00z.plots` among them) and at `csis-sandbox-configs` for the site's descriptions, committed in `csis-model-nosofs` on a `feature/configs-split-by-owner` branch and recorded here, per US1 (partial)
