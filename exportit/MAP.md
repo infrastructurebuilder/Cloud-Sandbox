@@ -177,6 +177,13 @@ Copied on 2026-11-12 by [stage 2](../ATTIC/SPECS/COMPLETED/STAGE-2.md). The
 project's own description is
 [cloudflow/README.md](cloudflow/README.md).
 
+**Since spec 005 (2026-11-23)** cloudflow also holds the templates and
+examples of job and cluster descriptions, in `examples/configs/`, moved from
+`csis-sandbox-configs` by `moved` lines in that unit's map, and publishes the
+schema they are read by: `schema/`, written from its own `src/` by
+`tools/configs_schema.py`, with the rules in `tools/schema_check.py`. Its
+tests hold the schema to the code and every example to the schema.
+
 ### Where each file goes
 
 From [cloudflow.map](cloudflow.map). Plotting was a unit of its own,
@@ -1063,13 +1070,28 @@ Copied on 2026-11-12 by [stage 6](../ATTIC/SPECS/COMPLETED/STAGE-6.md). The
 project's own description is
 [sandbox-configs/README.md](sandbox-configs/README.md).
 
+**Split by owner, spec 005 (2026-11-23).** First, in this unit, the 23
+descriptions cloudflow could not read were dealt with: 17 repaired (two
+trailing commas, six missing `table_name`, nine keys a sibling description
+of the same model gave), 4 retired to a new `attic/` with their reasons
+(no sibling gave what they lacked), the new-model template read as one
+(clarified 2026-11-23), and `current.system` retired with `current.image_id`
+once `csis-sandbox-terraform`'s output `cluster_description` replaced them.
+Then the 51 templates and examples moved to cloudflow's
+`examples/configs/`, by 51 `moved` lines in [sandbox-configs.map](sandbox-configs.map),
+which keep both units' lineage; a later sync carries the original's changes
+to them into cloudflow (the rehearsal's "a change to a description moved to
+cloudflow"). What stays is the site's: 66 descriptions, 7 helpers, notes and
+pointers, and 6 retired files.
+
 ### Where its files go
 
 From [sandbox-configs.map](sandbox-configs.map): all 130 files of
-`job.configs/` (80) and `cluster.configs/` (50), unchanged, under the
-same directory names. By the operator's decisions the copies keep
-their identifiers, and the templates and examples stay in the same
-unit as the site data. No patches.
+`job.configs/` (80) and `cluster.configs/` (50), under the same
+directory names. By the operator's decisions the copies keep their
+identifiers. No patches. Until spec 005 the templates and examples stayed
+in the same unit as the site data; since then 51 of them are cloudflow's
+(above).
 
 New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
 `.python-version`, `schema/` and `tests/`.
@@ -1080,16 +1102,20 @@ New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
 [schema/clusters.json](sandbox-configs/schema/clusters.json) name, for
 each of the 17 `JOBTYPE`s and the two platforms, every key cloudflow
 reads, whether it is required, optional or conditional, and the line
-that reads it. They are written from the code, not by hand:
-[tools/configs_schema.py](tools/configs_schema.py) reads
+that reads it. They are written from the code, not by hand. Since spec
+005 the schema is cloudflow's: its `tools/configs_schema.py`, moved there
+from this repository's `exportit/tools/`, writes its `schema/` with
+`just schema`, and its `tools/schema_check.py` holds the rules that read a
+description by it; [tools/configs_copy.py](tools/configs_copy.py) copies both
+into this unit (`just configs-schema`) and `just configs-schema-check`, part
+of `just test`, fails when a copy differs. The writer reads
 `JobFactory.py` and `ClusterFactory.py` for the dispatch and each
 class's `parseConfig()` for the keys, with Python's own parser. Two
 cases needed care, and each has a test: `table_name` is read under
 `if 'table_name' in cfDict` whose `else` raises, so it is required;
 `EXPNAME` is guarded the same way but only for LiveOcean, so it is
-conditional. `just configs-schema` writes the files again; the tools
-tests fail when they differ from what the code reads, or when a line
-named no longer reads its key.
+conditional. cloudflow's tests fail when the files differ from what the
+code reads, or when a line named no longer reads its key.
 
 ### What the files are
 
