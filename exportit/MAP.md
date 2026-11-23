@@ -102,6 +102,16 @@ deleted carries `owned` in its map: it owns its copied files, the
 baseline check passes it by, and the lineage check alone holds it to the
 original.
 
+A file can move from one unit to another (spec 003, 2026-11-22) with
+`moved <source> <unit> <destination>` in the map of the unit it leaves.
+That map keeps the `copy` rule that took the file, so both units' lineage
+is as it was made; the leaving unit no longer expects the file, and the
+arriving unit holds it as its own. The check reports a moved file its own
+map does not copy, one another unit's map also takes, one moved twice,
+one sent to no unit or to its own, and a destination the arriving unit
+copies or that two lines share. The first use: cloudflow's two Lambda
+functions and `lambda.env`, to `csis-sandbox-terraform`.
+
 Some originals are tracked although `.gitignore` excludes them (the
 notebooks). Their copies have to be added with `git add -f`; the check
 says so when one is missing from the index.
@@ -214,8 +224,13 @@ imports; the lower bounds are the versions in
 - **Plotting is part of the package**, as `cloudflow.plotting`, the way
   the code imports it. Stage 2 made it a second distribution sharing a
   `cloudflow` namespace; the operator folded it back on 2026-11-13.
-- **The Lambda functions stay in the package**, in
-  `src/cloudflow/cluster/`, as today.
+- **The Lambda functions stayed in the package**, in
+  `src/cloudflow/cluster/`, until spec 003 (2026-11-22) moved them to
+  `csis-sandbox-terraform`'s `reaper/functions/`, which packages and
+  deploys them; `cloudflow.map` records the move with three `moved`
+  lines. Every node cloudflow launches now carries the tag
+  `csis:launched-by = cloudflow`, which the terminating function's role
+  requires.
 
 ### Corrections made in the copy
 
@@ -246,7 +261,8 @@ recorded so that the real relocation can deal with them.
 2. Four modules cannot be imported. `utils/testutils.py` imports
    `modelUtil` as a top-level module; `workflows/scripts/random_ofs.py`
    reads `/com/nos/current.fcst` when loaded; the two Lambda functions
-   read their settings from the environment when loaded. The list and
+   read their settings from the environment when loaded (they have
+   since left for `csis-sandbox-terraform`, spec 003). The list and
    the reasons are in
    [cloudflow/tests/test_modules.py](cloudflow/tests/test_modules.py).
 3. Both cron scripts start `./workflows/nosofs_qops.py`, which exists
@@ -292,7 +308,8 @@ counts every such place per file, and a test fails if one is added.
   placement group that a cluster description names.
 - **AWS:** credentials, and a DynamoDB table named in the cluster
   description. `AWSCluster` refuses to start without it; the two
-  Lambda functions and `scripts/weekly_summary.nu` read the same
+  Lambda functions (`csis-sandbox-terraform`'s `reaper/` since spec 003)
+  and `scripts/weekly_summary.nu` read the same
   table. The table is made by hand and its name is configuration
   (operator, 2026-11-12).
 
@@ -466,14 +483,16 @@ mount; everything else through the node image.
 ### The first-boot script
 
 [init_template.ansible.tpl](sandbox-terraform/init_template.ansible.tpl)
-(written in stage 3, moved to the Terraform unit in stage 4) is
-`terraform/init_template.tpl` with its last step replaced. It
-installs `ansible-core`, runs `ansible-pull` against the provisioning
-repository at a version, then runs `node-image.yml`. It stops before
-the image if the playbook fails. Terraform would have to pass two more
-values, `provisioning_repo` and `provisioning_version`;
-[stage 4](../ATTIC/SPECS/COMPLETED/STAGE-4.md) owns that change. It still clones
-Cloud-Sandbox, because cloudflow runs from that checkout.
+(written in stage 3, moved to the Terraform unit in stage 4) was
+`terraform/init_template.tpl` with its last step replaced. Since spec 006
+(2026-11-22) it is the first boot `csis-sandbox-terraform`'s `main.tf`
+renders, with four required values: it clones cloudflow from its own
+repository at `cloudflow_version`, installs `ansible-core`, runs
+`ansible-pull` against the provisioning repository at
+`provisioning_version`, installs cloudflow for `ec2-user`, then runs
+`node-image.yml`, stopping before the image if any step fails. Nothing of
+the original is cloned any more. See [the `sandbox-terraform` section's
+first-boot template](#the-first-boot-template).
 
 ### Found while testing
 
@@ -739,16 +758,22 @@ the root `DEPLOYMENT.md`, and the screenshot it shows, copied from
 ### The first-boot template
 
 Written in stage 3 and moved here in stage 4, because it is rendered by
-Terraform's `templatefile()`. By the operator's decision it sits beside
-the copied `init_template.tpl` and `main.tf` is not changed. The README
-gives the change that would switch over: two variables,
-`provisioning_repo` and `provisioning_version`, and the new file name
-in the head node's `user_data`.
+Terraform's `templatefile()`. It sat beside the copied `init_template.tpl`
+until spec 006 (2026-11-22) switched `main.tf` to it: the head node's
+user data is now `local.user_data`, `init_template.ansible.tpl` rendered
+with four required variables, `provisioning_repo`, `provisioning_version`,
+`cloudflow_repo` and `cloudflow_version`, in place of `sandbox_version`.
+The first boot clones cloudflow from its own (public) repository at its
+tag into `/save/ec2-user/cloudflow`, links the old checkout's path to it,
+applies the playbooks with `ansible-pull`, installs cloudflow editable
+for `ec2-user`, and makes the image; nothing of the original is cloned.
+`init_template.tpl` is kept, unused, for comparison and for a sync from
+the original to land on.
 [tests/test_template.py](sandbox-terraform/tests/test_template.py)
-renders both templates through `tofu console` (`terraform console` until 2026-11-13): the old one with
-the five values `main.tf` passes, the new one with those five plus the
-two new ones, and it fails if either new value is left out. So the
-change in the README is complete, as far as the template goes.
+renders both templates through `tofu console`; `tests/firstboot.tftest.hcl`
+plans the module with mocked providers and reads the user data;
+`tests/test_plan.py` shows a plan without `provisioning_repo` failing on it.
+`just render-first-boot` prints what a node would be given.
 
 ### What it provides: the interface
 
@@ -782,8 +807,17 @@ passes its name in, the same way as `key_name`. What a real split
 should add is a variable for the table name, so that the IAM policy
 can be narrowed from `AmazonDynamoDBFullAccess_v2` to that one table,
 and an output that carries the name into the cluster description
-beside the other four values. The Lambda functions still have no
-owner.
+beside the other four values.
+
+**The Lambda functions are this unit's** since spec 003 (2026-11-22):
+`reaper/` is a root module of its own that packages them from
+`reaper/functions/`, schedules them and gives each a role allowed
+exactly what it calls, the terminating role only on nodes tagged
+`csis:launched-by = cloudflow`; nothing is created unless
+`enable_reaper` is true. Its providers (`aws ~> 6.0`, `archive ~> 2.0`)
+are newer than the main module's `~> 3.47`, which cannot create a
+Lambda function on a runtime AWS still supports. A `tofu test` with
+mocked providers holds it to its contract.
 
 It expects nothing from the other units. `sandbox-provisioning` runs on
 the node it creates.
@@ -1442,11 +1476,12 @@ What the maps decide, and what they leave:
 | A change to a patched file that the patch does not survive | stops on the merge's conflict, the unit left as it was; the patch is written again here |
 | A changed original that a unit translates (`sandbox-provisioning`) | carried, and reported: its parity tests say where the translation no longer holds |
 | A file only this repository may have (`local`) | stops |
+| A change to a file a map declares `moved` | merged into the leaving unit without the file (a modify/delete conflict on it is resolved by keeping it deleted), and carried into the unit it moved to, on the same `feature/<branch>`, as one commit naming the upstream commits; checked before anything changes, and stops if the change does not apply there or that unit is not clean on `develop` |
 
 `just sync-rehearse`, part of `just full-test`, runs one sync of each
 kind against throw-away clones of the real units: on 2026-11-18 all
 seven did as the table says, with the carried commits keeping their
-author.
+author. Spec 003 added an eighth, a change to a moved file.
 
 ## The order of the real relocations
 
