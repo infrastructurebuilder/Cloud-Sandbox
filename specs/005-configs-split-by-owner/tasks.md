@@ -151,9 +151,12 @@ maps, the tools and the Justfile are Cloud-Sandbox's.
   - Done 2026-11-23: `/speckit-converge` appended nothing: converged. Two differences from the design documents, neither actionable and both recorded: the data model says every status in cloudflow's catalogue is `ok`, and one is the new-model template (the operator's answer of 2026-11-23, in the spec); the output carries three security groups and `key_name` where research R6 listed fewer (what `current.system` held, and what a description needs; T026).
 - [X] T041 Walk `specs/005-configs-split-by-owner/quickstart.md`, recording each command and result (done condition 3)
   - Done 2026-11-23, each command and result: `just test` in `exportit/sandbox-configs`: 89 passed (every file as catalogued; retired only under `attic/`); in `exportit/cloudflow`: 210 passed (the schema equals the code; the 51 read by it); in `exportit/sandbox-terraform`: 32 passed (the output's keys, the fixture); the root `just test`: passed (`configs-schema-check`, the tools tests across units); the root `just full-test`: passed (lineage of both units; the rehearsal with a moved description).
-- [ ] T042 On the operator's word only: finish the three units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T043 Record that no release applies, unless the operator asks for one (done condition 5)
-- [ ] T044 Mark the spec **complete**, with the date, only when T001 to T043 are checked (done conditions 1 and 6)
+- [X] T042 On the operator's word only: finish the three units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+  - Done 2026-11-23, on the operator's word ("merge and push 005 when the full test passes"), the root `just test` and `just full-test` having passed (16 targets each; the rehearsal 9 of 9): each unit's branch squashed into its `develop` and pushed, the branch kept and pushed: `csis-sandbox-configs` `023e44b`, cloudflow `7bb64ad`, `csis-sandbox-terraform` `50f6b0f`, recorded here; then this branch squashed into Cloud-Sandbox's `develop` from its tree and pushed, with `just submodules-pushed` first.
+- [X] T043 Record that no release applies, unless the operator asks for one (done condition 5)
+  - Done 2026-11-23: no release applies: the plan names none; each unit's `release` target says nothing is released from it; `exportit/REMINDERS.md` keeps "Releasing from a unit's own repository" open.
+- [X] T044 Mark the spec **complete**, with the date, only when T001 to T043 are checked (done conditions 1 and 6)
+  - Done 2026-11-23: T001 to T043 checked, each with its record; the spec marked **complete** in its Status line and in `specs/README.md`.
 
 ---
 

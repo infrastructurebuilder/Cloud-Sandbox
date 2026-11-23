@@ -5,10 +5,9 @@ taken up
 
 **Created**: 2026-11-14, as stage 20; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
-spec 003 first,** for its `moved` directive. `csis-sandbox-configs` moved
-whole on moving day (2026-11-17, its decision 4), so this split is now a move
-between two repositories.
+**Status**: **Complete**, 2026-11-23. Clarified 2026-11-21 and 2026-11-23,
+planned 2026-11-21, implemented and merged 2026-11-23, every condition of
+done held (see [tasks.md](tasks.md) and the Outcome below).
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
