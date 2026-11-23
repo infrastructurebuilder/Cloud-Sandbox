@@ -43,6 +43,8 @@ making it public or copying the files by hand.
 - Q: Which credential should the first boot use to read the private
   `csis-sandbox-configs`? → A: a read-only deploy key on that repository,
   in a Secrets Manager secret of its own.
+- The operator, the same day: the documentation must note the need for the
+  key (or a token) in all the right places → FR-008, SC-005.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -123,6 +125,27 @@ carries the note of FR-006.
 - **FR-007**: Tests MUST render the module with and without the configs
   repository and hold the user data to the template, as specs 006 and 007 do;
   no credential value appears in any rendered output or plan.
+- **FR-008**: Every document that tells someone how to deploy a sandbox, what
+  its first boot does, or how to start a run MUST say that reading
+  `csis-sandbox-configs` needs a credential: the read-only deploy key of FR-003,
+  made by the operator, its private half in its own Secrets Manager secret,
+  never in a repository or a variable; and that a private playbooks'
+  repository needs its own credential, spec 007's deploy key or fine-grained
+  token. Without the key, the site's descriptions are not on the node. The
+  places, each changed in its own repository:
+  - `csis-sandbox-terraform`'s `DEPLOYMENT.md`: the settings (`configs_repo`,
+    `configs_version`, `configs_secret_arn`), how to make the key, add it to
+    the repository as read-only, put it in the secret and replace it; beside
+    spec 007's section on the playbooks' credential;
+  - `csis-sandbox-terraform`'s `README.md`, its first-boot section;
+  - `csis-sandbox-configs`' `README.md`: the repository is private, and head
+    nodes read it with that key;
+  - `csis-sandbox-provisioning`'s `DEPLOYMENT.md`, "What happens at first
+    boot": the clone of the site's descriptions, and its key;
+  - the run guides of FR-006: their note says the descriptions are there only
+    when the deployment set `configs_repo` and its key;
+  - Cloud-Sandbox's `exportit/MAP.md` (the `sandbox-terraform` first-boot
+    section) and `specs/README.md`.
 
 ### Key Entities
 
@@ -142,6 +165,9 @@ carries the note of FR-006.
   value finds nothing.
 - **SC-004**: Every unit's guide that names the old checkout's relative paths
   carries the note of FR-006, and those paths resolve on a new head node.
+- **SC-005**: Each place FR-008 lists says the key is needed, and how it is
+  made and kept; a search of them for `configs_secret_arn` or "deploy key"
+  finds each one.
 
 ## Assumptions
 
