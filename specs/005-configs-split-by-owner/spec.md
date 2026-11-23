@@ -40,6 +40,17 @@ today's cloudflow, the template a new site copies among them (it has no
   breaking lineage? → A: with spec 003's `moved` directive, one line per file
   in `sandbox-configs.map`; this spec waits for spec 003's implementation.
 
+### Session 2026-11-23
+
+- Q: What happens to `cloud_sandbox_experiment.template`, whose `MODEL` and
+  `JOBTYPE` are placeholders for a model cloudflow has no class for yet?
+  (asked while implementing) → A: it stays a template for a new model, as
+  `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md` uses it, and moves as it is;
+  the schema check reads it as a "new-model template": `MODEL` is
+  `MODEL_CLASS`, `JOBTYPE` ends in `_EXPERIMENT`, and its other keys are
+  those an existing experiment type requires. It is the one exception to
+  "readable by the schema".
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - A new site starts from cloudflow's examples (Priority: P1)
@@ -98,7 +109,10 @@ against the schema cloudflow publishes.
   since 2026-11-19: each repairable one repaired (trailing commas, missing
   keys, and first the template's missing `table_name`), each other retired to
   the unit's attic with its reason in the catalogue. Cloudflow then receives
-  only files its schema reads.
+  only files its schema reads, with one exception: the template for a new
+  model, `cloud_sandbox_experiment.template`, whose `MODEL` and `JOBTYPE` are
+  placeholders by design, is checked as a new-model template (its other keys
+  those an existing experiment type requires; clarified 2026-11-23).
 - **FR-004**: `csis-sandbox-terraform` MUST gain an output carrying a
   complete cluster-description fragment (the image ID, region, subnet,
   security groups and `table_name`), and a test MUST check that fragment
