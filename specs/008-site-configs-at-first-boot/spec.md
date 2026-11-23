@@ -33,7 +33,16 @@ making it public or copying the files by hand.
 
 ## Clarifications
 
-None asked yet.
+### Session 2026-11-23
+
+- Q: Where on the head node should the first boot put the site's description
+  files? → A: clone into `/save/$RUNUSER/sandbox-configs`, and link
+  `/save/$RUNUSER/Cloud-Sandbox/job.configs` and `…/cluster.configs` to it, so
+  the old paths keep working; the guides gain a note saying where the files
+  are.
+- Q: Which credential should the first boot use to read the private
+  `csis-sandbox-configs`? → A: a read-only deploy key on that repository,
+  in a Secrets Manager secret of its own.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -68,8 +77,8 @@ name the place this spec puts the site's descriptions.
 **Why this priority**: today about a dozen guides in six units name paths of
 the old checkout that no longer exist.
 
-**Independent Test**: a search of every unit's guides for the old relative
-paths finds none.
+**Independent Test**: every unit's guide that names the old relative paths
+carries the note of FR-006.
 
 ### Edge Cases
 
@@ -91,24 +100,26 @@ paths finds none.
   user data is unchanged.
 - **FR-002**: When set, the first boot MUST clone the configs repository at its
   tag, as `$RUNUSER`, after cloudflow and before the plays, into
-  [NEEDS CLARIFICATION: the place the site's runs read the descriptions from:
-  `/save/$RUNUSER/Cloud-Sandbox/` (so `job.configs/` and `cluster.configs/` sit
-  beside the `cloudflow` link, and the old `../job.configs/` paths from it keep
-  working), or `/save/$RUNUSER/sandbox-configs/`, with the guides changed to
-  name it].
-- **FR-003**: The clone MUST use spec 007's access: [NEEDS CLARIFICATION: one
-  fine-grained token read-only on both private repositories, the playbooks'
-  and the descriptions', in one secret; or a second deploy key, the
-  descriptions' own (a deploy key reaches one repository), in a second secret;
-  or either, as the operator sets]. The credential is read, used and removed as
-  spec 007's FR-005 says, and never written anywhere else.
+  `/save/$RUNUSER/sandbox-configs`, and MUST link
+  `/save/$RUNUSER/Cloud-Sandbox/job.configs` and
+  `/save/$RUNUSER/Cloud-Sandbox/cluster.configs` to its two directories, beside
+  spec 006's `cloudflow` link, so that the old paths (`../job.configs/…` from
+  the cloudflow link) keep working.
+- **FR-003**: The clone MUST use a read-only deploy key on the configs
+  repository, its private half in a Secrets Manager secret of its own, named to
+  the module (`configs_secret_arn`), read, used and removed as spec 007's
+  FR-005 says (in memory-backed storage, with tracing off, removed before the
+  image), over SSH with GitHub's pinned host keys (spec 007's FR-006). It is
+  never written anywhere else.
 - **FR-004**: A secret that cannot be read, or a refused clone, MUST stop the
   first boot visibly before any image is made.
 - **FR-005**: The head node's role MUST be allowed to read only the secrets
   this and spec 007 name.
 - **FR-006**: The run guides in every unit that name the old checkout's
-  `../job.configs/` and `../cluster.configs/` MUST name the place FR-002
-  chooses, each changed in its own unit.
+  `../job.configs/` and `../cluster.configs/` MUST gain a note that, on a head
+  node, those paths reach the site's descriptions in
+  `/save/$RUNUSER/sandbox-configs` through the links of FR-002, each changed in
+  its own unit; their commands stay as they are.
 - **FR-007**: Tests MUST render the module with and without the configs
   repository and hold the user data to the template, as specs 006 and 007 do;
   no credential value appears in any rendered output or plan.
@@ -129,8 +140,8 @@ paths finds none.
 - **SC-002**: With no configs repository set, the user data is unchanged.
 - **SC-003**: After the first boot, a search of the node for the credential's
   value finds nothing.
-- **SC-004**: A search of every unit's guides for the old checkout's relative
-  paths finds none.
+- **SC-004**: Every unit's guide that names the old checkout's relative paths
+  carries the note of FR-006, and those paths resolve on a new head node.
 
 ## Assumptions
 

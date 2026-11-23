@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain (2 remain: where the descriptions go, FR-002; which credential, FR-003)
+- [x] No [NEEDS CLARIFICATION] markers remain (both answered, 2026-11-23)
 - [x] Requirements are testable and unambiguous, once their questions are answered
 - [x] Success criteria are measurable
 - [x] All acceptance scenarios are defined
@@ -25,4 +25,4 @@
 
 - [x] All functional requirements have clear acceptance criteria
 - [x] User scenarios cover primary flows
-- [ ] Ready for `/speckit-plan`: not until the two markers are settled
+- [x] Ready for `/speckit-plan`
