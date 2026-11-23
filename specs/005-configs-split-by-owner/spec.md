@@ -5,10 +5,9 @@ taken up
 
 **Created**: 2026-11-14, as stage 20; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
-spec 003 first,** for its `moved` directive. `csis-sandbox-configs` moved
-whole on moving day (2026-11-17, its decision 4), so this split is now a move
-between two repositories.
+**Status**: **Complete**, 2026-11-23. Clarified 2026-11-21 and 2026-11-23,
+planned 2026-11-21, implemented and merged 2026-11-23, every condition of
+done held (see [tasks.md](tasks.md) and the Outcome below).
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -39,6 +38,17 @@ today's cloudflow, the template a new site copies among them (it has no
 - Q: How should the 51 templates and examples move to cloudflow without
   breaking lineage? → A: with spec 003's `moved` directive, one line per file
   in `sandbox-configs.map`; this spec waits for spec 003's implementation.
+
+### Session 2026-11-23
+
+- Q: What happens to `cloud_sandbox_experiment.template`, whose `MODEL` and
+  `JOBTYPE` are placeholders for a model cloudflow has no class for yet?
+  (asked while implementing) → A: it stays a template for a new model, as
+  `CLOUD_SANDBOX_MODEL_INTEGRATION_TEMPLATE.md` uses it, and moves as it is;
+  the schema check reads it as a "new-model template": `MODEL` is
+  `MODEL_CLASS`, `JOBTYPE` ends in `_EXPERIMENT`, and its other keys are
+  those an existing experiment type requires. It is the one exception to
+  "readable by the schema".
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -98,7 +108,10 @@ against the schema cloudflow publishes.
   since 2026-11-19: each repairable one repaired (trailing commas, missing
   keys, and first the template's missing `table_name`), each other retired to
   the unit's attic with its reason in the catalogue. Cloudflow then receives
-  only files its schema reads.
+  only files its schema reads, with one exception: the template for a new
+  model, `cloud_sandbox_experiment.template`, whose `MODEL` and `JOBTYPE` are
+  placeholders by design, is checked as a new-model template (its other keys
+  those an existing experiment type requires; clarified 2026-11-23).
 - **FR-004**: `csis-sandbox-terraform` MUST gain an output carrying a
   complete cluster-description fragment (the image ID, region, subnet,
   security groups and `table_name`), and a test MUST check that fragment
@@ -136,6 +149,33 @@ against the schema cloudflow publishes.
 ## Out of Scope
 
 Changing what cloudflow reads.
+
+## Outcome
+
+Implemented 2026-11-23, nothing on AWS.
+
+- **The 23 unreadable**, dealt with in `csis-sandbox-configs` before anything
+  moved: 17 repaired (2 trailing commas; 6 missing `table_name`; 9 keys a
+  sibling of the same model gave: `GRID` for three CORA reanalyses, `SAVEDIR`
+  for five ROMS forecasts, and three for `local.plots`); 4 retired to `attic/`
+  with their reasons (no sibling gave what they lacked); the new-model template
+  read as one (clarified 2026-11-23); `current.system` retired with
+  `current.image_id` (FR-004).
+- **Moved**: 51 templates and examples (3 and 48) to cloudflow's
+  `examples/configs/`, by 51 `moved` lines; searched first (no secret, account
+  number or real email; two personal paths already public in the original).
+- **Kept**: 66 site descriptions, every one read by cloudflow; 7 helpers,
+  notes and pointers; 6 retired, with their reasons.
+- **The schema** lives in cloudflow (`schema/`, `tools/configs_schema.py`,
+  `tools/schema_check.py`); `csis-sandbox-configs` holds checked copies of the
+  schema and the rules (`just configs-schema-check`).
+- **FR-004**: `csis-sandbox-terraform`'s output `cluster_description`, its
+  keys held to cloudflow's cluster schema; it carries the head node's three
+  security groups (as `current.system` did) and `key_name`, beyond the plan's
+  list. Its finding of the image once `node-image.yml` has made it is proved
+  only by a real deployment (spec 001).
+- **SC-001**: every description, in either place, is read by cloudflow or is
+  in an attic with its reason. **SC-002**: see tasks T034 and T035.
 
 ## Carried From
 

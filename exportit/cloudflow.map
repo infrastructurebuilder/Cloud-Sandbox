@@ -14,6 +14,12 @@ covers docs/
 # back, so cloudflow is one distribution again, as in the root setup.py.
 copy cloudflow/__init__.py   src/cloudflow/__init__.py
 copy cloudflow/cluster/      src/cloudflow/cluster/
+# The two zombie-node functions belong to csis-sandbox-terraform since spec 003:
+# its reaper/ module packages and deploys them. The copy rule above still takes
+# them, so the lineage is as it was made; a sync carries their changes there.
+moved cloudflow/cluster/lambda_identify_zombies.py  sandbox-terraform  reaper/functions/lambda_identify_zombies.py
+moved cloudflow/cluster/lambda_terminate_zombies.py sandbox-terraform  reaper/functions/lambda_terminate_zombies.py
+moved cloudflow/cluster/lambda.env                  sandbox-terraform  reaper/functions/lambda.env
 copy cloudflow/job/          src/cloudflow/job/
 copy cloudflow/plotting/     src/cloudflow/plotting/
 copy cloudflow/services/     src/cloudflow/services/
@@ -81,6 +87,8 @@ new uv.lock
 new Justfile
 new .python-version
 new tests/
+new schema/       # the schema of job and cluster descriptions, written from the code (spec 005)
+new tools/        # configs_schema.py, moved here from Cloud-Sandbox, and schema_check.py (spec 005)
 new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)
 new .specify/     # Spec Kit 1.2.3 and the constitution (MOVINGDAY.md, M4)
 new .claude/      # Spec Kit's skills

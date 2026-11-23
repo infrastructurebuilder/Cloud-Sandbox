@@ -5,13 +5,6 @@ aside and why, and where the details are.
 
 ## Open
 
-- **Who owns the Lambda functions** (put aside 2026-11-13; planned as
-  [spec 003](../specs/003-lambda-functions-owner/spec.md)). The two
-  zombie-node functions stay inside cloudflow's package
-  (`src/cloudflow/cluster/`), where they are today, by stage 2's
-  decision 5. Whether cloudflow, `sandbox-ops` or someone else should own
-  them is not decided. See [MAP.md](MAP.md#cloudflow) and
-  [STAGE-2.md](../ATTIC/SPECS/COMPLETED/STAGE-2.md#decisions-taken).
 - **The live proof on AWS** (planned as
   [spec 001](../specs/001-live-proof-on-aws/spec.md); put aside 2026-11-13; it will come
   shortly). Every unit is tested locally, and `site.yml`, `users.yml` and
@@ -26,10 +19,14 @@ aside and why, and where the details are.
   `exportit/`; in a unit's own repository on GitHub they lead nowhere.
   Left on purpose; rewrite them when a unit is first used apart from
   Cloud-Sandbox.
-- **`sandbox-configs` moved whole** (2026-11-17, moving day's decision
-  4). [Spec 005](../specs/005-configs-split-by-owner/spec.md)'s split, templates and examples to
-  cloudflow, is still possible; the files that move will not bring their
-  history from `csis-sandbox-configs` into `cloudflow`.
+- **Remove the link at `/save/$RUNUSER/Cloud-Sandbox/cloudflow`**
+  (2026-11-22, spec 006). The first boot links the old checkout's path to
+  cloudflow's new place, because about twenty of `csis-sandbox-configs`'
+  job descriptions (`CONFIGTMPL`) and some of cloudflow's scripts and
+  examples (`run_liveocean.sh`, `liveocean_fallback.sh`, `examples/cron/`)
+  name it; [spec 006's research R3](../specs/006-first-boot-runs-playbooks/research.md)
+  lists them. Once they name the new place, each in its own unit, the
+  template's link goes.
 - **Releasing from a unit's own repository** (2026-11-17). Each unit's
   `release` target still says "nothing to release from exportit/". How a
   unit is released, now that it has a repository and a first tag, is not
