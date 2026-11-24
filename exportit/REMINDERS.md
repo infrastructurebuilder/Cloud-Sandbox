@@ -31,6 +31,14 @@ aside and why, and where the details are.
   subscription-manager dnf plugin" ran, and by the second apply the file
   said `enabled=1` again, so that apply changed it. Small, and in the
   script's order; to become a spec if a second apply must change nothing.
+- **Narrow the head node's managed policies** (2026-11-24, spec 002's
+  research R2; `csis-sandbox-terraform`). The main module's default
+  `managed_policies` attach `AmazonEC2FullAccess`, `AmazonS3FullAccess`,
+  `AmazonFSxFullAccess`, `AmazonDynamoDBFullAccess_v2` and others to the head
+  node's role (its `variables.tf` says `TODO: limit this`), so a node may write
+  to any bucket, `ioos-cloud-sandbox` included. Spec 002's scoped policy on the
+  build cache (`build_cache_bucket`) is written for when that list is narrowed;
+  narrowing it, to what cloudflow and the playbooks use, is a spec of its own.
 - **Links that leave a unit** (2026-11-17, moving day's decision 5).
   27 links in the units' own pages lead out of the unit, 25 of them to
   [MAP.md](MAP.md). They resolve where the units are checked out under

@@ -727,6 +727,24 @@ hours, and Ansible refuses a task that is both asynchronous and in
 check mode; stage 10 said the role had check mode and had not run it.
 The task is now synchronous when previewing, which builds nothing.
 
+### Pushing a build to the RHEL 10 cache (spec 002)
+
+`push-build-cache.yml`, beside `site.yml` and never imported by it, is
+run by hand on a built head node: the collection's
+`spack_buildcache_push` sends the environment's installed packages that
+the cache lacks to `spack_mirror`, signed with `spack_key_fingerprint`,
+and rebuilds the index. It stops first, naming the key, unless the
+signing key's private half is in Spack's keyring; the operator puts it
+there by hand and takes it off after
+([docs/BUILD-CACHE.md](sandbox-provisioning/docs/BUILD-CACHE.md)). It
+replaces `sandbox-ops`' `spack-update-mirror.sh`. The parity test holds
+its mirror, key and environment to that script's; the container test
+pushes a fake-installed package to a cache in a directory, unsigned:
+check mode pushes nothing, the first run pushes, the second changes
+nothing, and a signed push without the key stops. The defaults
+(`spack_cache_only: -1`, `spack_site_mirror: false`, the RHEL 8 mirror)
+stay until a build has installed from the new cache.
+
 ### What a real relocation would change
 
 - Create the repository, extract with `just export-filter
@@ -834,6 +852,18 @@ exactly what it calls, the terminating role only on nodes tagged
 are newer than the main module's `~> 3.47`, which cannot create a
 Lambda function on a runtime AWS still supports. A `tofu test` with
 mocked providers holds it to its contract.
+
+**The RHEL 10 build cache's bucket is this unit's** since spec 002:
+`build-cache/` is a root module of its own, with its own state, so that
+no head node's removal touches it. It makes one private bucket
+(`csis-sandbox-rhel10-build-cache` by default: public access blocked,
+ownership enforced, SSE-S3), whose `mirror_url` output is
+`sandbox-provisioning`'s `spack_mirror`. The main module's
+`build_cache_bucket`, when set, gives the head node's role a policy on
+that bucket alone: list it, and read, write and delete its objects. While
+the default `managed_policies` hold `AmazonS3FullAccess` it grants nothing
+new (a reminder in [REMINDERS.md](REMINDERS.md)). Mocked `tofu test`s hold
+both.
 
 It expects nothing from the other units. `sandbox-provisioning` runs on
 the node it creates.
@@ -1321,7 +1351,10 @@ above its task:
   `ufs-setup-instance.sh`, which is superseded.
 - **The mirror tools carry RHEL 8 versions:** `spack-update-mirror.sh`
   lists gcc 11.2.1 and oneAPI 2023.1.0; `ufs-envars.sh` names Spack
-  v0.22.5 and `linux-rhel8`.
+  v0.22.5 and `linux-rhel8`. Since spec 002, `spack-update-mirror.sh` is
+  marked replaced by `sandbox-provisioning`'s `push-build-cache.yml`
+  (its header, README row and catalogue's `superseded_by`, which
+  `check-catalogue.sh` holds to `<unit>: <path>`); it stays, in use.
 - **Personal data in the tree:** `scripts/system/patrick.gitconfig`
   (a name and an address), the mirror key's user id (a work address),
   and three `sudoers` files that name accounts. They are copied as they
