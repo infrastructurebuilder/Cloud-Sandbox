@@ -132,11 +132,16 @@ proof's working copy is outside every repository, on your local machine.
 
 ## Phase 5: User Story 3 - Nothing left behind (Priority: P2)
 
-- [ ] T031 [US3] Box E1: `tofu workspace show` prints `live-proof`; otherwise stop
-- [ ] T032 [US3] **(AWS, asked)** Box E2: `tofu destroy -var-file=proof.tfvars`; read the list before answering; `Destroy complete!`
-- [ ] T033 [US3] **(AWS, asked)** Boxes E3 and E4: the image deregistered and its snapshot deleted, by ID
-- [ ] T034 [US3] Box E5: `aws resourcegroupstaggingapi get-resources` for the proof's `Project` tag, and `describe-images`/`describe-snapshots --owners self` for its prefix, all empty (SC-004)
-- [ ] T035 [US3] Box E6: the VPC's, subnets' and route tables' descriptions taken again and compared with T018's: equal (SC-004)
+- [X] T031 [US3] Box E1: `tofu workspace show` prints `live-proof`; otherwise stop
+  - Done 2026-11-23: `live-proof`.
+- [X] T032 [US3] **(AWS, asked)** Box E2: `tofu destroy -var-file=proof.tfvars`; read the list before answering; `Destroy complete!`
+  - Done 2026-11-23, on the operator's word ("destroy it"): the destroy planned first and its list read, exactly the 22 resources of T020; applied, "22 destroyed"; nothing left in the workspace's state but its data sources.
+- [X] T033 [US3] **(AWS, asked)** Boxes E3 and E4: the image deregistered and its snapshot deleted, by ID
+  - Done 2026-11-23: the one image with the prefix, `CSIS-Live-Proof-happy-antelope-Node`, deregistered, and its snapshot deleted, by ID (procedure box E3).
+- [X] T034 [US3] Box E5: `aws resourcegroupstaggingapi get-resources` for the proof's `Project` tag, and `describe-images`/`describe-snapshots --owners self` for its prefix, all empty (SC-004)
+  - Done 2026-11-23 (procedure box E4): images and snapshots with the prefix, none; the IAM role, none. **Finding:** the tagging API still listed four ARNs with the proof's tag minutes after: two of its instances, the snapshot and a volume; `describe-instances` showed one terminated and the other gone, `describe-snapshots` and `describe-volumes` "NotFound". The tagging API's index lags deletion; the box must say so, and check by the resources' own calls.
+- [X] T035 [US3] Box E6: the VPC's, subnets' and route tables' descriptions taken again and compared with T018's: equal (SC-004)
+  - Done 2026-11-23 (procedure box E5): the VPC as it was. The route tables as they were but for the order of two associations, the same two; the box's plain `diff` reports that, so it must sort first. The subnets as they were but for two free-address counts, neither the proof's: the proof's subnet had 34 more free than before, the other private subnet 20 fewer (other users of the VPC); noted, not a failure.
 
 ---
 
