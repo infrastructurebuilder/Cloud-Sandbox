@@ -92,17 +92,28 @@ proof's working copy is outside every repository, on your local machine.
 
 **Independent Test**: `site.yml`'s recap from the boot, the second apply and check mode.
 
-- [ ] T017 [US1] Box A1: `aws sts get-caller-identity` for the `noaa` account and `session-manager-plugin --version`; if either fails, stop and ask for the session to be refreshed (FR-001, FR-017)
-- [ ] T018 [US1] Boxes A2 and A3: the working copy at the unit's merged commit, `proof/` copied in, a new key pair on your local machine; the VPC by its name, its subnets and route tables listed; **YOUR DECISION** the subnet (default: the private one in the module's zone); `proof.tfvars` filled from the example; the VPC's, subnets' and route tables' descriptions saved on your local machine (research R6)
-- [ ] T019 [US1] Box A4: `tofu init`, `tofu workspace new live-proof`, `tofu plan -var-file=proof.tfvars`; it must show only additions, `0 to change, 0 to destroy`, every resource with the prefix; otherwise stop (FR-003, FR-008)
-- [ ] T020 [US1] **(AWS, asked)** Box A5: `tofu apply`; the node's ID; an SSM session to it opens
-- [ ] T021 [US1] Box B1: follow the first boot (`/root/setup.log`, the plays' recap) until it ends, repeatable across sessions (research R8); record how long it took
-- [ ] T022 [US1] Box B2: the boot's `site.yml` recap ends `failed=0`; the cloudflow install succeeded; the log says the image waits for stage C (SC-001; spec 006's first real use)
-- [ ] T023 [US1] Box B3: the second apply by hand, `spack_site_mirror=true`, its recap kept as `site-second.log`; every task that changed is a finding, a change caused by an upstream release repeated once before it is called one (edge case)
-- [ ] T024 [US1] Box B4: check mode, kept as `site-check.log`; every task that would change is a finding
-- [ ] T025 [P] [US1] Box B5: Spack's configuration compared with `tests/container/expected-spack-config.json` by `tests/container/compare-spack-config.py`; each difference a finding
-- [ ] T026 [P] [US1] Box B6: every module file under the environment's root has the time it had after the boot (`refresh_modules: when_needed`)
-- [ ] T027 [US1] Box B7: `jupyterhub.yml` applied; the hub answers on its port, as `tests/jupyterhub-check.yml` checks it (FR-016)
+- [X] T017 [US1] Box A1: `aws sts get-caller-identity` for the `noaa` account and `session-manager-plugin --version`; if either fails, stop and ask for the session to be refreshed (FR-001, FR-017)
+  - Done 2026-11-23: the caller is the `noaa` account's SSO power-user role; `session-manager-plugin` 1.2.835.0.
+- [X] T018 [US1] Boxes A2 and A3: the working copy at the unit's merged commit, `proof/` copied in, a new key pair on your local machine; the VPC by its name, its subnets and route tables listed; **YOUR DECISION** the subnet (default: the private one in the module's zone); `proof.tfvars` filled from the example; the VPC's, subnets' and route tables' descriptions saved on your local machine (research R6)
+  - Done 2026-11-23: the working copy `$HOME/csis-live-proof` at `csis-sandbox-terraform` `6e3b071` with `proof/` in it; a key pair made for the proof on the local machine; the operator chose subnet 3, the IOOS VPC's private subnet in `us-east-2b`; `proof.tfvars` filled from the example; `vpc-before.json`, `subnets-before.json` and `routes-before.json` saved there.
+- [X] T019 [US1] Box A4: `tofu init`, `tofu workspace new live-proof`, `tofu plan -var-file=proof.tfvars`; it must show only additions, `0 to change, 0 to destroy`, every resource with the prefix; otherwise stop (FR-003, FR-008)
+  - Done 2026-11-23: `Plan: 22 to add, 0 to change, 0 to destroy`; every name with the deployment's prefix, the IAM role's name free in the account. **Finding:** OpenTofu's AWS provider cannot use the `noaa` SSO profile ("missing required configuration: sso_region, sso_start_url"), though the AWS CLI can; the plan ran with the session's temporary credentials exported (`aws configure export-credentials --profile noaa --format env`, `AWS_PROFILE` unset), never printed. Box A4 must say so.
+- [X] T020 [US1] **(AWS, asked)** Box A5: `tofu apply`; the node's ID; an SSM session to it opens
+  - Done 2026-11-23, on the operator's word ("apply"): `Apply complete! Resources: 22 added`; the node answered Session Manager (`Online`) a minute after.
+- [X] T021 [US1] Box B1: follow the first boot (`/root/setup.log`, the plays' recap) until it ends, repeatable across sessions (research R8); record how long it took
+  - Done 2026-11-23, at the third boot. The first, at `csis-sandbox-provisioning` `0.0.2`, stopped after ten seconds at "Silence the subscription-manager dnf plugin": the task edited `/etc/dnf/pluginconf.d/subscription-manager.conf`, the script's L34, and RHEL 10.2 has only `/etc/dnf/plugins/`; the script's `sed` failed unnoticed and the container test turns the task off. Fixed, on the operator's choice (B: the right path, edited only if it exists), as `0.0.3` (`af32eb5`, tagged and pushed); the node replaced. The second boot stopped at cloudflow's clone: the first boot's template makes the `/save` link only when the EFS volume has no `save/`, so a head node replaced on a kept volume has no `/save` (and the volume held the first clone). On the operator's choice (A), the volume was replaced with the node; the bug is a finding for a spec of its own (T039). The third boot, on a new volume, ran from 23:00 to 23:34 UTC: **34 minutes**, not the hours the procedure says. Spack built five packages (ESMF 8.9.1 in 7 minutes, PETSc, HDF5, netCDF-C, parallel-netCDF); Python, GCC and Intel's compilers and MPI were the system's. The log is kept as `logs/setup.log` in the working copy.
+- [X] T022 [US1] Box B2: the boot's `site.yml` recap ends `failed=0`; the cloudflow install succeeded; the log says the image waits for stage C (SC-001; spec 006's first real use)
+  - Done 2026-11-23: `ok=150 changed=67 unreachable=0 failed=0`; "Successfully installed cloudflow-1.6.0b1"; the last line "The node image is left for LIVE-PROOF.md's stage C." Spack's environment holds `esmf@8.9.1+mpi+pnetcdf` and `petsc+mpi`, built with oneAPI 2024.2.1.
+- [X] T023 [US1] Box B3: the second apply by hand, `spack_site_mirror=true`, its recap kept as `site-second.log`; every task that changed is a finding, a change caused by an upstream release repeated once before it is called one (edge case)
+  - Done 2026-11-23: `ok=134 changed=2 failed=0`, in about six minutes; kept as `logs/site-second.log`. **Findings:** "Update every installed package" changed, eleven packages released since the first apply (rdma-core 61.0-2, dkms 3.4.4 and others): upstream, and repeated by T024's check mode, which found nothing to change. "Silence the subscription-manager dnf plugin" changed again: the first apply's update ran after it and upgraded subscription-manager from 1.30.12 to 1.30.16, after which the file was back to `enabled=1`, though RPM marks it `%config(noreplace)`; the script has the same order. Check mode then found it unchanged.
+- [X] T024 [US1] Box B4: check mode, kept as `site-check.log`; every task that would change is a finding
+  - Done 2026-11-23: `ok=120 changed=0 failed=0`; kept as `logs/site-check.log`. No finding.
+- [X] T025 [P] [US1] Box B5: Spack's configuration compared with `tests/container/expected-spack-config.json` by `tests/container/compare-spack-config.py`; each difference a finding
+  - Done 2026-11-23: five differences. **Findings:** the site's mirror `s3-mirror` is among the mirrors (expected: the proof sets `spack_site_mirror=true`, the container does not); `bison`, `flex`, `gettext` and `openssl` are found as externals on RHEL 10.2, which the container does not have.
+- [X] T026 [P] [US1] Box B6: every module file under the environment's root has the time it had after the boot (`refresh_modules: when_needed`)
+  - Done 2026-11-23: no module file newer than the second apply's start. No finding.
+- [X] T027 [US1] Box B7: `jupyterhub.yml` applied; the hub answers on its port, as `tests/jupyterhub-check.yml` checks it (FR-016)
+  - Done 2026-11-23: `/hub/login` answered `200`; `ok=24 changed=21 failed=0`, kept as `logs/jupyterhub.log`. **Finding:** the box runs `jupyterhub.yml` without the six settings only a site can give, and the role refuses (as it should); it was run with the container test's values (`hub.example.invalid`, from `tests/container/vars.yml`). The box must name them.
 
 **Checkpoint**: the node is built and its findings recorded.
 
@@ -110,9 +121,12 @@ proof's working copy is outside every repository, on your local machine.
 
 ## Phase 4: User Story 2 - An image a compute node can start from (Priority: P2)
 
-- [ ] T028 [US2] **(AWS, asked)** Box C1: `node-image.yml` on the head node, kept as `node-image.log`
-- [ ] T029 [US2] Box C2: from your local machine, `aws ec2 describe-images --owners self` for the prefix shows the image `available`, and its snapshot (SC-002)
-- [ ] T030 [US2] Box D: with `compare_with_script = false`, skipped; record the last row of the "Not proved" table as deferred by the flag (SC-005)
+- [X] T028 [US2] **(AWS, asked)** Box C1: `node-image.yml` on the head node, kept as `node-image.log`
+  - Done 2026-11-23, on the operator's word ("make the image"): `ok=14 changed=5 failed=0` (the Prefect server stopped, the root volume snapshotted, the image registered, its id kept in the login user's home, Prefect started again); kept as `logs/node-image.log`. The image is named for the module's `ami_name` with `-Node` added.
+- [X] T029 [US2] Box C2: from your local machine, `aws ec2 describe-images --owners self` for the prefix shows the image `available`, and its snapshot (SC-002)
+  - Done 2026-11-23: one image, `CSIS-Live-Proof-happy-antelope-Node`, `available`, with one snapshot.
+- [X] T030 [US2] Box D: with `compare_with_script = false`, skipped; record the last row of the "Not proved" table as deferred by the flag (SC-005)
+  - Done 2026-11-23: skipped, `compare_with_script = false`; the comparison with a node built the original way stays deferred (`exportit/REMINDERS.md`, T014).
 
 ---
 
