@@ -147,15 +147,29 @@ proof's working copy is outside every repository, on your local machine.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T036 In `specs/001-live-proof-on-aws/spec.md`, add an **Outcome** section: the date, the node's type and build time, every finding (T023 to T027), the image, the removal's checks; no address, ID or account identifier (FR-006)
-- [ ] T037 In `exportit/MAP.md`, mark each row of the "Not proved" table proved, with the date and what was seen, or not proved, with why (SC-003)
-- [ ] T038 [P] In `exportit/sandbox-terraform/init_template.ansible.tpl`'s header, remove "Not run anywhere yet" (spec 006's T014), and link this outcome from spec 006's tasks
-- [ ] T039 [P] For each finding that needs fixing, a line in `exportit/REMINDERS.md` naming the unit it concerns, to become a spec of its own (Out of Scope)
-- [ ] T040 [P] In `specs/README.md`, set 001's state
-- [ ] T041 Commit the units' last changes, if any, on their branches; record the submodules here; run `just constitution-check`
-- [ ] T042 Run the root `just test` and `just full-test`
-- [ ] T043 Run `/speckit-converge` on `specs/001-live-proof-on-aws/`; record that it appended nothing, or carry out what it appended (done condition 2)
-- [ ] T044 Walk `specs/001-live-proof-on-aws/quickstart.md`'s "Done when", each line with its evidence from T017 to T035 (done condition 3)
+- [X] T036 In `specs/001-live-proof-on-aws/spec.md`, add an **Outcome** section: the date, the node's type and build time, every finding (T023 to T027), the image, the removal's checks; no address, ID or account identifier (FR-006)
+  - Done 2026-11-23: `spec.md`'s **Outcome**: the run, the node's type and build time, a table of every check, the nine findings, and the "Not proved" table's state; no address, ID or account identifier. The status line says it was run.
+- [X] T037 In `exportit/MAP.md`, mark each row of the "Not proved" table proved, with the date and what was seen, or not proved, with why (SC-003)
+  - Done 2026-11-23: `exportit/MAP.md`: RHEL and AWS, the first boot, the drivers' and the tuning profile's installation, the build, the module files and the image proved, with the date and what was seen; that the drivers load on the image's kernel not proved (finding 7); the comparison deferred by the flag. Also its notes on the build, the site mirror's list, the procedure and the first-boot script.
+- [X] T038 [P] In `exportit/sandbox-terraform/init_template.ansible.tpl`'s header, remove "Not run anywhere yet" (spec 006's T014), and link this outcome from spec 006's tasks
+  - Done 2026-11-23: the template's header says spec 001 ran it, and names the kept-volume bug (`csis-sandbox-terraform` `cec0e5c`, on `feature/first-boot-proved`); spec 006's T014 links this outcome.
+- [X] T039 [P] For each finding that needs fixing, a line in `exportit/REMINDERS.md` naming the unit it concerns, to become a spec of its own (Out of Scope)
+  - Done 2026-11-23: `exportit/REMINDERS.md` gains three, each naming its unit: the kept volume's `/save` (`csis-sandbox-terraform`), the drivers' kernel and the plugin's order (`csis-sandbox-provisioning`). The procedure's own findings are fixed in its version 3 (`csis-sandbox-provisioning` `ffd65b2`, on `feature/live-proof-v3`), not reminded. The open item for the live proof itself is gone: it is done.
+- [X] T040 [P] In `specs/README.md`, set 001's state
+  - Done 2026-11-23: 001's row says it was run, links the outcome, and says it is not yet merged; the note on cost gives the run's times.
+- [X] T041 Commit the units' last changes, if any, on their branches; record the submodules here; run `just constitution-check`
+  - Done 2026-11-23: the units' last changes committed on their branches and recorded here: `csis-sandbox-provisioning` `3fc4a1b` (`feature/live-proof-v3`: `LIVE-PROOF.md` version 3, the README and DEPLOYMENT pages; on `0.0.3`'s `develop`), `csis-sandbox-terraform` `cec0e5c` (`feature/first-boot-proved`), `csis-cloud-sandbox` `7b46b4b` (`feature/provisioning-0.0.3`, recorded in T030's commit). `just constitution-check`: the shared part (2.1.0), CLAUDE.md and LICENSE agree in every unit. Each unit's `just test` and `just full-test` passed (provisioning 473 tests and the container applied twice, nothing changed the second time; terraform 34 and 5 slow).
+- [X] T042 Run the root `just test` and `just full-test`
+  - Done 2026-11-23: the root `just test` and `just full-test` passed; `units.toml` 15 units consistent, the sync rehearsal 9 of 9.
+- [X] T043 Run `/speckit-converge` on `specs/001-live-proof-on-aws/`; record that it appended nothing, or carry out what it appended (done condition 2)
+  - Done 2026-11-23: `/speckit-converge` appended Phase 7, T048 and T049 (two of the provisioning unit's pages still said nothing had been applied to a real head node, and gave only "several hours"); both carried out.
+- [X] T044 Walk `specs/001-live-proof-on-aws/quickstart.md`'s "Done when", each line with its evidence from T017 to T035 (done condition 3)
+  - Done 2026-11-23, each line of the quickstart's "Done when" with its evidence:
+    - `site.yml` ended `failed=0`; the second apply's two changes and check mode's none are findings 3 and 4 (T022 to T024): **met** (SC-001).
+    - The image was `available` (T029): **met** (SC-002).
+    - Every row of `exportit/MAP.md`'s "Not proved" table is marked, proved or not with why (T037): **met** (SC-003).
+    - Nothing with the prefix found, each resource asked by its own call, and the VPC, subnets and route tables as they were (T034, T035; the quickstart's E5 and E6 are the procedure's E4 and E5): **met** (SC-004), the tagging index's lag noted.
+    - Stage D skipped with the flag `false`, recorded as deferred (T030): **met** (SC-005).
 - [ ] T045 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's `feature/live-proof` into `develop` and push, with `just submodules-pushed` first (done condition 4)
 - [ ] T046 Record that no release applies, unless the operator asks for one (done condition 5)
 - [ ] T047 Mark the spec **complete**, with the date, only when T001 to T046 are checked, each with its record (done conditions 1 and 6)
@@ -189,3 +203,10 @@ proof's working copy is outside every repository, on your local machine.
 - The node and everything with the prefix is billed from T020 until T034 finds nothing.
 - Logs stay on your local machine; nothing from them that identifies the account goes into a repository.
 - Nothing in `ATTIC/` is read for any task.
+
+## Phase 7: Convergence
+
+- [X] T048 In `exportit/sandbox-provisioning/README.md`'s "What has not been proved", say what spec 001's run proved on RHEL 10.2 and AWS and what it left not proved (the drivers on the image's kernel, the comparison with the old way), linking the outcome, in place of "No playbook here has been applied to a real head node" and "has itself not been run" per SC-003 (contradicts)
+  - Done 2026-11-23: the section is now "What has been proved on AWS, and what has not": what the run proved, and the two things still not proved; `DEPLOYMENT.md`'s "What has not been proved", which said the same, now points at it.
+- [X] T049 In `exportit/sandbox-provisioning/DEPLOYMENT.md`, beside "it takes several hours, depending on the head node's instance type", give the run's measure: 34 minutes for the first boot on a `c6i.8xlarge` per FR-009 (partial)
+  - Done 2026-11-23: `DEPLOYMENT.md` adds the run's 34 minutes on a `c6i.8xlarge`.

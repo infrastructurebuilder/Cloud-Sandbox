@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-14, as stage 15; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. It runs in the `noaa`
+**Status**: Run on AWS 2026-11-23; outcome below. It ran in the `noaa`
 account in us-east-2, inside the existing IOOS VPC, creating only new
 resources (the operator's answer, 2026-11-21); the role there cannot create
 a network, so the module is given one.
@@ -317,6 +317,79 @@ with the operator's word at each, and the account shows nothing else of it.
 - Running a model, or starting a compute node from the image (FR-014).
 - Fixing what the proof finds: a finding becomes a spec of its own, in the
   unit it concerns.
+
+## Outcome
+
+Run on 2026-11-23 by the agent, box by box, from `LIVE-PROOF.md` version 2,
+each AWS step on the operator's word; the procedure then corrected as
+version 3 (`csis-sandbox-provisioning`). The tasks' records (T017 to T035)
+hold each box's result; the logs stay on the operator's machine (FR-006).
+
+**The node.** `c6i.8xlarge` (32 processors, so `spack_jobs` 31) on RHEL 10.2,
+in the IOOS VPC's private subnet in `us-east-2b`, with
+`csis-sandbox-provisioning` 0.0.3 and cloudflow 1.6.0b1. Its first boot,
+spec 006's, ran in **34 minutes**: Spack compiled five packages (ESMF 8.9.1,
+in 7 minutes, PETSc, HDF5, netCDF-C and parallel-netCDF), the system giving
+Python, GCC and Intel's compilers and MPI. The procedure had said hours.
+
+| Check | Result |
+| --- | --- |
+| The plan (A4) | 22 to add, 0 to change, 0 to destroy |
+| The first boot (B2) | `failed=0`, at the third boot (findings 1 and 2) |
+| The second apply (B3) | `failed=0`, 2 changed (findings 3 and 4) |
+| Check mode (B4) | 0 to change |
+| Spack's configuration (B5) | 5 differences (finding 5) |
+| Module files (B6) | none rewritten |
+| JupyterHub (B7) | answers `200`, with test settings (finding 6) |
+| The image (C1, C2) | made, `available`, one snapshot (SC-002) |
+| Stage D | skipped, `compare_with_script = false` (SC-005) |
+| Removal (E1 to E5) | 22 destroyed; the image and snapshot deleted; nothing with the prefix found by each resource's own call; the VPC, subnets and route tables as they were (SC-004; finding 9) |
+
+**The findings.** Each one that needs fixing is in `exportit/REMINDERS.md`,
+to become a spec of its own in the unit it concerns (Out of Scope); the
+procedure's are fixed in its version 3.
+
+1. **A path RHEL 10 lacks** (`csis-sandbox-provisioning`). "Silence the
+   subscription-manager dnf plugin" edited
+   `/etc/dnf/pluginconf.d/subscription-manager.conf`, carried from the
+   script's L34; RHEL 10 has `/etc/dnf/plugins/`. The script's `sed` failed
+   unnoticed; the container test turns the task off. The first boot stopped
+   there. **Fixed** in 0.0.3, on the operator's choice: the right path, edited
+   only if it exists.
+2. **A kept EFS volume gets no `/save`** (`csis-sandbox-terraform`). The node
+   replaced to boot 0.0.3, on the same volume, stopped at cloudflow's clone:
+   the first boot makes the `/save` link only on a new volume. The proof went
+   on with a new volume (the operator's choice); the bug is a reminder.
+3. **The update** changed on the second apply: eleven packages released
+   since the first. Upstream; check mode then found nothing to change.
+4. **The subscription-manager plugin** changed again on the second apply: the
+   first apply's update, after the task, upgraded subscription-manager, and
+   the file said `enabled=1` again. Check mode then found it unchanged. A
+   reminder.
+5. **Spack's configuration** differs from the container's in the site's
+   mirror (the proof turns it on) and in four externals RHEL 10.2 has and the
+   container lacks (`bison`, `flex`, `gettext`, `openssl`). Expected; no fix.
+6. **JupyterHub's box** gave none of the six settings only a site can give,
+   and the role refused, as it should. Run with the container test's values;
+   the box now names them.
+7. **The drivers' kernel** (`csis-sandbox-provisioning`): the update installed
+   RHEL 10.3's kernel without a reboot, and the EFA and Lustre drivers were
+   installed for the running 10.2 kernel. Whether they load on the image's
+   kernel is not proved. A reminder.
+8. **OpenTofu and the SSO profile**: the AWS provider cannot read the `noaa`
+   profile's single sign-on session, which the CLI can; every OpenTofu box
+   now exports the session's temporary credentials first.
+9. **Removal's checks**: the tagging index still listed four deleted
+   resources minutes after; a route table's associations come back in no
+   fixed order; other users change the subnets' free-address counts. Box E4
+   now asks each resource by its own call, and box E5 sorts and sets the
+   counts aside.
+
+**The "Not proved" table.** In `exportit/MAP.md`: RHEL and AWS, the first
+boot, the drivers' and the tuning profile's installation, the build, the
+module files and the image are proved; that the drivers load on the image's
+kernel is not (finding 7); the comparison with a node built the old way is
+deferred by the flag (FR-018). The site mirror's list is applied.
 
 ## Carried From
 

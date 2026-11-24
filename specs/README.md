@@ -29,7 +29,7 @@ Every spec below is planned and tasked and none is started, so every one is
 | 1 | [003](003-lambda-functions-owner/spec.md) | The Lambda functions: an owner, tests, an OpenTofu module, and the `moved` directive. **Complete**, 2026-11-22 | nothing | `feature/lambda-functions-owner` | 40 | none: nothing applied |
 | 2 | [006](006-first-boot-runs-playbooks/spec.md) | The first boot runs the playbooks: four required values, the playbooks and cloudflow cloned from their own public repositories. **Complete**, 2026-11-22 | nothing | `feature/first-boot-runs-playbooks` | 28 | none: proved by a mocked plan |
 | 3 | [005](005-configs-split-by-owner/spec.md) | `csis-sandbox-configs` split: the 23 unreadable repaired or retired, then 51 examples and the schema to cloudflow. **Complete**, 2026-11-23 | 003 (`moved`) | `feature/configs-split-by-owner` | 44 | none |
-| 4 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by 006's first boot, an image, and nothing left behind | 006 (its first boot) | `feature/live-proof` | 47 | **yes**: hours of a head node in `noaa`, us-east-2 |
+| 4 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by 006's first boot, an image, and nothing left behind. **Run**, 2026-11-23 ([outcome](001-live-proof-on-aws/spec.md#outcome)); merged on the operator's word, not yet | 006 (its first boot) | `feature/live-proof` | 47 | **yes**: a head node in `noaa`, us-east-2, for an afternoon; all of it removed |
 | 5 | [002](002-rhel10-build-cache/spec.md) | A build cache for RHEL 10 in a bucket of its own, pushed by a playbook | 001 (`proof/`, the procedure) | `feature/rhel10-build-cache` | 44 | **yes**: a bucket that stays, and a head node |
 | 6 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001 (`proof/`); 002 (the catalogue's `superseded_by` rule) | `feature/spack-stack-ufs-coastal` | 40 | **yes**: a head node of its own |
 | 7 | [007](007-private-playbooks-access/spec.md) | The first boot reads a private playbooks' repository, with a deploy key or a fine-grained token | 006 | `feature/private-playbooks-access` | 30 | only for its last proof, when someone wants a private repository |
@@ -51,9 +51,11 @@ Every spec below is planned and tasked and none is started, so every one is
    its code can be built any time after 006, its AWS proof when a private
    repository is wanted.
 
-Specs 001, 002 and 004 each run a head node of 32 processors for hours
-(about $1.36 an hour for a `c6i.8xlarge`), every AWS step on the operator's
-word, and remove what they made at their end (002's bucket stays).
+Specs 001, 002 and 004 each run a head node of 32 processors (about $1.36
+an hour for a `c6i.8xlarge`), every AWS step on the operator's word, and
+remove what they made at their end (002's bucket stays). On 001's run the
+first boot took 34 minutes; the node's hours were mostly spent waiting for
+answers and fixes.
 
 ## How a file moves between units
 
