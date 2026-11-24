@@ -5,10 +5,10 @@ taken up
 
 **Created**: 2026-11-14, as stage 21; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. Needs
-nothing first but cloudflow's repository made public (FR-002): it is written
-and tested without AWS, and put into use by the first head node built after
-it (spec 001 can be that node).
+**Status**: **Complete**, 2026-11-22. Clarified and planned 2026-11-21,
+implemented and merged 2026-11-22, every condition of done held (see
+[tasks.md](tasks.md)). Written and tested without AWS; its first real boot
+is spec 001's head node.
 
 **Input**: the stage plan of 2026-11-14 ("the two-variable change"), carried
 from the ATTIC on the operator's instruction of 2026-11-19.
