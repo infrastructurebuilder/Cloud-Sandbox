@@ -46,6 +46,24 @@ operator's instruction of 2026-11-19.
   → A: it stays in `csis-sandbox-ops`, marked as replaced; no file moves
   between units, and its mapping line is unchanged.
 
+### Session 2026-11-24
+
+Found at T019: the site's signing key (fingerprint ending `F525C05B06DCA266`)
+was kept on its owner's machine, and its private half cannot be obtained.
+
+- Q: Which key signs the new cache? → A: a new key, made for it (the
+  operator: "We will have to make a new signing key").
+- Q: Where do head nodes get the new key's public half? → A: in
+  `csis-sandbox-provisioning`, which the `spack` role puts in place and trusts,
+  pinned to its fingerprint; nothing is fetched.
+- Q: Where is its private half kept, and how is it made? → A: made on the
+  local machine, with no passphrase, and kept with its public half in the
+  Keybase team folder `/Volumes/Keybase/team/csimagesystem`, named so that it
+  is known what it is, beside a `README.md` saying what it is, what it is used
+  for and how to manage it. It is on a head node only while a push runs.
+- Made 2026-11-24: RSA 4096, signing only, no expiry, fingerprint
+  `8D58116F59406FF3B70812BA065FBB8F66F38D66`, its user ID naming the cache and no person.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Push a build to the cache (Priority: P1)
@@ -103,9 +121,12 @@ catalogue.
 
 ### Edge Cases
 
-- The private key is never in a repository or a variable; it is put in place
-  by hand, as today (`scp-secret.sh` stays). The signing key is the only
-  secret on the node; S3 access comes from the role (FR-003).
+- The private key is never in a repository, a variable or an AWS secret; it
+  is copied to the node by hand, as a file, for a push, and taken off after
+  (FR-007). The signing key is the only secret on the node; S3 access comes
+  from the role (FR-003).
+- A push aimed at `ioos-cloud-sandbox`, by a setting left at its old default
+  or given by mistake, stops before anything is sent (FR-008).
 - A push interrupted part-way: running it again pushes what is missing, and
   only that.
 
@@ -144,6 +165,17 @@ catalogue.
   the variables the scripts read (parity), check its syntax and lint, and prove
   its push against a mirror in a directory in the container, unsigned. The
   push to S3 is proved by doing it.
+- **FR-007**: The cache MUST be signed with the key made for it on 2026-11-24
+  (`8D58116F59406FF3B70812BA065FBB8F66F38D66`), not the old site key, whose private half cannot be obtained.
+  `spack_key_fingerprint` MUST name it. Its public half MUST be in
+  `csis-sandbox-provisioning`, put in place and trusted by the `spack` role
+  pinned to that fingerprint, in place of the download from
+  `ioos-cloud-sandbox`; tests MUST hold the file's fingerprint to the setting,
+  and its user ID to naming no person. Its private half MUST be kept in the
+  Keybase team folder `csimagesystem` with a `README.md`, and nowhere else.
+- **FR-008**: `push-build-cache.yml` MUST refuse a `spack_mirror` in
+  `ioos-cloud-sandbox` before pushing anything (FR-002), and a test MUST show
+  it refusing.
 
 ## Success Criteria *(mandatory)*
 
