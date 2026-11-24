@@ -170,9 +170,12 @@ proof's working copy is outside every repository, on your local machine.
     - Every row of `exportit/MAP.md`'s "Not proved" table is marked, proved or not with why (T037): **met** (SC-003).
     - Nothing with the prefix found, each resource asked by its own call, and the VPC, subnets and route tables as they were (T034, T035; the quickstart's E5 and E6 are the procedure's E4 and E5): **met** (SC-004), the tagging index's lag noted.
     - Stage D skipped with the flag `false`, recorded as deferred (T030): **met** (SC-005).
-- [ ] T045 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's `feature/live-proof` into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T046 Record that no release applies, unless the operator asks for one (done condition 5)
-- [ ] T047 Mark the spec **complete**, with the date, only when T001 to T046 are checked, each with its record (done conditions 1 and 6)
+- [X] T045 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's `feature/live-proof` into `develop` and push, with `just submodules-pushed` first (done condition 4)
+  - Done 2026-11-24, on the operator's word ("merge"): the units' branches squashed into their `develop` and pushed, each kept and pushed: `csis-sandbox-provisioning` `3c8d6fb` (`feature/live-proof-v3`), `csis-sandbox-terraform` `f07607d` (`feature/first-boot-proved`), `csis-cloud-sandbox` `dcb558c` (`feature/provisioning-0.0.3`); `0.0.3` was merged, tagged and pushed on 2026-11-23, also on the operator's word (`af32eb5`, `feature/subscription-manager-path` kept). Then Cloud-Sandbox's `feature/live-proof` squashed into `develop` and pushed, with `just submodules-pushed` first.
+- [X] T046 Record that no release applies, unless the operator asks for one (done condition 5)
+  - Done 2026-11-24: no release applies to spec 001. The one release it needed, `csis-sandbox-provisioning` `0.0.3`, was cut on the operator's word during the run (T021).
+- [X] T047 Mark the spec **complete**, with the date, only when T001 to T046 are checked, each with its record (done conditions 1 and 6)
+  - Done 2026-11-24: T001 to T046, and the convergence's T048 and T049, checked, each with its record; `spec.md` and `specs/README.md` say **complete**.
 
 ---
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-14, as stage 15; carried into this spec 2026-11-19
 
-**Status**: Run on AWS 2026-11-23; outcome below. It ran in the `noaa`
+**Status**: **Complete**, 2026-11-24. Run on AWS 2026-11-23; outcome below. It ran in the `noaa`
 account in us-east-2, inside the existing IOOS VPC, creating only new
 resources (the operator's answer, 2026-11-21); the role there cannot create
 a network, so the module is given one.
