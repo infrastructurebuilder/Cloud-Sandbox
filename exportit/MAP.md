@@ -498,7 +498,8 @@ repository at `cloudflow_version`, installs `ansible-core`, runs
 `ansible-pull` against the provisioning repository at
 `provisioning_version`, installs cloudflow for `ec2-user`, then runs
 `node-image.yml`, stopping before the image if any step fails. Nothing of
-the original is cloned any more. See [the `sandbox-terraform` section's
+the original is cloned any more. Spec 001 ran it on a real head node
+(2026-11-23). See [the `sandbox-terraform` section's
 first-boot template](#the-first-boot-template).
 
 ### Found while testing
@@ -537,14 +538,16 @@ first-boot template](#the-first-boot-template).
 | Eight roles (all but the four below) applied with `ansible-pull` to an AlmaLinux 10 container, twice; the second run must change nothing; the result is checked | `just full-test` | pass: 49 changes, then 0 |
 | `spack_environment`'s `spack.yaml` (stage 9): an environment made with the script's commands and one written by the role's template, side by side with the real Spack v1.2.0, give the same manifest and the same merged `concretizer`, `modules` and `packages` | `just full-test` | pass (2026-11-13) |
 | `spack_environment` through `spack_env` (stage 10), with `spack_environment_state: concretized`: ESMF and PETSc concretized with the real oneAPI and Spack v1.2.0, 36 packages, Intel's compilers and MPI among them; the second run changes nothing | `just full-test` | pass (2026-11-13) |
-| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and building `spack_environment` and its module files | nowhere (the build and the module files are proved by the collection's own tests against the real Spack) | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
-| Anything on RHEL, or on AWS | nowhere | **not proved** |
-| The first-boot script | nowhere | **not proved**: it needs a real EFS volume |
-| Whether the playbook leaves the same node the script does | nowhere | **not proved** |
+| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and building `spack_environment` and its module files | the live proof on AWS ([spec 001](../specs/001-live-proof-on-aws/spec.md#outcome)) | **proved 2026-11-23**: the EFA driver and AWS's libfabric installed, the Lustre client installed, the tuning profile active; ESMF 8.9.1 and PETSc built and installed with oneAPI 2024.2.1 in 34 minutes; no module file rewritten by a second apply; an image AWS reports `available`. **Not proved:** that the two drivers load on the kernel the image boots: the boot's update installed a newer kernel after they were built for the running one (a finding) |
+| Anything on RHEL, or on AWS | the live proof on AWS (spec 001) | **proved 2026-11-23**: RHEL 10.2 on `c6i.8xlarge`, `site.yml` `failed=0`; applied again, two tasks changed (both findings); check mode, nothing to change |
+| The first-boot script | the live proof on AWS (spec 001) | **proved 2026-11-23**, at its third boot: the first stopped at a path RHEL 10 lacks (fixed, `csis-sandbox-provisioning` 0.0.3), the second at a kept EFS volume's missing `/save` link (a finding) |
+| Whether the playbook leaves the same node the script does | nowhere | **not proved**: deferred, `compare_with_script = false` ([REMINDERS.md](REMINDERS.md)) |
 
 [docs/LIVE-PROOF.md](sandbox-provisioning/docs/LIVE-PROOF.md) is the
-procedure that would settle the last four rows. It costs a head node
-for several hours. It has not been run either.
+procedure that settles the last four rows. Spec 001 ran it on
+2026-11-23 (its version 2, then corrected as version 3); the rows above
+say what it showed, and [spec 001's outcome](../specs/001-live-proof-on-aws/spec.md#outcome)
+lists every finding.
 
 One guess in the untested roles is marked where it is made, and a second
 was until stage 10. The
@@ -639,7 +642,8 @@ naming the script's L812, L817 and L820-L822 as the three did:
   container test does the same.
 - **Not proved in the container:** the build. Spack's fake installs leave
   `python-venv` without the `python3` that the rest of the ESMF and PETSc
-  tree needs, so the container concretizes only.
+  tree needs, so the container concretizes only. The live proof built it
+  on AWS (2026-11-23, spec 001).
 
 ### Spack set up through the collection (stage 11)
 
@@ -712,8 +716,10 @@ How it is held:
   script. Externals are compared by package name, because their versions
   are the image's; the versions the roles state themselves are checked
   against the variables.
-- **Not proved:** the site mirror's list, which needs the site's bucket.
-  Its first application is the live proof on AWS.
+- **Proved on AWS** (2026-11-23, spec 001): the site mirror's list. With
+  `spack_site_mirror=true` the mirror `s3-mirror` is in Spack's
+  configuration. It supplied nothing: the build compiles everything
+  (`--no-cache`, as the script does).
 
 Found by the check-mode pass: **`spack_environment` could not be
 previewed at all.** Its build task is asynchronous, for a build of
@@ -775,7 +781,10 @@ tag into `/save/ec2-user/cloudflow`, links the old checkout's path to it,
 applies the playbooks with `ansible-pull`, installs cloudflow editable
 for `ec2-user`, and makes the image; nothing of the original is cloned.
 `init_template.tpl` is kept, unused, for comparison and for a sync from
-the original to land on.
+the original to land on. Spec 001's live proof ran it on RHEL 10.2
+(2026-11-23) and found that on an EFS volume that already has `save/`, a
+head node replaced with its volume kept, the `/save` link is not made and
+cloudflow's clone fails ([REMINDERS.md](REMINDERS.md)).
 [tests/test_template.py](sandbox-terraform/tests/test_template.py)
 renders both templates through `tofu console`; `tests/firstboot.tftest.hcl`
 plans the module with mocked providers and reads the user data;
