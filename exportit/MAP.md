@@ -459,7 +459,7 @@ included, and to write each one down.
 | What the script does | Here |
 | --- | --- |
 | Sets `EFA_MINAMAL`, tests `EFA_MINIMAL`, so the minimal EFA install always runs | `efa_driver_minimal: true`; both branches are translated |
-| `SPACK_CACHEONLY=-1`, so Spack never uses binary caches and compiles everything | `spack_cache_only: -1` |
+| `SPACK_CACHEONLY=-1`, so Spack never uses binary caches and compiles everything | `spack_cache_only: -1` until spec 002; `0` since 0.0.4 (2026-11-25), installing what the RHEL 10 cache holds |
 | Exports `SPACK_MIRROR`, `SPACK_KEY_URL`, `SPACK_KEY`; nothing uses them | Kept as variables; nothing uses them |
 | Updates every package and builds the drivers without a reboot | The same; the `efa_driver` role prints a warning when the running kernel is not the newest installed |
 | Turns off the Lustre repository's signature check | The same |
@@ -741,9 +741,28 @@ replaces `sandbox-ops`' `spack-update-mirror.sh`. The parity test holds
 its mirror, key and environment to that script's; the container test
 pushes a fake-installed package to a cache in a directory, unsigned:
 check mode pushes nothing, the first run pushes, the second changes
-nothing, and a signed push without the key stops. The defaults
-(`spack_cache_only: -1`, `spack_site_mirror: false`, the RHEL 8 mirror)
-stay until a build has installed from the new cache.
+nothing, a signed push without the key stops, and a push to
+`ioos-cloud-sandbox` stops before anything is sent.
+
+The cache is signed with a key made for it on 2026-11-24
+(`8D58116F59406FF3B70812BA065FBB8F66F38D66`): the old site key's private
+half could not be obtained. Its public half is the `spack` role's
+`files/build-cache-signing-key.pub.asc`, put where `spack-pubkey.sh`
+put its download and trusted pinned to `spack_key_fingerprint`; its
+private half is in the team's Keybase folder, never in a repository.
+
+Proved on AWS by spec 002 (2026-11-24 and 25): the first push sent the
+environment's 24 packages, signed; a second sent nothing; a build with
+its own install tree fetched 19 from the cache and built none; and a
+fresh head node with the defaults alone did the same, its first boot
+taking 24 minutes against 34 when it compiled. **Since 0.0.4 the
+defaults use the cache:** `spack_cache_only: 0`, `spack_site_mirror:
+true`, `spack_mirror` the RHEL 10 cache. The three steps that trust the
+keys the mirrors publish run `spack buildcache keys --install --trust
+--yes-to-all` through the collection's `command` step: its 0.0.2
+`from_mirrors` did not answer Spack's "Trust key? [y/N]". The
+collection's 0.0.3 does; [spec 009](../specs/009-collection-from-mirrors/spec.md)
+goes back to it.
 
 ### What a real relocation would change
 

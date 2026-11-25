@@ -4,9 +4,9 @@
 
 **Created**: 2026-11-14, as stage 16; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
-spec 001 first:** it needs a real build to push, and the access the live
-proof shows a head node has.
+**Status**: Run on AWS 2026-11-24 and 25; outcome below. The defaults install
+from the cache since `csis-sandbox-provisioning` 0.0.4. Merged in the units;
+Cloud-Sandbox's branch waits for the operator's word.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -201,6 +201,51 @@ catalogue.
 ## Out of Scope
 
 The UFS spack-stack's cache (spec 004).
+
+## Outcome
+
+Run on 2026-11-24 and 2026-11-25 by the agent, each AWS step on the
+operator's word. The tasks' records (T017 to T027, T045 to T048) hold each
+step's result; the logs stay on the operator's machine.
+
+| Check | Result |
+| --- | --- |
+| The bucket (T017) | made: private, ownership enforced, SSE-S3, in us-east-2; kept |
+| The first push (T021, SC-001) | the environment's 24 packages, signed with the new key, in 40 seconds; listed for `linux-rhel10-x86_64_v3`; all 24 manifests verify |
+| The second push (T022, SC-002) | nothing pushed, `changed=0` |
+| A build from the cache (T023, SC-003) | with an install tree of its own: 19 packages fetched and relocated, none built, in 3 minutes (the cache's other 5 are build-only) |
+| A fresh node with the defaults alone (T026, SC-004) | at 0.0.4: the same 19 fetched, none built; the first boot 24 minutes against 34 when it compiled |
+| Removal (T027) | the node's 23 resources destroyed, nothing left with its tag, the VPC as it was; the bucket kept with its 79 objects |
+
+**The findings**, each fixed or recorded:
+
+1. **The site's signing key could not be obtained**: it was kept on its
+   owner's machine. A new key was made for the cache (FR-007), its public
+   half shipped in the playbooks and pinned, its private half kept in the
+   team's Keybase folder with a README.
+2. **The keyring check read the trusted keys too**: `spack gpg list
+   --signing` lists them first, and every node trusts the key's public half.
+   Fixed (`830e08f`): only the "Signing keys" section is read.
+3. **The signed push had not run in any test**: the module refuses `key` and
+   `unsigned` together, `unsigned: false` included. Fixed (`6e4b037`).
+4. **A push must not go to `ioos-cloud-sandbox`**, which `spack_mirror`'s old
+   default named: the play now refuses it (FR-008).
+5. **`spack gpg trust` asks for confirmation**; with no terminal it fails and
+   leaves the copied key file behind. The procedure says `--yes-to-all`.
+6. **The collection's `from_mirrors` did not answer Spack's "Trust key?
+   [y/N]"** once the cache published its key. Worked around in the playbooks
+   (`2a4980c`, a `command` step with `--yes-to-all`); fixed in the collection
+   by its spec 003, released as 0.0.3; going back to `from_mirrors` is
+   [spec 009](../009-collection-from-mirrors/spec.md).
+7. **Spack refuses to push an environment with any package uninstalled**,
+   build-only ones included: the container test pushes an environment of its
+   own, and `docs/BUILD-CACHE.md` says the environment must be fully built.
+8. **Research R5 was wrong**: a second environment directory on the same node
+   is not a fresh build; its packages are found installed. The build from the
+   cache needed an install tree of its own, and the defaults' proof a fresh
+   node.
+9. **Spec 001's first boot compiled 24 packages, not five**, as its outcome
+   had said; corrected there.
 
 ## Carried From
 

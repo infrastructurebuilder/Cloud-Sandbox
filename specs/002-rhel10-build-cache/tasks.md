@@ -89,7 +89,8 @@ its own repository.
   - Done 2026-11-24, on the operator's word ("merge when the full test passes"): the three branches squashed into their `develop` and pushed, each kept and pushed: `csis-sandbox-terraform` `d366c93`, `csis-sandbox-provisioning` `a1744f8`, `csis-sandbox-ops` `bfd2097`. The AWS steps use these.
 - [X] T017 [US1] **(AWS, asked)** In a working copy of `build-cache/` with local state: plan (four additions, nothing else), apply; if the name is taken, stop for the operator's decision
   - Done 2026-11-24, on the operator's word ("apply the bucket"): a working copy of `build-cache/` at `csis-sandbox-terraform` `d366c93`, local state, in `$HOME/csis-build-cache`; the name was free (`head-bucket` 404); plan 4 to add, 0 to change, 0 to destroy; applied, 4 added. Read back from AWS: public access blocked on all four, `BucketOwnerEnforced`, `AES256`, in us-east-2; `mirror_url` `s3://csis-sandbox-rhel10-build-cache/`.
-- [ ] T018 [US1] **(AWS, asked)** A head node, as spec 001's tasks T017 to T022 (its stages A and B), with `build_cache_bucket` set in `proof.tfvars`
+- [X] T018 [US1] **(AWS, asked)** A head node, as spec 001's tasks T017 to T022 (its stages A and B), with `build_cache_bucket` set in `proof.tfvars`
+  - Done 2026-11-24, on the operator's word ("start the node"): a working copy `$HOME/csis-build-cache-node` at `csis-sandbox-terraform` `d366c93` with `proof/`, its own prefix (`csis_build_cache_node`, `CSIS-Build-Cache-Node`), `build_cache_bucket` set, the network's descriptions saved; plan 23 to add (spec 001's 22 and the build-cache policy), 0 to change, 0 to destroy; applied; `Online` in Session Manager. Its first boot at `0.0.3` ended `failed=0` in about 37 minutes, the image left for later.
 ### The new signing key (added 2026-11-24, on the operator's decision; FR-007, FR-008)
 
 The site's key cannot be obtained (spec's session 2026-11-24), so T019 waits
@@ -148,18 +149,30 @@ for these.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T031 [P] In `exportit/MAP.md`, the cache: the bucket, the playbook, the defaults, the script replaced
-- [ ] T032 [P] In `specs/README.md`, set 002's state
-- [ ] T033 Commit the units' last changes on their branches; record the submodules; `just constitution-check`
-- [ ] T034 Run the root `just test`
-- [ ] T035 Run the root `just full-test`
-- [ ] T036 In `specs/002-rhel10-build-cache/spec.md`, an **Outcome** section: the date, how many packages were pushed, how many the second build fetched, the third; no identifiers
+- [X] T031 [P] In `exportit/MAP.md`, the cache: the bucket, the playbook, the defaults, the script replaced
+  - Done 2026-11-25: `exportit/MAP.md`: the bucket (`build-cache/`, in the `sandbox-terraform` part), the playbook, the new key, what was proved on AWS, the defaults since 0.0.4, the `command` workaround and spec 009 (in the `sandbox-provisioning` part), the script replaced (in the `sandbox-ops` part), and the script-behaviour table's `SPACK_CACHEONLY` row.
+- [X] T032 [P] In `specs/README.md`, set 002's state
+  - Done 2026-11-25: 002's row says it was run, links the outcome, and says it is not yet merged. Spec 009's row was added on its own branch.
+- [X] T033 Commit the units' last changes on their branches; record the submodules; `just constitution-check`
+  - Done 2026-11-25: the units' last changes on their branches, recorded here: `csis-sandbox-provisioning` `f2e330c` (`feature/rhel10-cache-docs`: the pages for the cache by default and the 24 packages, and the README's playbook), `csis-sandbox-ops` `67ef98c` (`feature/build-cache-key`: the new key's public half in `keys/`, which the root test of the trusted key expects, with its catalogue row and README line), `csis-sandbox-terraform` `3bd2834` (`feature/build-cache-readme`), `csis-cloud-sandbox` `d39b71f` (`feature/provisioning-0.0.4`); `csis-sandbox-terraform` `develop` `d366c93` and `csis-sandbox-provisioning` `develop` `900fe26` (0.0.4) merged before. `just constitution-check`: the shared part (2.1.0), CLAUDE.md and LICENSE agree in every unit.
+- [X] T034 Run the root `just test`
+  - Done 2026-11-25: the root `just test` passed, after the new key's public half was added to `csis-sandbox-ops` (it failed first: `test_the_site_mirror_keys_fingerprint_is_the_key_sandbox_ops_keeps` wanted `keys/8D58116F59406FF3B70812BA065FBB8F66F38D66.pub`), and again after T049 and T050.
+- [X] T035 Run the root `just full-test`
+  - Done 2026-11-25: the root `just full-test` passed: every unit's `just full-test` (the container applied twice, the second changing nothing, and the push's cases), `units.toml` 15 units consistent, the sync rehearsal 9 of 9.
+- [X] T036 In `specs/002-rhel10-build-cache/spec.md`, an **Outcome** section: the date, how many packages were pushed, how many the second build fetched, the third; no identifiers
+  - Done 2026-11-25: `spec.md`'s **Outcome**: a table of every check (the bucket, 24 pushed, 0 the second time, 19 fetched and none built by a build with its own install tree and by a fresh node at 0.0.4, the removal) and nine findings, each fixed or recorded; no identifier. The status line says it was run. Spec 001's outcome corrected the same day: its first boot compiled 24 packages, not five.
 - [X] T037 [P] In `exportit/sandbox-provisioning/docs/`, a short page on pushing the cache (when, the key by hand, the check mode first), linked from the playbook's header
   - Done 2026-11-24, with T013: `exportit/sandbox-provisioning/docs/BUILD-CACHE.md` (when to push, the key by hand and off again, check mode first, a fully installed environment), linked from the playbook's header.
-- [ ] T038 [P] For any finding of the run, a line in `exportit/REMINDERS.md`
-- [ ] T039 Re-read [quickstart.md](quickstart.md) against what was run; correct it if a step differed
-- [ ] T040 Run `/speckit-converge` on `specs/002-rhel10-build-cache/`; record that it appended nothing, or carry out what it appended (done condition 2)
-- [ ] T041 Walk `specs/002-rhel10-build-cache/quickstart.md`, each step's evidence from the tasks above (done condition 3)
+- [X] T038 [P] For any finding of the run, a line in `exportit/REMINDERS.md`
+  - Done 2026-11-25: no new line. Of the nine findings, eight are fixed in the units; the collection's `from_mirrors` is fixed in the collection (its spec 003, 0.0.3) and going back to it is spec 009, a spec rather than a reminder, on the operator's instruction; the managed policies' reminder was added at T009.
+- [X] T039 Re-read [quickstart.md](quickstart.md) against what was run; correct it if a step differed
+  - Done 2026-11-25: `quickstart.md`'s AWS steps corrected to what was run: the key from Keybase as a file through a tunnel with `--yes-to-all`, the listing with `--allarch` and the manifests' signatures, the build from the cache with an install tree of its own, the defaults' proof on a fresh node with an empty store, and about an hour of a head node rather than hours. Step 1 (no AWS) is as run.
+- [X] T040 Run `/speckit-converge` on `specs/002-rhel10-build-cache/`; record that it appended nothing, or carry out what it appended (done condition 2)
+  - Done 2026-11-25: `/speckit-converge` found FR-001 to FR-008 and SC-001 to SC-004 met, and appended Phase 7, T049 and T050 (two READMEs did not name the new module and playbook); both carried out.
+- [X] T041 Walk `specs/002-rhel10-build-cache/quickstart.md`, each step's evidence from the tasks above (done condition 3)
+  - Done 2026-11-25, `quickstart.md` walked with each step's evidence:
+    - 1, without AWS: each unit's `just test` and `just full-test`, and the root's (T008, T014, T030, T033 to T035): passed; the container's push `changed` then `changed=0` (T014); `build-cache/`'s plan four resources and one scoped policy (T003, T004).
+    - 2.1 the bucket (T017); 2.2 the head node (T018); 2.3 the key and the three pushes (T019 to T022, T045 to T048); 2.4 the listing and the signatures (T021); 2.5 the build from the cache, with an install tree of its own (T023); 2.6 the defaults, the key off, the fresh node (T024 to T026); 2.7 the node removed, the bucket kept (T027). Each as written, the quickstart having been corrected to what was run (T039).
 - [ ] T042 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
 - [ ] T043 Record that no release applies, unless the operator asks for one (done condition 5)
 - [ ] T044 Mark the spec **complete**, with the date, only when T001 to T043 are checked (done conditions 1 and 6)
@@ -193,3 +206,10 @@ for these.
 - The signing key's private half is never in a repository, a variable or a log; the operator puts it on the node and the procedure takes it off.
 - `ioos-cloud-sandbox` is never written to.
 - Nothing in `ATTIC/` is read for any task.
+
+## Phase 7: Convergence
+
+- [X] T049 In `exportit/sandbox-terraform/README.md`'s "What the files are", add `build-cache/` (the RHEL 10 build cache's bucket, a root module of its own, applied once and kept; DEPLOYMENT.md, step 9) per plan: Source Code (missing)
+  - Done 2026-11-25: `csis-sandbox-terraform` `3bd2834`: the files' table and the paragraph above it name `build-cache/`. `just test` passed.
+- [X] T050 In `exportit/sandbox-provisioning/README.md`'s playbook table, add `push-build-cache.yml` (pushes a built head node's environment to the RHEL 10 cache, by hand, never by `site.yml`; docs/BUILD-CACHE.md) per FR-001 (missing)
+  - Done 2026-11-25: `csis-sandbox-provisioning` `f2e330c`: the playbook table names `push-build-cache.yml`. `just test` passed.
