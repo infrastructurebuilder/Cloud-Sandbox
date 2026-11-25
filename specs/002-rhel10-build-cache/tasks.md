@@ -173,9 +173,12 @@ for these.
   - Done 2026-11-25, `quickstart.md` walked with each step's evidence:
     - 1, without AWS: each unit's `just test` and `just full-test`, and the root's (T008, T014, T030, T033 to T035): passed; the container's push `changed` then `changed=0` (T014); `build-cache/`'s plan four resources and one scoped policy (T003, T004).
     - 2.1 the bucket (T017); 2.2 the head node (T018); 2.3 the key and the three pushes (T019 to T022, T045 to T048); 2.4 the listing and the signatures (T021); 2.5 the build from the cache, with an install tree of its own (T023); 2.6 the defaults, the key off, the fresh node (T024 to T026); 2.7 the node removed, the bucket kept (T027). Each as written, the quickstart having been corrected to what was run (T039).
-- [ ] T042 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T043 Record that no release applies, unless the operator asks for one (done condition 5)
-- [ ] T044 Mark the spec **complete**, with the date, only when T001 to T043 are checked (done conditions 1 and 6)
+- [X] T042 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+  - Done 2026-11-25, on the operator's word ("merge when the full test passes"), after the root `just full-test` passed again on exactly what was merged: the units' branches squashed into their `develop` and pushed, each kept and pushed: `csis-sandbox-provisioning` `985c2f9` (`feature/rhel10-cache-docs`), `csis-sandbox-ops` `f9b64fe` (`feature/build-cache-key`), `csis-sandbox-terraform` `019061c` (`feature/build-cache-readme`), `csis-cloud-sandbox` `cf8afb7` (`feature/provisioning-0.0.4`). Merged earlier, each on the operator's word: `csis-sandbox-terraform` `d366c93`, `csis-sandbox-provisioning` `a1744f8`, `830e08f`, `d6dc882`, `6e4b037`, `2a4980c` and `900fe26`, `csis-sandbox-ops` `bfd2097`. Then Cloud-Sandbox's `feature/rhel10-build-cache` squashed into `develop` and pushed, with `just submodules-pushed` first.
+- [X] T043 Record that no release applies, unless the operator asks for one (done condition 5)
+  - Done 2026-11-25: two releases were cut during the run, each on the operator's word: `csis-sandbox-provisioning` `0.0.4` (the defaults on the cache, T025), and the one before it for spec 001, `0.0.3`. No other release applies. The bucket `csis-sandbox-rhel10-build-cache` stays, with its packages; its local state is in `$HOME/csis-build-cache`.
+- [X] T044 Mark the spec **complete**, with the date, only when T001 to T043 are checked (done conditions 1 and 6)
+  - Done 2026-11-25: T001 to T043, T045 to T048 and the convergence's T049 and T050 checked, each with its record; `spec.md` and `specs/README.md` say **complete**.
 
 ---
 

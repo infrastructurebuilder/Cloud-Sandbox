@@ -4,9 +4,9 @@
 
 **Created**: 2026-11-14, as stage 16; carried into this spec 2026-11-19
 
-**Status**: Run on AWS 2026-11-24 and 25; outcome below. The defaults install
-from the cache since `csis-sandbox-provisioning` 0.0.4. Merged in the units;
-Cloud-Sandbox's branch waits for the operator's word.
+**Status**: **Complete**, 2026-11-25. Run on AWS 2026-11-24 and 25; outcome
+below. The defaults install from the cache since `csis-sandbox-provisioning`
+0.0.4.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
