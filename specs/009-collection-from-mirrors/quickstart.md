@@ -17,12 +17,14 @@ Expected: `"version": "0.0.3"`, where it was 0.0.2 before.
 
 ```sh
 grep -n "from_mirrors\|yes-to-all" roles/spack/tasks/main.yml roles/intel_oneapi/tasks/main.yml
+grep -n "args: \[buildcache, keys" roles/*/tasks/main.yml    # nothing
 just test
 ```
 
-Expected: three `from_mirrors: true` steps and no `--yes-to-all`; `just test`
-passes (parity carries the scripts' command as `from_mirrors`, the floor
-held at 0.0.3).
+Expected: three `from_mirrors: true` steps; `--yes-to-all` appears only in
+the three comments above them, which say what spec 002 did before 0.0.3; no
+step has `args: [buildcache, keys, …]`. `just test` passes (parity carries the
+scripts' command as `from_mirrors`, the floor held at 0.0.3).
 
 ## 3. The container: a mirror that publishes a key
 
