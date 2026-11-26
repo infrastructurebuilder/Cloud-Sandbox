@@ -758,11 +758,14 @@ fresh head node with the defaults alone did the same, its first boot
 taking 24 minutes against 34 when it compiled. **Since 0.0.4 the
 defaults use the cache:** `spack_cache_only: 0`, `spack_site_mirror:
 true`, `spack_mirror` the RHEL 10 cache. The three steps that trust the
-keys the mirrors publish run `spack buildcache keys --install --trust
---yes-to-all` through the collection's `command` step: its 0.0.2
-`from_mirrors` did not answer Spack's "Trust key? [y/N]". The
-collection's 0.0.3 does; [spec 009](../specs/009-collection-from-mirrors/spec.md)
-goes back to it.
+keys the mirrors publish are the collection's `from_mirrors` steps, on
+0.0.3 or later (`requirements.yml`'s floor since
+[spec 009](../specs/009-collection-from-mirrors/spec.md)), which answers
+Spack's "Trust key? [y/N]". Its 0.0.2 did not, and from spec 002 until spec
+009 the steps ran `spack buildcache keys --install --trust --yes-to-all`
+through the collection's `command` step instead. The container test proves
+them against a mirror that publishes a key, made by a signed push with a
+throwaway key.
 
 ### What a real relocation would change
 
