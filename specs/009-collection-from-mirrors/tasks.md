@@ -100,12 +100,23 @@ needs 0.0.3 installed, which US2's floor brings.
   - Done 2026-11-26: 009's row says it is in progress; set again at T023.
 - [X] T014 Grep `exportit/sandbox-provisioning/` and `exportit/MAP.md` for `--yes-to-all` used for `buildcache keys`, and for `TRUST_MIRROR_KEYS`' old form: none left (SC-001); `docs/BUILD-CACHE.md`'s `spack gpg trust --yes-to-all` is another command, and stays
   - Done 2026-11-26: no step runs `buildcache keys` through `command` (SC-001); `--yes-to-all` is left only in comments saying what spec 002 did (`test_parity.py`, the three steps), in `MAP.md`'s history, and in `docs/BUILD-CACHE.md`'s `spack gpg trust --yes-to-all`, another command.
-- [ ] T015 Commit the unit's work on its branch; record the submodule here; run `just constitution-check`
-- [ ] T016 Run the root `just test`
-- [ ] T017 Run the root `just full-test`
-- [ ] T018 In `specs/009-collection-from-mirrors/spec.md`, an **Outcome** section: the installed version before and after, the container case's result, and that the real-node proof is spec 004's T017, to be linked when its record exists
-- [ ] T019 Run `/speckit-converge` on `specs/009-collection-from-mirrors/`; record that it appended nothing, or carry out what it appended (done condition 2)
-- [ ] T020 Walk `specs/009-collection-from-mirrors/quickstart.md`, steps 1 to 4 each with its evidence; step 5 is spec 004's (done condition 3)
+- [X] T015 Commit the unit's work on its branch; record the submodule here; run `just constitution-check`
+  - Done 2026-11-26: `csis-sandbox-provisioning`'s work committed on `feature/collection-from-mirrors` (`49fce50`, then `a0c5852` for T024) and recorded here; `just constitution-check`: the shared part (2.1.0), CLAUDE.md and LICENSE agree in every unit.
+- [X] T016 Run the root `just test`
+  - Done 2026-11-26, as part of the root `just full-test` (T017), which runs it.
+- [X] T017 Run the root `just full-test`
+  - Done 2026-11-26: the root `just full-test` failed once, rightly: `test_the_collection_is_pinned_where_it_is_used_at_its_manifest_version` found `units.toml` naming the collection 0.0.1, outside `>=0.0.3,<0.1.0`. With `units.toml` naming 0.0.3 (`csis-cloud-sandbox` `5a98070`, on `feature/collection-0.0.3`), it passed: every unit's full test, `units.toml` 15 units consistent, the sync rehearsal 9 of 9.
+- [X] T018 In `specs/009-collection-from-mirrors/spec.md`, an **Outcome** section: the installed version before and after, the container case's result, and that the real-node proof is spec 004's T017, to be linked when its record exists
+  - Done 2026-11-26: `spec.md`'s **Outcome**: the installed version before and after, the steps, the container's case with 0.0.3 and with 0.0.2, and spec 004's T017 to be linked; the status line says it is built.
+- [X] T019 Run `/speckit-converge` on `specs/009-collection-from-mirrors/`; record that it appended nothing, or carry out what it appended (done condition 2)
+  - Done 2026-11-26: `/speckit-converge` found FR-001 to FR-007 and SC-001 to SC-003 met (SC-004 is spec 004's), and appended Phase 5, T024 (the README's range); carried out. The `units.toml` change (T017) was not asked by a task and is kept: the root test requires it.
+- [X] T020 Walk `specs/009-collection-from-mirrors/quickstart.md`, steps 1 to 4 each with its evidence; step 5 is spec 004's (done condition 3)
+  - Done 2026-11-26, `quickstart.md` walked:
+    - 1. `requirements.yml` asks for `>=0.0.3,<0.1.0`; `just init` left 0.0.3 where 0.0.2 was (T004).
+    - 2. Three `from_mirrors: true` steps and no `--yes-to-all` step; `just test` passed (T009, T010, T014).
+    - 3. `just full-test`: the signed push, the key trusted with no prompt, the second apply changing nothing (T010).
+    - 4. The root `just test` and `just full-test` passed (T017); `units.toml` names sandbox-provisioning 0.0.5 at T021.
+    - 5. Spec 004's T017, later (FR-007).
 - [ ] T021 On the operator's word only: finish the unit's branch into its `develop` with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), tag `0.0.5` and push; in `exportit/cloud-sandbox/units.toml`, sandbox-provisioning 0.0.5, committed in `csis-cloud-sandbox` on a branch, finished and pushed; record their commits; then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
 - [ ] T022 Record the release: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021 (done condition 5)
 - [ ] T023 Mark the spec **complete**, with the date, only when T001 to T022 are checked (done conditions 1 and 6); its outcome links spec 004's T017 record once it exists
@@ -138,3 +149,8 @@ needs 0.0.3 installed, which US2's floor brings.
 
 - The container's throwaway signing key is made and thrown away inside the container; no real key is used.
 - Nothing in `ATTIC/` is read for any task.
+
+## Phase 5: Convergence
+
+- [X] T024 In `exportit/sandbox-provisioning/README.md`, the `just init` line names the collection's range as `>=0.0.3,<0.1.0`, not `>=0.0.1,<0.1.0`, per FR-001 (contradicts)
+  - Done 2026-11-26: `csis-sandbox-provisioning` `a0c5852`: the `just init` line names `>=0.0.3,<0.1.0`. `just test` passed.
