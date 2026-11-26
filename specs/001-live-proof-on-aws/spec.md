@@ -328,9 +328,13 @@ hold each box's result; the logs stay on the operator's machine (FR-006).
 **The node.** `c6i.8xlarge` (32 processors, so `spack_jobs` 31) on RHEL 10.2,
 in the IOOS VPC's private subnet in `us-east-2b`, with
 `csis-sandbox-provisioning` 0.0.3 and cloudflow 1.6.0b1. Its first boot,
-spec 006's, ran in **34 minutes**: Spack compiled five packages (ESMF 8.9.1,
-in 7 minutes, PETSc, HDF5, netCDF-C and parallel-netCDF), the system giving
-Python, GCC and Intel's compilers and MPI. The procedure had said hours.
+spec 006's, ran in **34 minutes**: Spack compiled the environment's 24
+packages (ESMF 8.9.1, in 7 minutes, PETSc, HDF5, netCDF-C and -Fortran,
+parallel-netCDF, ParallelIO, compression libraries, Python's build tools),
+the system giving Python, GCC and Intel's compilers and MPI. The procedure
+had said hours. (Corrected 2026-11-25: this said five packages, counted from
+the wrong lines of the log; spec 002's push of the same environment counted
+24.)
 
 | Check | Result |
 | --- | --- |

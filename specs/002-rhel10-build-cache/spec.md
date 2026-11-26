@@ -4,9 +4,9 @@
 
 **Created**: 2026-11-14, as stage 16; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
-spec 001 first:** it needs a real build to push, and the access the live
-proof shows a head node has.
+**Status**: **Complete**, 2026-11-25. Run on AWS 2026-11-24 and 25; outcome
+below. The defaults install from the cache since `csis-sandbox-provisioning`
+0.0.4.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -45,6 +45,24 @@ operator's instruction of 2026-11-19.
 - Q: Once the playbook has pushed, what happens to `spack-update-mirror.sh`?
   → A: it stays in `csis-sandbox-ops`, marked as replaced; no file moves
   between units, and its mapping line is unchanged.
+
+### Session 2026-11-24
+
+Found at T019: the site's signing key (fingerprint ending `F525C05B06DCA266`)
+was kept on its owner's machine, and its private half cannot be obtained.
+
+- Q: Which key signs the new cache? → A: a new key, made for it (the
+  operator: "We will have to make a new signing key").
+- Q: Where do head nodes get the new key's public half? → A: in
+  `csis-sandbox-provisioning`, which the `spack` role puts in place and trusts,
+  pinned to its fingerprint; nothing is fetched.
+- Q: Where is its private half kept, and how is it made? → A: made on the
+  local machine, with no passphrase, and kept with its public half in the
+  Keybase team folder `/Volumes/Keybase/team/csimagesystem`, named so that it
+  is known what it is, beside a `README.md` saying what it is, what it is used
+  for and how to manage it. It is on a head node only while a push runs.
+- Made 2026-11-24: RSA 4096, signing only, no expiry, fingerprint
+  `8D58116F59406FF3B70812BA065FBB8F66F38D66`, its user ID naming the cache and no person.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -103,9 +121,12 @@ catalogue.
 
 ### Edge Cases
 
-- The private key is never in a repository or a variable; it is put in place
-  by hand, as today (`scp-secret.sh` stays). The signing key is the only
-  secret on the node; S3 access comes from the role (FR-003).
+- The private key is never in a repository, a variable or an AWS secret; it
+  is copied to the node by hand, as a file, for a push, and taken off after
+  (FR-007). The signing key is the only secret on the node; S3 access comes
+  from the role (FR-003).
+- A push aimed at `ioos-cloud-sandbox`, by a setting left at its old default
+  or given by mistake, stops before anything is sent (FR-008).
 - A push interrupted part-way: running it again pushes what is missing, and
   only that.
 
@@ -144,6 +165,17 @@ catalogue.
   the variables the scripts read (parity), check its syntax and lint, and prove
   its push against a mirror in a directory in the container, unsigned. The
   push to S3 is proved by doing it.
+- **FR-007**: The cache MUST be signed with the key made for it on 2026-11-24
+  (`8D58116F59406FF3B70812BA065FBB8F66F38D66`), not the old site key, whose private half cannot be obtained.
+  `spack_key_fingerprint` MUST name it. Its public half MUST be in
+  `csis-sandbox-provisioning`, put in place and trusted by the `spack` role
+  pinned to that fingerprint, in place of the download from
+  `ioos-cloud-sandbox`; tests MUST hold the file's fingerprint to the setting,
+  and its user ID to naming no person. Its private half MUST be kept in the
+  Keybase team folder `csimagesystem` with a `README.md`, and nowhere else.
+- **FR-008**: `push-build-cache.yml` MUST refuse a `spack_mirror` in
+  `ioos-cloud-sandbox` before pushing anything (FR-002), and a test MUST show
+  it refusing.
 
 ## Success Criteria *(mandatory)*
 
@@ -169,6 +201,51 @@ catalogue.
 ## Out of Scope
 
 The UFS spack-stack's cache (spec 004).
+
+## Outcome
+
+Run on 2026-11-24 and 2026-11-25 by the agent, each AWS step on the
+operator's word. The tasks' records (T017 to T027, T045 to T048) hold each
+step's result; the logs stay on the operator's machine.
+
+| Check | Result |
+| --- | --- |
+| The bucket (T017) | made: private, ownership enforced, SSE-S3, in us-east-2; kept |
+| The first push (T021, SC-001) | the environment's 24 packages, signed with the new key, in 40 seconds; listed for `linux-rhel10-x86_64_v3`; all 24 manifests verify |
+| The second push (T022, SC-002) | nothing pushed, `changed=0` |
+| A build from the cache (T023, SC-003) | with an install tree of its own: 19 packages fetched and relocated, none built, in 3 minutes (the cache's other 5 are build-only) |
+| A fresh node with the defaults alone (T026, SC-004) | at 0.0.4: the same 19 fetched, none built; the first boot 24 minutes against 34 when it compiled |
+| Removal (T027) | the node's 23 resources destroyed, nothing left with its tag, the VPC as it was; the bucket kept with its 79 objects |
+
+**The findings**, each fixed or recorded:
+
+1. **The site's signing key could not be obtained**: it was kept on its
+   owner's machine. A new key was made for the cache (FR-007), its public
+   half shipped in the playbooks and pinned, its private half kept in the
+   team's Keybase folder with a README.
+2. **The keyring check read the trusted keys too**: `spack gpg list
+   --signing` lists them first, and every node trusts the key's public half.
+   Fixed (`830e08f`): only the "Signing keys" section is read.
+3. **The signed push had not run in any test**: the module refuses `key` and
+   `unsigned` together, `unsigned: false` included. Fixed (`6e4b037`).
+4. **A push must not go to `ioos-cloud-sandbox`**, which `spack_mirror`'s old
+   default named: the play now refuses it (FR-008).
+5. **`spack gpg trust` asks for confirmation**; with no terminal it fails and
+   leaves the copied key file behind. The procedure says `--yes-to-all`.
+6. **The collection's `from_mirrors` did not answer Spack's "Trust key?
+   [y/N]"** once the cache published its key. Worked around in the playbooks
+   (`2a4980c`, a `command` step with `--yes-to-all`); fixed in the collection
+   by its spec 003, released as 0.0.3; going back to `from_mirrors` is
+   [spec 009](../009-collection-from-mirrors/spec.md).
+7. **Spack refuses to push an environment with any package uninstalled**,
+   build-only ones included: the container test pushes an environment of its
+   own, and `docs/BUILD-CACHE.md` says the environment must be fully built.
+8. **Research R5 was wrong**: a second environment directory on the same node
+   is not a fresh build; its packages are found installed. The build from the
+   cache needed an install tree of its own, and the defaults' proof a fresh
+   node.
+9. **Spec 001's first boot compiled 24 packages, not five**, as its outcome
+   had said; corrected there.
 
 ## Carried From
 
