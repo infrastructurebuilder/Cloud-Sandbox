@@ -34,7 +34,7 @@ Every spec below is planned and tasked and none is started, so every one is
 | 6 | [009](009-collection-from-mirrors/spec.md) | The playbooks take the collection's 0.0.3 and its `from_mirrors` again, in place of spec 002's `command` workaround | 002 (merged first); before 004, whose head node proves it | `feature/collection-from-mirrors` | 23 | for its proof, a head node |
 | 7 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001 (`proof/`); 002 (the catalogue's `superseded_by` rule); 009 (its proof rides this node) | `feature/spack-stack-ufs-coastal` | 40 | **yes**: a head node of its own |
 | 8 | [007](007-private-playbooks-access/spec.md) | The first boot reads a private playbooks' repository, with a deploy key or a fine-grained token | 006 | `feature/private-playbooks-access` | 30 | only for its last proof, when someone wants a private repository |
-| 9 | [008](008-site-configs-at-first-boot/spec.md) | The first boot puts the site's private descriptions (`csis-sandbox-configs`) on the head node, with spec 007's credential | 006, 007 | `feature/site-configs-at-first-boot` | (not yet tasked) | for its proof, a head node |
+| 9 | [008](008-site-configs-at-first-boot/spec.md) | The first boot puts the site's private descriptions (`csis-sandbox-configs`) on the head node, with spec 007's credential | 006, 007 | `feature/site-configs-at-first-boot` | 47 | for its proof, a head node |
 
 **Why this order:**
 
