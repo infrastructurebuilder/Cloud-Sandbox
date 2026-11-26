@@ -46,6 +46,23 @@ making it public or copying the files by hand.
 - The operator, the same day: the documentation must note the need for the
   key (or a token) in all the right places → FR-008, SC-005.
 
+### Session 2026-11-25
+
+Found while planning: the guides run `workflow_main.py ../cluster.configs/…
+../job.configs/…` from inside `/save/$RUNUSER/Cloud-Sandbox/cloudflow`, which
+is a link to `/save/$RUNUSER/cloudflow/src/cloudflow` (spec 006). A program
+resolves `..` from its real directory, so those paths land in
+`/save/$RUNUSER/cloudflow/src/` (tried: with links at
+`Cloud-Sandbox/job.configs` only, the shell's `ls ../job.configs` and a
+program's `open('../job.configs/x')` both fail).
+
+- Q: Where should the links to the site's descriptions go? → A: in both
+  places: `/save/$RUNUSER/cloudflow/src/job.configs` and `…/cluster.configs`,
+  where the guides' relative paths land (inside cloudflow's checkout, kept out
+  of its git status), and `/save/$RUNUSER/Cloud-Sandbox/job.configs` and
+  `…/cluster.configs`, for the old absolute paths (the operator, "Both
+  places").
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - A new head node has the site's descriptions (Priority: P1)
@@ -102,11 +119,14 @@ carries the note of FR-006.
   user data is unchanged.
 - **FR-002**: When set, the first boot MUST clone the configs repository at its
   tag, as `$RUNUSER`, after cloudflow and before the plays, into
-  `/save/$RUNUSER/sandbox-configs`, and MUST link
-  `/save/$RUNUSER/Cloud-Sandbox/job.configs` and
-  `/save/$RUNUSER/Cloud-Sandbox/cluster.configs` to its two directories, beside
-  spec 006's `cloudflow` link, so that the old paths (`../job.configs/…` from
-  the cloudflow link) keep working.
+  `/save/$RUNUSER/sandbox-configs`, and MUST link its two directories,
+  `job.configs` and `cluster.configs`, in two places: in
+  `/save/$RUNUSER/cloudflow/src/`, where the guides' relative paths
+  (`../job.configs/…`, run from the cloudflow link) land, kept out of
+  cloudflow's git status; and in `/save/$RUNUSER/Cloud-Sandbox/`, beside spec
+  006's `cloudflow` link, for the old absolute paths. A test MUST show a
+  program opening `../job.configs/…` from the cloudflow link reaching the
+  site's file.
 - **FR-003**: The clone MUST use a read-only deploy key on the configs
   repository, its private half in a Secrets Manager secret of its own, named to
   the module (`configs_secret_arn`), read, used and removed as spec 007's
@@ -121,7 +141,8 @@ carries the note of FR-006.
   `../job.configs/` and `../cluster.configs/` MUST gain a note that, on a head
   node, those paths reach the site's descriptions in
   `/save/$RUNUSER/sandbox-configs` through the links of FR-002, each changed in
-  its own unit; their commands stay as they are.
+  its own unit; their commands stay as they are. On 2026-11-25 they are ten
+  guides in eight units (the plan's research R5 lists them).
 - **FR-007**: Tests MUST render the module with and without the configs
   repository and hold the user data to the template, as specs 006 and 007 do;
   no credential value appears in any rendered output or plan.
