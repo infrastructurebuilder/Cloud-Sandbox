@@ -7,7 +7,8 @@ Cloud-Sandbox can now raise its pin for the spack ansible collection to 0.0.3
 and replace its command workaround with `from_mirrors` … Make a spec to do
 that."
 
-**Status**: Built 2026-11-26; outcome below. Clarified 2026-11-25. **Needs spec 002 merged first** (done, 2026-11-25): the workaround it removes
+**Status**: **Complete**, 2026-11-26, as `csis-sandbox-provisioning` 0.0.5; outcome
+below. Its proof on a real node is spec 004's head node (FR-007). **Needs spec 002 merged first** (done, 2026-11-25): the workaround it removes
 is spec 002's, merged in `csis-sandbox-provisioning` (`2a4980c`), and spec
 002's Cloud-Sandbox branch is not merged yet.
 

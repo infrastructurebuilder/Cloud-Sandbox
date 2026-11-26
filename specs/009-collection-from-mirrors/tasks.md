@@ -117,9 +117,12 @@ needs 0.0.3 installed, which US2's floor brings.
     - 3. `just full-test`: the signed push, the key trusted with no prompt, the second apply changing nothing (T010).
     - 4. The root `just test` and `just full-test` passed (T017); `units.toml` names sandbox-provisioning 0.0.5 at T021.
     - 5. Spec 004's T017, later (FR-007).
-- [ ] T021 On the operator's word only: finish the unit's branch into its `develop` with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), tag `0.0.5` and push; in `exportit/cloud-sandbox/units.toml`, sandbox-provisioning 0.0.5, committed in `csis-cloud-sandbox` on a branch, finished and pushed; record their commits; then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T022 Record the release: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021 (done condition 5)
-- [ ] T023 Mark the spec **complete**, with the date, only when T001 to T022 are checked (done conditions 1 and 6); its outcome links spec 004's T017 record once it exists
+- [X] T021 On the operator's word only: finish the unit's branch into its `develop` with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), tag `0.0.5` and push; in `exportit/cloud-sandbox/units.toml`, sandbox-provisioning 0.0.5, committed in `csis-cloud-sandbox` on a branch, finished and pushed; record their commits; then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+  - Done 2026-11-26, on the operator's word ("merge when the full test passes"), after the root `just full-test` passed on exactly what was merged: `csis-sandbox-provisioning`'s branch, with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), squashed into `develop` as `dbc46a2`, tagged `0.0.5` and pushed, `feature/collection-from-mirrors` kept; `csis-cloud-sandbox`'s `units.toml` (the collection 0.0.3, sandbox-provisioning 0.0.5) squashed into `develop` as `e1694f5` and pushed, `feature/collection-0.0.3` kept. Then Cloud-Sandbox's branch squashed into `develop` and pushed, with `just submodules-pushed` first. (A first push of the units failed in zsh, which does not split a variable into words; nothing had reached the remotes, and they were pushed with the refs written out.)
+- [X] T022 Record the release: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021 (done condition 5)
+  - Done 2026-11-26: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021; `units.toml` names it. No other release applies.
+- [X] T023 Mark the spec **complete**, with the date, only when T001 to T022 are checked (done conditions 1 and 6); its outcome links spec 004's T017 record once it exists
+  - Done 2026-11-26: T001 to T022 and the convergence's T024 checked, each with its record; `spec.md` and `specs/README.md` say **complete**. The outcome links spec 004's T017 when its record exists (FR-007).
 
 ---
 
