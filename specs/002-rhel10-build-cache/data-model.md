@@ -29,7 +29,7 @@ Output: `mirror_url` = `s3://<bucket_name>/`.
 | --- | --- | --- |
 | `spack_environment_dir` | the role's | the environment it pushed |
 | `spack_mirror` | `group_vars/all.yml` (FR-004 changes it) | `SPACK_MIRROR` |
-| `spack_key_fingerprint` | `22DC0120…F525C05B06DCA266` | `KEY=F525C05B06DCA266` |
+| `spack_key_fingerprint` | `8D58116F59406FF3B70812BA065FBB8F66F38D66`, the key made for the cache (FR-007) | `KEY=F525C05B06DCA266`, a different key, whose private half is lost |
 
 ## The defaults, before and after
 

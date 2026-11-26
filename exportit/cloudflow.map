@@ -87,6 +87,8 @@ new uv.lock
 new Justfile
 new .python-version
 new tests/
+new schema/       # the schema of job and cluster descriptions, written from the code (spec 005)
+new tools/        # configs_schema.py, moved here from Cloud-Sandbox, and schema_check.py (spec 005)
 new .gitignore   # the unit's own, since it is a repository of its own (MOVINGDAY.md)
 new .specify/     # Spec Kit 1.2.3 and the constitution (MOVINGDAY.md, M4)
 new .claude/      # Spec Kit's skills

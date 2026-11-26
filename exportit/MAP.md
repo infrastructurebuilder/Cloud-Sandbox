@@ -177,6 +177,13 @@ Copied on 2026-11-12 by [stage 2](../ATTIC/SPECS/COMPLETED/STAGE-2.md). The
 project's own description is
 [cloudflow/README.md](cloudflow/README.md).
 
+**Since spec 005 (2026-11-23)** cloudflow also holds the templates and
+examples of job and cluster descriptions, in `examples/configs/`, moved from
+`csis-sandbox-configs` by `moved` lines in that unit's map, and publishes the
+schema they are read by: `schema/`, written from its own `src/` by
+`tools/configs_schema.py`, with the rules in `tools/schema_check.py`. Its
+tests hold the schema to the code and every example to the schema.
+
 ### Where each file goes
 
 From [cloudflow.map](cloudflow.map). Plotting was a unit of its own,
@@ -452,7 +459,7 @@ included, and to write each one down.
 | What the script does | Here |
 | --- | --- |
 | Sets `EFA_MINAMAL`, tests `EFA_MINIMAL`, so the minimal EFA install always runs | `efa_driver_minimal: true`; both branches are translated |
-| `SPACK_CACHEONLY=-1`, so Spack never uses binary caches and compiles everything | `spack_cache_only: -1` |
+| `SPACK_CACHEONLY=-1`, so Spack never uses binary caches and compiles everything | `spack_cache_only: -1` until spec 002; `0` since 0.0.4 (2026-11-25), installing what the RHEL 10 cache holds |
 | Exports `SPACK_MIRROR`, `SPACK_KEY_URL`, `SPACK_KEY`; nothing uses them | Kept as variables; nothing uses them |
 | Updates every package and builds the drivers without a reboot | The same; the `efa_driver` role prints a warning when the running kernel is not the newest installed |
 | Turns off the Lustre repository's signature check | The same |
@@ -491,7 +498,8 @@ repository at `cloudflow_version`, installs `ansible-core`, runs
 `ansible-pull` against the provisioning repository at
 `provisioning_version`, installs cloudflow for `ec2-user`, then runs
 `node-image.yml`, stopping before the image if any step fails. Nothing of
-the original is cloned any more. See [the `sandbox-terraform` section's
+the original is cloned any more. Spec 001 ran it on a real head node
+(2026-11-23). See [the `sandbox-terraform` section's
 first-boot template](#the-first-boot-template).
 
 ### Found while testing
@@ -530,14 +538,16 @@ first-boot template](#the-first-boot-template).
 | Eight roles (all but the four below) applied with `ansible-pull` to an AlmaLinux 10 container, twice; the second run must change nothing; the result is checked | `just full-test` | pass: 49 changes, then 0 |
 | `spack_environment`'s `spack.yaml` (stage 9): an environment made with the script's commands and one written by the role's template, side by side with the real Spack v1.2.0, give the same manifest and the same merged `concretizer`, `modules` and `packages` | `just full-test` | pass (2026-11-13) |
 | `spack_environment` through `spack_env` (stage 10), with `spack_environment_state: concretized`: ESMF and PETSc concretized with the real oneAPI and Spack v1.2.0, 36 packages, Intel's compilers and MPI among them; the second run changes nothing | `just full-test` | pass (2026-11-13) |
-| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and building `spack_environment` and its module files | nowhere (the build and the module files are proved by the collection's own tests against the real Spack) | **not proved**: kernel modules, hours of compiling, kernel settings and AWS |
-| Anything on RHEL, or on AWS | nowhere | **not proved** |
-| The first-boot script | nowhere | **not proved**: it needs a real EFS volume |
-| Whether the playbook leaves the same node the script does | nowhere | **not proved** |
+| `efa_driver`, `fsx_lustre_client`, `hpc_tuning`, `node-image.yml`, and building `spack_environment` and its module files | the live proof on AWS ([spec 001](../specs/001-live-proof-on-aws/spec.md#outcome)) | **proved 2026-11-23**: the EFA driver and AWS's libfabric installed, the Lustre client installed, the tuning profile active; ESMF 8.9.1 and PETSc built and installed with oneAPI 2024.2.1 in 34 minutes; no module file rewritten by a second apply; an image AWS reports `available`. **Not proved:** that the two drivers load on the kernel the image boots: the boot's update installed a newer kernel after they were built for the running one (a finding) |
+| Anything on RHEL, or on AWS | the live proof on AWS (spec 001) | **proved 2026-11-23**: RHEL 10.2 on `c6i.8xlarge`, `site.yml` `failed=0`; applied again, two tasks changed (both findings); check mode, nothing to change |
+| The first-boot script | the live proof on AWS (spec 001) | **proved 2026-11-23**, at its third boot: the first stopped at a path RHEL 10 lacks (fixed, `csis-sandbox-provisioning` 0.0.3), the second at a kept EFS volume's missing `/save` link (a finding) |
+| Whether the playbook leaves the same node the script does | nowhere | **not proved**: deferred, `compare_with_script = false` ([REMINDERS.md](REMINDERS.md)) |
 
 [docs/LIVE-PROOF.md](sandbox-provisioning/docs/LIVE-PROOF.md) is the
-procedure that would settle the last four rows. It costs a head node
-for several hours. It has not been run either.
+procedure that settles the last four rows. Spec 001 ran it on
+2026-11-23 (its version 2, then corrected as version 3); the rows above
+say what it showed, and [spec 001's outcome](../specs/001-live-proof-on-aws/spec.md#outcome)
+lists every finding.
 
 One guess in the untested roles is marked where it is made, and a second
 was until stage 10. The
@@ -632,7 +642,8 @@ naming the script's L812, L817 and L820-L822 as the three did:
   container test does the same.
 - **Not proved in the container:** the build. Spack's fake installs leave
   `python-venv` without the `python3` that the rest of the ESMF and PETSc
-  tree needs, so the container concretizes only.
+  tree needs, so the container concretizes only. The live proof built it
+  on AWS (2026-11-23, spec 001).
 
 ### Spack set up through the collection (stage 11)
 
@@ -705,14 +716,53 @@ How it is held:
   script. Externals are compared by package name, because their versions
   are the image's; the versions the roles state themselves are checked
   against the variables.
-- **Not proved:** the site mirror's list, which needs the site's bucket.
-  Its first application is the live proof on AWS.
+- **Proved on AWS** (2026-11-23, spec 001): the site mirror's list. With
+  `spack_site_mirror=true` the mirror `s3-mirror` is in Spack's
+  configuration. It supplied nothing: the build compiles everything
+  (`--no-cache`, as the script does).
 
 Found by the check-mode pass: **`spack_environment` could not be
 previewed at all.** Its build task is asynchronous, for a build of
 hours, and Ansible refuses a task that is both asynchronous and in
 check mode; stage 10 said the role had check mode and had not run it.
 The task is now synchronous when previewing, which builds nothing.
+
+### Pushing a build to the RHEL 10 cache (spec 002)
+
+`push-build-cache.yml`, beside `site.yml` and never imported by it, is
+run by hand on a built head node: the collection's
+`spack_buildcache_push` sends the environment's installed packages that
+the cache lacks to `spack_mirror`, signed with `spack_key_fingerprint`,
+and rebuilds the index. It stops first, naming the key, unless the
+signing key's private half is in Spack's keyring; the operator puts it
+there by hand and takes it off after
+([docs/BUILD-CACHE.md](sandbox-provisioning/docs/BUILD-CACHE.md)). It
+replaces `sandbox-ops`' `spack-update-mirror.sh`. The parity test holds
+its mirror, key and environment to that script's; the container test
+pushes a fake-installed package to a cache in a directory, unsigned:
+check mode pushes nothing, the first run pushes, the second changes
+nothing, a signed push without the key stops, and a push to
+`ioos-cloud-sandbox` stops before anything is sent.
+
+The cache is signed with a key made for it on 2026-11-24
+(`8D58116F59406FF3B70812BA065FBB8F66F38D66`): the old site key's private
+half could not be obtained. Its public half is the `spack` role's
+`files/build-cache-signing-key.pub.asc`, put where `spack-pubkey.sh`
+put its download and trusted pinned to `spack_key_fingerprint`; its
+private half is in the team's Keybase folder, never in a repository.
+
+Proved on AWS by spec 002 (2026-11-24 and 25): the first push sent the
+environment's 24 packages, signed; a second sent nothing; a build with
+its own install tree fetched 19 from the cache and built none; and a
+fresh head node with the defaults alone did the same, its first boot
+taking 24 minutes against 34 when it compiled. **Since 0.0.4 the
+defaults use the cache:** `spack_cache_only: 0`, `spack_site_mirror:
+true`, `spack_mirror` the RHEL 10 cache. The three steps that trust the
+keys the mirrors publish run `spack buildcache keys --install --trust
+--yes-to-all` through the collection's `command` step: its 0.0.2
+`from_mirrors` did not answer Spack's "Trust key? [y/N]". The
+collection's 0.0.3 does; [spec 009](../specs/009-collection-from-mirrors/spec.md)
+goes back to it.
 
 ### What a real relocation would change
 
@@ -768,7 +818,10 @@ tag into `/save/ec2-user/cloudflow`, links the old checkout's path to it,
 applies the playbooks with `ansible-pull`, installs cloudflow editable
 for `ec2-user`, and makes the image; nothing of the original is cloned.
 `init_template.tpl` is kept, unused, for comparison and for a sync from
-the original to land on.
+the original to land on. Spec 001's live proof ran it on RHEL 10.2
+(2026-11-23) and found that on an EFS volume that already has `save/`, a
+head node replaced with its volume kept, the `/save` link is not made and
+cloudflow's clone fails ([REMINDERS.md](REMINDERS.md)).
 [tests/test_template.py](sandbox-terraform/tests/test_template.py)
 renders both templates through `tofu console`; `tests/firstboot.tftest.hcl`
 plans the module with mocked providers and reads the user data;
@@ -818,6 +871,18 @@ exactly what it calls, the terminating role only on nodes tagged
 are newer than the main module's `~> 3.47`, which cannot create a
 Lambda function on a runtime AWS still supports. A `tofu test` with
 mocked providers holds it to its contract.
+
+**The RHEL 10 build cache's bucket is this unit's** since spec 002:
+`build-cache/` is a root module of its own, with its own state, so that
+no head node's removal touches it. It makes one private bucket
+(`csis-sandbox-rhel10-build-cache` by default: public access blocked,
+ownership enforced, SSE-S3), whose `mirror_url` output is
+`sandbox-provisioning`'s `spack_mirror`. The main module's
+`build_cache_bucket`, when set, gives the head node's role a policy on
+that bucket alone: list it, and read, write and delete its objects. While
+the default `managed_policies` hold `AmazonS3FullAccess` it grants nothing
+new (a reminder in [REMINDERS.md](REMINDERS.md)). Mocked `tofu test`s hold
+both.
 
 It expects nothing from the other units. `sandbox-provisioning` runs on
 the node it creates.
@@ -1063,13 +1128,28 @@ Copied on 2026-11-12 by [stage 6](../ATTIC/SPECS/COMPLETED/STAGE-6.md). The
 project's own description is
 [sandbox-configs/README.md](sandbox-configs/README.md).
 
+**Split by owner, spec 005 (2026-11-23).** First, in this unit, the 23
+descriptions cloudflow could not read were dealt with: 17 repaired (two
+trailing commas, six missing `table_name`, nine keys a sibling description
+of the same model gave), 4 retired to a new `attic/` with their reasons
+(no sibling gave what they lacked), the new-model template read as one
+(clarified 2026-11-23), and `current.system` retired with `current.image_id`
+once `csis-sandbox-terraform`'s output `cluster_description` replaced them.
+Then the 51 templates and examples moved to cloudflow's
+`examples/configs/`, by 51 `moved` lines in [sandbox-configs.map](sandbox-configs.map),
+which keep both units' lineage; a later sync carries the original's changes
+to them into cloudflow (the rehearsal's "a change to a description moved to
+cloudflow"). What stays is the site's: 66 descriptions, 7 helpers, notes and
+pointers, and 6 retired files.
+
 ### Where its files go
 
 From [sandbox-configs.map](sandbox-configs.map): all 130 files of
-`job.configs/` (80) and `cluster.configs/` (50), unchanged, under the
-same directory names. By the operator's decisions the copies keep
-their identifiers, and the templates and examples stay in the same
-unit as the site data. No patches.
+`job.configs/` (80) and `cluster.configs/` (50), under the same
+directory names. By the operator's decisions the copies keep their
+identifiers. No patches. Until spec 005 the templates and examples stayed
+in the same unit as the site data; since then 51 of them are cloudflow's
+(above).
 
 New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
 `.python-version`, `schema/` and `tests/`.
@@ -1080,16 +1160,20 @@ New: `README.md`, `LICENSE`, `Justfile`, `pyproject.toml`, `uv.lock`,
 [schema/clusters.json](sandbox-configs/schema/clusters.json) name, for
 each of the 17 `JOBTYPE`s and the two platforms, every key cloudflow
 reads, whether it is required, optional or conditional, and the line
-that reads it. They are written from the code, not by hand:
-[tools/configs_schema.py](tools/configs_schema.py) reads
+that reads it. They are written from the code, not by hand. Since spec
+005 the schema is cloudflow's: its `tools/configs_schema.py`, moved there
+from this repository's `exportit/tools/`, writes its `schema/` with
+`just schema`, and its `tools/schema_check.py` holds the rules that read a
+description by it; [tools/configs_copy.py](tools/configs_copy.py) copies both
+into this unit (`just configs-schema`) and `just configs-schema-check`, part
+of `just test`, fails when a copy differs. The writer reads
 `JobFactory.py` and `ClusterFactory.py` for the dispatch and each
 class's `parseConfig()` for the keys, with Python's own parser. Two
 cases needed care, and each has a test: `table_name` is read under
 `if 'table_name' in cfDict` whose `else` raises, so it is required;
 `EXPNAME` is guarded the same way but only for LiveOcean, so it is
-conditional. `just configs-schema` writes the files again; the tools
-tests fail when they differ from what the code reads, or when a line
-named no longer reads its key.
+conditional. cloudflow's tests fail when the files differ from what the
+code reads, or when a line named no longer reads its key.
 
 ### What the files are
 
@@ -1286,7 +1370,10 @@ above its task:
   `ufs-setup-instance.sh`, which is superseded.
 - **The mirror tools carry RHEL 8 versions:** `spack-update-mirror.sh`
   lists gcc 11.2.1 and oneAPI 2023.1.0; `ufs-envars.sh` names Spack
-  v0.22.5 and `linux-rhel8`.
+  v0.22.5 and `linux-rhel8`. Since spec 002, `spack-update-mirror.sh` is
+  marked replaced by `sandbox-provisioning`'s `push-build-cache.yml`
+  (its header, README row and catalogue's `superseded_by`, which
+  `check-catalogue.sh` holds to `<unit>: <path>`); it stays, in use.
 - **Personal data in the tree:** `scripts/system/patrick.gitconfig`
   (a name and an address), the mirror key's user id (a work address),
   and three `sudoers` files that name accounts. They are copied as they
