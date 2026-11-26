@@ -7,7 +7,8 @@ Cloud-Sandbox can now raise its pin for the spack ansible collection to 0.0.3
 and replace its command workaround with `from_mirrors` … Make a spec to do
 that."
 
-**Status**: Draft; clarified 2026-11-25. **Needs spec 002 merged first** (done, 2026-11-25): the workaround it removes
+**Status**: **Complete**, 2026-11-26, as `csis-sandbox-provisioning` 0.0.5; outcome
+below. Its proof on a real node is spec 004's head node (FR-007). **Needs spec 002 merged first** (done, 2026-11-25): the workaround it removes
 is spec 002's, merged in `csis-sandbox-provisioning` (`2a4980c`), and spec
 002's Cloud-Sandbox branch is not merged yet.
 
@@ -166,6 +167,26 @@ installed version is 0.0.3.
 - **SC-004**: Spec 004's head node, the first built with this change, ends its
   first boot `failed=0`, installs the environment from the cache, and runs the
   `from_mirrors` steps with no prompt (FR-007).
+
+## Outcome
+
+Done on 2026-11-26, with no AWS.
+
+| Check | Result |
+| --- | --- |
+| The installed collection, before and after `just init` (SC-002) | 0.0.2, then 0.0.3 over it |
+| The three steps (SC-001) | the collection's `from_mirrors` again; no `command` step runs `buildcache keys` |
+| The container's new case, with 0.0.3 (SC-003) | a signed push with a throwaway key published its keys; `site.yml` with that cache as the site mirror trusted the key with no prompt, and a second apply changed nothing |
+| The same case, with 0.0.2 pinned for one run | stopped at Spack's "Trust key: … [y/N]" in the `from_mirrors` step: the bug the case is there to catch |
+| A real node (SC-004) | spec 004's head node, its T017, to be linked here when its record exists |
+
+Found on the way:
+
+- `units.toml` named the collection 0.0.1, which the playbooks had already
+  left for 0.0.2 and which the new floor does not admit; the root test of
+  pins said so, and it now names 0.0.3.
+- `csis-sandbox-provisioning`'s README still quoted the old range; the
+  convergence corrected it.
 
 ## Assumptions
 

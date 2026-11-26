@@ -35,8 +35,10 @@ needs 0.0.3 installed, which US2's floor brings.
 
 ## Phase 1: Setup
 
-- [ ] T001 Start `feature/collection-from-mirrors` with git-flow in `exportit/sandbox-provisioning/` from its `develop`, after checking it is clean and level with its origin
-- [ ] T002 Run `just init` in `exportit/sandbox-provisioning/` and record the collection's installed version from `.collections/ansible_collections/infrastructurebuilder/csis_spack/MANIFEST.json` (0.0.2 expected); run the root `just test`
+- [X] T001 Start `feature/collection-from-mirrors` with git-flow in `exportit/sandbox-provisioning/` from its `develop`, after checking it is clean and level with its origin
+  - Done 2026-11-26: `feature/collection-from-mirrors` started with git-flow in `csis-sandbox-provisioning` from `develop` (`985c2f9`), clean and level with its origin; Cloud-Sandbox's `feature/spec-009-collection-from-mirrors` brought level with `develop` by a merge (its one conflict, `specs/README.md`, resolved with `develop`'s, which held all of it).
+- [X] T002 Run `just init` in `exportit/sandbox-provisioning/` and record the collection's installed version from `.collections/ansible_collections/infrastructurebuilder/csis_spack/MANIFEST.json` (0.0.2 expected); run the root `just test`
+  - Done 2026-11-26: `just init`; the installed collection 0.0.2 (`MANIFEST.json`), under the range `>=0.0.1,<0.1.0`. The root `just test` had passed on this tree (`develop` `281cd29`) that day.
 
 ---
 
@@ -48,12 +50,15 @@ needs 0.0.3 installed, which US2's floor brings.
 
 ### Tests first
 
-- [ ] T003 [US2] In `exportit/sandbox-provisioning/tests/test_parity.py`, add a test that `requirements.yml` asks for `infrastructurebuilder.csis_spack` `>=0.0.3,<0.1.0` (data-model.md: "Before `>=0.0.1,<0.1.0`, After `>=0.0.3,<0.1.0`"), its comment saying 0.0.3 is the first to answer Spack's confirmation; and that `amazon.aws` stays `>=9.0.0,<10.0.0`; run it and see it fail for the right reason, recording it
+- [X] T003 [US2] In `exportit/sandbox-provisioning/tests/test_parity.py`, add a test that `requirements.yml` asks for `infrastructurebuilder.csis_spack` `>=0.0.3,<0.1.0` (data-model.md: "Before `>=0.0.1,<0.1.0`, After `>=0.0.3,<0.1.0`"), its comment saying 0.0.3 is the first to answer Spack's confirmation; and that `amazon.aws` stays `>=9.0.0,<10.0.0`; run it and see it fail for the right reason, recording it
+  - Done 2026-11-26: `test_the_collection_is_at_least_the_one_that_answers_spacks_confirmation` in `tests/test_parity.py` (both collections' ranges, and the comment naming 0.0.3); it failed on the floor `0.0.1`.
 
 ### Implementation
 
-- [ ] T004 [US2] In `exportit/sandbox-provisioning/requirements.yml`, set the floor to `>=0.0.3,<0.1.0` with a comment saying why (research R1); run `just init` and record that the installed version is now 0.0.3, where T002 found 0.0.2 (SC-002); and record, quoting the lines, that the two other installs need nothing more because each installs into a place with no collection yet (FR-002): `csis-sandbox-terraform`'s `init_template.ansible.tpl` runs `ansible-galaxy collection install -r requirements.yml` in a fresh clone at `/opt/sandbox-provisioning`, and `tests/container/converge.sh` does the same in a new container
-- [ ] T005 [US2] In `exportit/sandbox-provisioning/docs/LIVE-PROOF.md`, box B3 installs the collections from `requirements.yml` (`ansible-galaxy collection install -r requirements.yml`, as the first boot does) before `site.yml`, so that a node built on 0.0.2 gets 0.0.3 (research R4); the box becomes `v4`, the page's version line at its head says version 4 and what it changed (box B3, for spec 009), and `tests/test_live_proof_form.py` allows `v4`; run `just test`: T003 and the form tests pass
+- [X] T004 [US2] In `exportit/sandbox-provisioning/requirements.yml`, set the floor to `>=0.0.3,<0.1.0` with a comment saying why (research R1); run `just init` and record that the installed version is now 0.0.3, where T002 found 0.0.2 (SC-002); and record, quoting the lines, that the two other installs need nothing more because each installs into a place with no collection yet (FR-002): `csis-sandbox-terraform`'s `init_template.ansible.tpl` runs `ansible-galaxy collection install -r requirements.yml` in a fresh clone at `/opt/sandbox-provisioning`, and `tests/container/converge.sh` does the same in a new container
+  - Done 2026-11-26: `requirements.yml` asks for `>=0.0.3,<0.1.0`, its comment saying why; `just init` installed 0.0.3 over the 0.0.2 ("infrastructurebuilder.csis_spack:0.0.3 was installed successfully") (SC-002); T003 passes. The two other installs need nothing more, each installing where there is no collection yet: the first boot clones the playbooks into a fresh `/opt/sandbox-provisioning` and runs `( cd $PROVISIONING && ansible-galaxy collection install -r requirements.yml )` (`init_template.ansible.tpl` L109 to L110; its second install, L150, is in the same checkout), and the container test clones into a new container and runs `ansible-galaxy collection install -r requirements.yml` (`converge.sh` L116 to L118) (FR-002).
+- [X] T005 [US2] In `exportit/sandbox-provisioning/docs/LIVE-PROOF.md`, box B3 installs the collections from `requirements.yml` (`ansible-galaxy collection install -r requirements.yml`, as the first boot does) before `site.yml`, so that a node built on 0.0.2 gets 0.0.3 (research R4); the box becomes `v4`, the page's version line at its head says version 4 and what it changed (box B3, for spec 009), and `tests/test_live_proof_form.py` allows `v4`; run `just test`: T003 and the form tests pass
+  - Done 2026-11-26: box B3 installs the collections (`sudo -E ansible-galaxy collection install -r requirements.yml`) before `site.yml`, as `v4`; the page's version line says version 4 and why; the form test allows `v4`, and two new tests hold that B3 installs first (it failed first) and that the page's version is its newest box's. `just test` 493 passed.
 
 **Checkpoint**: no checkout can apply the playbooks with 0.0.2.
 
@@ -67,14 +72,19 @@ needs 0.0.3 installed, which US2's floor brings.
 
 ### Tests first
 
-- [ ] T006 [P] [US1] In `exportit/sandbox-provisioning/tests/test_parity.py`, make `TRUST_MIRROR_KEYS` `{"kind": "gpg_key", "from_mirrors": True}` with its comment saying the collection answers the prompt since 0.0.3; replace `test_no_step_trusts_mirror_keys_through_the_collections_from_mirrors` with a test that no step of the two roles runs `buildcache keys` through `kind: command`, and that exactly three steps are `TRUST_MIRROR_KEYS`; keep `test_as_steps_carries_out_buildcache_keys_with_yes_to_all` renamed for `from_mirrors` (research R3)
-- [ ] T007 [P] [US1] In `exportit/sandbox-provisioning/tests/container/converge.sh`, after the push cases, the case of research R2: as `ec2-user`, `spack gpg create` a throwaway key, read its fingerprint; `push-build-cache.yml` signed (`push_build_cache_unsigned: false`, `spack_key_fingerprint` the throwaway key's, `spack_mirror` a second directory, `spack_environment_dir` the test environment); `spack gpg untrust --signing` the key and check it is not trusted; then `site.yml --tags spack,intel_oneapi` with `spack_site_mirror: true` and `spack_mirror` the signed directory (overriding `tests/container/vars.yml`'s `false`), so that **all three** steps run: the `spack` role's first list (L700) and the site mirror's list (L19, its pinned key from the role's own file, no S3), and `intel_oneapi`'s (L959). It must finish with no prompt and report a change, Spack must trust the throwaway key afterwards (`spack gpg list --trusted`), and a second apply must report `changed=0`; then the mirror (`s3-mirror`, pointed at the directory) removed
-- [ ] T008 [US1] Run `just test` and `just full-test` and see T006 and T007 fail for the right reason (the steps are still `command` steps; record what the container case reports), recording which failed
+- [X] T006 [P] [US1] In `exportit/sandbox-provisioning/tests/test_parity.py`, make `TRUST_MIRROR_KEYS` `{"kind": "gpg_key", "from_mirrors": True}` with its comment saying the collection answers the prompt since 0.0.3; replace `test_no_step_trusts_mirror_keys_through_the_collections_from_mirrors` with a test that no step of the two roles runs `buildcache keys` through `kind: command`, and that exactly three steps are `TRUST_MIRROR_KEYS`; keep `test_as_steps_carries_out_buildcache_keys_with_yes_to_all` renamed for `from_mirrors` (research R3)
+  - Done 2026-11-26: `TRUST_MIRROR_KEYS` is `{"kind": "gpg_key", "from_mirrors": True}`; the test that no step uses `from_mirrors` is now `test_the_mirrors_keys_are_trusted_by_the_collections_own_step` (three `from_mirrors` steps, no `command` step running `buildcache keys`); the `as_steps` test renamed; the Intel list's kinds back to `gpg_key`.
+- [X] T007 [P] [US1] In `exportit/sandbox-provisioning/tests/container/converge.sh`, after the push cases, the case of research R2: as `ec2-user`, `spack gpg create` a throwaway key, read its fingerprint; `push-build-cache.yml` signed (`push_build_cache_unsigned: false`, `spack_key_fingerprint` the throwaway key's, `spack_mirror` a second directory, `spack_environment_dir` the test environment); `spack gpg untrust --signing` the key and check it is not trusted; then `site.yml --tags spack,intel_oneapi` with `spack_site_mirror: true` and `spack_mirror` the signed directory (overriding `tests/container/vars.yml`'s `false`), so that **all three** steps run: the `spack` role's first list (L700) and the site mirror's list (L19, its pinned key from the role's own file, no S3), and `intel_oneapi`'s (L959). It must finish with no prompt and report a change, Spack must trust the throwaway key afterwards (`spack gpg list --trusted`), and a second apply must report `changed=0`; then the mirror (`s3-mirror`, pointed at the directory) removed
+  - Done 2026-11-26: the case in `converge.sh`, after the push cases: a throwaway key (`spack gpg create`), a signed push with it to `/tmp/signed-cache`, which must publish a key; the key taken off (`untrust --signing`, and `untrust` if still trusted) and checked untrusted; then `site.yml --tags spack,intel_oneapi` with `spack_site_mirror: true` and `spack_mirror` that cache, so that all three steps run, twice: the key must be trusted after, the second apply `changed=0`; then the mirror removed. `shellcheck` clean.
+- [X] T008 [US1] Run `just test` and `just full-test` and see T006 and T007 fail for the right reason (the steps are still `command` steps; record what the container case reports), recording which failed
+  - Done 2026-11-26: on the `command` steps, T006's parity tests failed (4: the three lists and the new test). The container case is built to catch `from_mirrors` on 0.0.2, which the `command` steps do not have; it was seen to fail that way after T009: a diagnostic run of the container (`site` play only) with `requirements.yml` pinned to `==0.0.2` for the run, then restored, stopped in "Trust keys | gpg_key: from the mirrors" at `Trust key: 659B…9836 [y/N]` (SC-003's failure).
 
 ### Implementation
 
-- [ ] T009 [US1] In `exportit/sandbox-provisioning/roles/spack/tasks/main.yml` (the first list, `funcs-setup-instance.sh` L700; the site mirror's list, `spack-pubkey.sh` L19) and `exportit/sandbox-provisioning/roles/intel_oneapi/tasks/main.yml` (`funcs-setup-instance.sh` L959), make each of the three `command` steps `kind: gpg_key` with `from_mirrors: true`, each still saying the script lines it replaces, its comment saying the collection answers Spack's confirmation since 0.0.3 (data-model.md, "The three steps")
-- [ ] T010 [US1] Run `just test` and `just full-test` in the unit: T006 and T007 pass, and the container's second apply and check mode still change nothing
+- [X] T009 [US1] In `exportit/sandbox-provisioning/roles/spack/tasks/main.yml` (the first list, `funcs-setup-instance.sh` L700; the site mirror's list, `spack-pubkey.sh` L19) and `exportit/sandbox-provisioning/roles/intel_oneapi/tasks/main.yml` (`funcs-setup-instance.sh` L959), make each of the three `command` steps `kind: gpg_key` with `from_mirrors: true`, each still saying the script lines it replaces, its comment saying the collection answers Spack's confirmation since 0.0.3 (data-model.md, "The three steps")
+  - Done 2026-11-26: the three steps (`roles/spack/tasks/main.yml` L700 and L19, `roles/intel_oneapi/tasks/main.yml` L959) are `kind: gpg_key`, `from_mirrors: true`, each still under its `# Replaces` line, the comment saying the collection answers the prompt since 0.0.3.
+- [X] T010 [US1] Run `just test` and `just full-test` in the unit: T006 and T007 pass, and the container's second apply and check mode still change nothing
+  - Done 2026-11-26: `just test` 493 passed; `just full-test` passed with 0.0.3: the signed push published its keys, `site.yml` with that mirror trusted the key with no prompt (`changed=4`) and changed nothing the second time (`changed=0`), and the container's second apply and check mode changed nothing (SC-003). `csis-sandbox-provisioning` `49fce50`.
 
 **Checkpoint**: no `--yes-to-all` workaround is left; the container proves the steps against a mirror that publishes a key.
 
@@ -82,19 +92,37 @@ needs 0.0.3 installed, which US2's floor brings.
 
 ## Phase 4: Polish & Cross-Cutting Concerns
 
-- [ ] T011 [P] In `exportit/MAP.md`, the paragraph that describes the workaround (the `sandbox-provisioning` part, "The three steps that trust the keys the mirrors publish …") says the steps are the collection's `from_mirrors` again, on 0.0.3, since this spec
-- [ ] T012 [P] In `specs/004-spack-stack-ufs-coastal/tasks.md`, T017's description (its head node) adds that its `proof.tfvars` sets `provisioning_version` to the tag this spec cuts (0.0.5) or a later one, and that its record says whether the first boot ended `failed=0`, installed from the RHEL 10 cache, and ran the three `from_mirrors` steps with no prompt (spec 009's FR-007, SC-004; research R5)
-- [ ] T013 [P] In `specs/README.md`, set 009's state
-- [ ] T014 Grep `exportit/sandbox-provisioning/` and `exportit/MAP.md` for `--yes-to-all` used for `buildcache keys`, and for `TRUST_MIRROR_KEYS`' old form: none left (SC-001); `docs/BUILD-CACHE.md`'s `spack gpg trust --yes-to-all` is another command, and stays
-- [ ] T015 Commit the unit's work on its branch; record the submodule here; run `just constitution-check`
-- [ ] T016 Run the root `just test`
-- [ ] T017 Run the root `just full-test`
-- [ ] T018 In `specs/009-collection-from-mirrors/spec.md`, an **Outcome** section: the installed version before and after, the container case's result, and that the real-node proof is spec 004's T017, to be linked when its record exists
-- [ ] T019 Run `/speckit-converge` on `specs/009-collection-from-mirrors/`; record that it appended nothing, or carry out what it appended (done condition 2)
-- [ ] T020 Walk `specs/009-collection-from-mirrors/quickstart.md`, steps 1 to 4 each with its evidence; step 5 is spec 004's (done condition 3)
-- [ ] T021 On the operator's word only: finish the unit's branch into its `develop` with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), tag `0.0.5` and push; in `exportit/cloud-sandbox/units.toml`, sandbox-provisioning 0.0.5, committed in `csis-cloud-sandbox` on a branch, finished and pushed; record their commits; then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T022 Record the release: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021 (done condition 5)
-- [ ] T023 Mark the spec **complete**, with the date, only when T001 to T022 are checked (done conditions 1 and 6); its outcome links spec 004's T017 record once it exists
+- [X] T011 [P] In `exportit/MAP.md`, the paragraph that describes the workaround (the `sandbox-provisioning` part, "The three steps that trust the keys the mirrors publish …") says the steps are the collection's `from_mirrors` again, on 0.0.3, since this spec
+  - Done 2026-11-26: `exportit/MAP.md`'s paragraph says the steps are the collection's `from_mirrors` on 0.0.3 or later, what spec 002 did meanwhile, and the container's case.
+- [X] T012 [P] In `specs/004-spack-stack-ufs-coastal/tasks.md`, T017's description (its head node) adds that its `proof.tfvars` sets `provisioning_version` to the tag this spec cuts (0.0.5) or a later one, and that its record says whether the first boot ended `failed=0`, installed from the RHEL 10 cache, and ran the three `from_mirrors` steps with no prompt (spec 009's FR-007, SC-004; research R5)
+  - Done 2026-11-26: spec 004's T017 sets `provisioning_version` to 0.0.5 or later, and its record says whether the first boot ended `failed=0`, installed from the cache, and ran the three steps with no prompt.
+- [X] T013 [P] In `specs/README.md`, set 009's state
+  - Done 2026-11-26: 009's row says it is in progress; set again at T023.
+- [X] T014 Grep `exportit/sandbox-provisioning/` and `exportit/MAP.md` for `--yes-to-all` used for `buildcache keys`, and for `TRUST_MIRROR_KEYS`' old form: none left (SC-001); `docs/BUILD-CACHE.md`'s `spack gpg trust --yes-to-all` is another command, and stays
+  - Done 2026-11-26: no step runs `buildcache keys` through `command` (SC-001); `--yes-to-all` is left only in comments saying what spec 002 did (`test_parity.py`, the three steps), in `MAP.md`'s history, and in `docs/BUILD-CACHE.md`'s `spack gpg trust --yes-to-all`, another command.
+- [X] T015 Commit the unit's work on its branch; record the submodule here; run `just constitution-check`
+  - Done 2026-11-26: `csis-sandbox-provisioning`'s work committed on `feature/collection-from-mirrors` (`49fce50`, then `a0c5852` for T024) and recorded here; `just constitution-check`: the shared part (2.1.0), CLAUDE.md and LICENSE agree in every unit.
+- [X] T016 Run the root `just test`
+  - Done 2026-11-26, as part of the root `just full-test` (T017), which runs it.
+- [X] T017 Run the root `just full-test`
+  - Done 2026-11-26: the root `just full-test` failed once, rightly: `test_the_collection_is_pinned_where_it_is_used_at_its_manifest_version` found `units.toml` naming the collection 0.0.1, outside `>=0.0.3,<0.1.0`. With `units.toml` naming 0.0.3 (`csis-cloud-sandbox` `5a98070`, on `feature/collection-0.0.3`), it passed: every unit's full test, `units.toml` 15 units consistent, the sync rehearsal 9 of 9.
+- [X] T018 In `specs/009-collection-from-mirrors/spec.md`, an **Outcome** section: the installed version before and after, the container case's result, and that the real-node proof is spec 004's T017, to be linked when its record exists
+  - Done 2026-11-26: `spec.md`'s **Outcome**: the installed version before and after, the steps, the container's case with 0.0.3 and with 0.0.2, and spec 004's T017 to be linked; the status line says it is built.
+- [X] T019 Run `/speckit-converge` on `specs/009-collection-from-mirrors/`; record that it appended nothing, or carry out what it appended (done condition 2)
+  - Done 2026-11-26: `/speckit-converge` found FR-001 to FR-007 and SC-001 to SC-003 met (SC-004 is spec 004's), and appended Phase 5, T024 (the README's range); carried out. The `units.toml` change (T017) was not asked by a task and is kept: the root test requires it.
+- [X] T020 Walk `specs/009-collection-from-mirrors/quickstart.md`, steps 1 to 4 each with its evidence; step 5 is spec 004's (done condition 3)
+  - Done 2026-11-26, `quickstart.md` walked:
+    - 1. `requirements.yml` asks for `>=0.0.3,<0.1.0`; `just init` left 0.0.3 where 0.0.2 was (T004).
+    - 2. Three `from_mirrors: true` steps and no `--yes-to-all` step; `just test` passed (T009, T010, T014).
+    - 3. `just full-test`: the signed push, the key trusted with no prompt, the second apply changing nothing (T010).
+    - 4. The root `just test` and `just full-test` passed (T017); `units.toml` names sandbox-provisioning 0.0.5 at T021.
+    - 5. Spec 004's T017, later (FR-007).
+- [X] T021 On the operator's word only: finish the unit's branch into its `develop` with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), tag `0.0.5` and push; in `exportit/cloud-sandbox/units.toml`, sandbox-provisioning 0.0.5, committed in `csis-cloud-sandbox` on a branch, finished and pushed; record their commits; then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+  - Done 2026-11-26, on the operator's word ("merge when the full test passes"), after the root `just full-test` passed on exactly what was merged: `csis-sandbox-provisioning`'s branch, with the version raised to 0.0.5 (`pyproject.toml`, `uv.lock`), squashed into `develop` as `dbc46a2`, tagged `0.0.5` and pushed, `feature/collection-from-mirrors` kept; `csis-cloud-sandbox`'s `units.toml` (the collection 0.0.3, sandbox-provisioning 0.0.5) squashed into `develop` as `e1694f5` and pushed, `feature/collection-0.0.3` kept. Then Cloud-Sandbox's branch squashed into `develop` and pushed, with `just submodules-pushed` first. (A first push of the units failed in zsh, which does not split a variable into words; nothing had reached the remotes, and they were pushed with the refs written out.)
+- [X] T022 Record the release: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021 (done condition 5)
+  - Done 2026-11-26: `csis-sandbox-provisioning` 0.0.5, cut on the operator's word with T021; `units.toml` names it. No other release applies.
+- [X] T023 Mark the spec **complete**, with the date, only when T001 to T022 are checked (done conditions 1 and 6); its outcome links spec 004's T017 record once it exists
+  - Done 2026-11-26: T001 to T022 and the convergence's T024 checked, each with its record; `spec.md` and `specs/README.md` say **complete**. The outcome links spec 004's T017 when its record exists (FR-007).
 
 ---
 
@@ -124,3 +152,8 @@ needs 0.0.3 installed, which US2's floor brings.
 
 - The container's throwaway signing key is made and thrown away inside the container; no real key is used.
 - Nothing in `ATTIC/` is read for any task.
+
+## Phase 5: Convergence
+
+- [X] T024 In `exportit/sandbox-provisioning/README.md`, the `just init` line names the collection's range as `>=0.0.3,<0.1.0`, not `>=0.0.1,<0.1.0`, per FR-001 (contradicts)
+  - Done 2026-11-26: `csis-sandbox-provisioning` `a0c5852`: the `just init` line names `>=0.0.3,<0.1.0`. `just test` passed.
