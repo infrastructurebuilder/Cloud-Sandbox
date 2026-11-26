@@ -83,6 +83,7 @@ specs/009-collection-from-mirrors/
 ```text
 exportit/sandbox-provisioning/              # csis-sandbox-provisioning
 ├── requirements.yml                        # >=0.0.3,<0.1.0, and why
+├── README.md                               # the `just init` line's range (the convergence's T024)
 ├── roles/spack/tasks/main.yml              # two steps: funcs L700, spack-pubkey.sh L19
 ├── roles/intel_oneapi/tasks/main.yml       # one step: funcs L959
 ├── tests/test_parity.py                    # TRUST_MIRROR_KEYS back to from_mirrors; the floor
@@ -90,7 +91,7 @@ exportit/sandbox-provisioning/              # csis-sandbox-provisioning
 ├── pyproject.toml, uv.lock                 # version 0.0.5
 └── docs/LIVE-PROOF.md                      # box B3: the collections installed again (research R4)
 
-exportit/cloud-sandbox/units.toml           # sandbox-provisioning 0.0.5 (csis-cloud-sandbox)
+exportit/cloud-sandbox/units.toml           # the collection 0.0.3, sandbox-provisioning 0.0.5 (csis-cloud-sandbox)
 
 Cloud-Sandbox (the workshop)
 ├── exportit/MAP.md                         # the workaround's paragraph: from_mirrors, 0.0.3
