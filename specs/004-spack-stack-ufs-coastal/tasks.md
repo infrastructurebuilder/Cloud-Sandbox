@@ -7,7 +7,7 @@ description: "Task list for spack-stack for UFS Coastal"
 
 **Input**: Design documents from `specs/004-spack-stack-ufs-coastal/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md); spec 001 merged (its `proof/`); spec 002's `superseded_by` rule in `csis-sandbox-ops`
+**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md); spec 001 merged (its `proof/`); spec 002's `superseded_by` rule in `csis-sandbox-ops`; spec 009 merged (done, 2026-11-26: the collection's 0.0.3, and this spec's head node is its proof on a real node)
 
 **Done**: by the six conditions of the constitution's Development Workflow
 (1.2.0): T036 to T040 are those conditions' tasks. Each task, when checked,
@@ -34,6 +34,7 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 
 - [ ] T001 Start `feature/spack-stack-ufs-coastal` with git-flow in `exportit/sandbox-provisioning/`, `exportit/model-ufscoastal/` and `exportit/sandbox-ops/` from their `develop`, each clean and level with its origin
 - [ ] T002 Run `just init` in the three units and the root `just test`
+- [ ] T041 Before any other work, correct the design documents to what the analysis of 2026-11-26 found (I1, A1): in `specs/004-spack-stack-ufs-coastal/data-model.md` (the `ufs_stack_setup` row), `plan.md` (Technical Context's Testing line) and `quickstart.md` (step 1's comment), each step of `ufs_stack_setup` names the legacy line it replaces with a `# Replaces <file> L<n>` comment above it, held by `tests/test_traceability.py`, not with a `replaces:` key, which the collection's `setup` role refuses as an option no step kind has; and `spec.md`'s **Status** says it was planned and tasked on 2026-11-21, not that it is ready for `/speckit-plan`
 
 ---
 
@@ -52,13 +53,13 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 
 ### Tests first
 
-- [ ] T005 [P] [US1] Write `exportit/sandbox-provisioning/tests/test_ufs_stack.py`: every step of `ufs_stack_setup` has a `replaces:` naming a line of `legacy/`'s `setup_spack-stack` or `build_spack-stack-environment` that exists; no step names the `system` scope; `ufs_stack_version` is not a branch name of the repository it names (a tag or a commit, by `git ls-remote`, marked `slow`); the playbook fails before cloning when it is given a branch
+- [ ] T005 [P] [US1] Add `ufs-stack.yml` to `exportit/sandbox-provisioning/tests/test_traceability.py`'s `PLAYBOOKS`, so that every task and every step of `ufs_stack_setup` must carry a `# Replaces funcs-setup-instance.sh L<n>` comment naming a line of `legacy/`'s `setup_spack-stack` (L340) or `build_spack-stack-environment` (L428) that exists, or a `# New: <why>` (no `replaces:` key: the collection's `setup` role refuses options a step kind does not have); and write `exportit/sandbox-provisioning/tests/test_ufs_stack.py`: no step names the `system` scope; no step or task names `gcc-toolset` (FR-002); `ufs_stack_version` is not a branch name of the repository it names (a tag or a commit, by `git ls-remote`, marked `slow`); the playbook fails before cloning when it is given a branch
 - [ ] T006 [P] [US1] In `exportit/sandbox-provisioning/tests/container/converge.sh`, add `ufs-stack.yml` with `ufs_stack_install: false` after `site.yml`: the environment concretizes; `/etc/spack` in the container is byte for byte as before the playbook
 - [ ] T007 [US1] Run them and see them fail for the right reason, recording which failed
 
 ### Implementation
 
-- [ ] T008 [US1] Write `exportit/sandbox-provisioning/ufs-stack.yml` as research R3 and [contracts/ufs-stack-playbook.md](contracts/ufs-stack-playbook.md) say: the ref check; the clone with submodules; the collection's `setup` role with `ufs_stack_setup` (`environment`, `command` with `creates:`, `detect` and `config` into the environment's scope, `spack add sp`); `spack_env` with `refresh_modules: when_needed`, skipped past concretizing when `ufs_stack_install` is false; `spack stack setup-meta-modules` with `creates:`
+- [ ] T008 [US1] Write `exportit/sandbox-provisioning/ufs-stack.yml` as research R3 and [contracts/ufs-stack-playbook.md](contracts/ufs-stack-playbook.md) say: the ref check; the clone with submodules; the collection's `setup` role with `ufs_stack_setup` (`environment`, `command` with `changes: creates` and `creates:` (the collection requires `changes`), `detect` and `config` into the environment's scope, `spack add sp`); `spack_env` with `refresh_modules: when_needed`, skipped past concretizing when `ufs_stack_install` is false; `spack stack setup-meta-modules` as a `command` step with `changes: creates` and `creates:`
 - [ ] T009 [US1] Its variables, in the playbook's `vars` or `group_vars/ufs_stack.yml`, with the choice of T004 and its record as a comment; add the playbook to the unit's syntax and lint targets
 - [ ] T010 [US1] Run the unit's `just test` and `just full-test`: T005 and T006 pass
 - [ ] T011 [P] [US1] In `exportit/sandbox-ops/bin/add-ufs-setup.sh` and `bin/ufs-envars.sh`, a header line naming `csis-sandbox-provisioning`'s `ufs-stack.yml`; in `CATALOGUE.tsv`, both rows keep `in-use` with `superseded_by` `csis-sandbox-provisioning: ufs-stack.yml`; `spack-stack-update-mirror.sh` and `spack-stack-mirror-create.sh` unchanged; `tests/shellcheck.counts` if a line moved; `just test` (research R9)
@@ -70,7 +71,7 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 ### Implementation (its files, read before a build; corrected after T024)
 
 - [ ] T012 [P] [US2] In `exportit/model-ufscoastal/README`, say that spack-stack is built by `csis-sandbox-provisioning`'s `ufs-stack.yml` on a head node, where, and at which release; remove the pointer to `ufs-setup-instance.sh` (FR-006)
-- [ ] T013 [US2] In `exportit/model-ufscoastal/setup.sh`, source `{{ ufs_stack_dir }}/setup.sh` at its real path for the chosen release, and remove the `gcc-toolset-13` line with a comment saying why (research R5); `just test` (shellcheck as recorded, `tests/shellcheck.counts` updated if a finding moved)
+- [ ] T013 [US2] In `exportit/model-ufscoastal/setup.sh`, a plain shell script that renders no template, source the chosen release's `setup.sh` by its real path (`/save/environments/<the directory T009 gives ufs_stack_dir>/setup.sh`), and remove the `gcc-toolset-13` line with a comment saying why (research R5); `just test` (shellcheck as recorded, `tests/shellcheck.counts` updated if a finding moved)
 - [ ] T014 [US2] In `exportit/model-ufscoastal/modulefiles/tcl/ufs_ioossb.intel.tcl` and `modulefiles/lua/ufs_ioossb.intel.lua`, the new environment's `Core` path and each `module load` at the version the chosen release's `unified-dev` template gives, read from its files; `just test`
 
 ---
@@ -78,10 +79,10 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 ## Phase 5: The proof on a head node
 
 - [ ] T015 Commit the three units' work on their branches; record the submodules here; run the root `just test` and `just full-test`
-- [ ] T016 On the operator's word only: finish the three units' branches into their `develop` and push; record their commits
-- [ ] T017 **(AWS, asked)** A head node of this spec's own, as spec 001's tasks T017 to T022 (its stages A and B); its `proof.tfvars` sets `provisioning_version` to `csis-sandbox-provisioning` 0.0.5 (spec 009's tag) or a later one, and its record says whether the first boot ended `failed=0`, installed from the RHEL 10 cache, and ran the three `from_mirrors` steps with no prompt (spec 009's FR-007 and SC-004: this node is spec 009's proof on a real node)
+- [ ] T016 On the operator's word only: finish the three units' branches into their `develop` and push; raise `csis-sandbox-provisioning`'s version to 0.0.6 (`pyproject.toml`, `uv.lock`), tag `0.0.6` and push, and name it in `exportit/cloud-sandbox/units.toml` (`csis-cloud-sandbox`, on a branch, finished and pushed): the head node's first boot must carry `ufs-stack.yml`, which `0.0.5` does not; record their commits
+- [ ] T017 **(AWS, asked)** A head node of this spec's own, as spec 001's tasks T017 to T022 (its stages A and B); its `proof.tfvars` sets `provisioning_version` to `0.0.6` (T016), which is later than spec 009's `0.0.5` and holds `ufs-stack.yml`, and its record says whether the first boot ended `failed=0`, installed from the RHEL 10 cache, and ran the three `from_mirrors` steps with no prompt (spec 009's FR-007 and SC-004: this node is spec 009's proof on a real node)
 - [ ] T018 Before the playbook: `ls -la --time-style=full-iso /etc/spack` and the sandbox environment's `spack concretize --fresh` output saved
-- [ ] T019 [US1] `ufs-stack.yml` applied; its recap and the time it took recorded
+- [ ] T019 [US1] `ufs-stack.yml` applied from the node's checkout of `0.0.6` (`/opt/sandbox-provisioning`); its recap and the time it took recorded
 - [ ] T020 [US1] Applied again: `changed=0` (SC-001)
 - [ ] T021 [US1] `module avail` shows the meta-modules (SC-002)
 - [ ] T022 After the playbook: `/etc/spack` and the concretization equal T018's (SC-004)
@@ -106,14 +107,14 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 - [ ] T036 Run `/speckit-converge` on `specs/004-spack-stack-ufs-coastal/`; record that it appended nothing, or carry out what it appended (done condition 2)
 - [ ] T037 Walk `specs/004-spack-stack-ufs-coastal/quickstart.md`, each step's evidence from the tasks above (done condition 3)
 - [ ] T038 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T039 Record that no release applies, unless the operator asks for one (done condition 5)
+- [ ] T039 Record the release: `csis-sandbox-provisioning` `0.0.6`, cut on the operator's word at T016; no other release applies unless the operator asks (done condition 5)
 - [ ] T040 Mark the spec **complete**, with the date, only when T001 to T039 are checked (done conditions 1 and 6)
 
 ---
 
 ## Dependencies & Execution Order
 
-- **Setup**: needs spec 001 merged and spec 002's catalogue rule.
+- **Setup**: needs spec 001 merged, spec 002's catalogue rule, and spec 009 merged (all done); T041 before any other work.
 - **Foundational**: T003, then T004; T004 may stop for the operator (FR-001).
 - **US1 code (T005 to T011)**: after T004.
 - **US2 files (T012 to T014)**: after T004 (the release fixes the paths and versions).
