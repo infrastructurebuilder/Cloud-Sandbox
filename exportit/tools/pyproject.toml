@@ -23,7 +23,7 @@ ignore = ["D203", "D213"]
 "tests/*" = ["D", "PLR2004"]
 
 [tool.pyright]
-include = ["export.py", "configs_schema.py", "tests"]
+include = ["export.py", "configs_copy.py", "tests"]
 typeCheckingMode = "strict"
 pythonVersion = "3.12"
 

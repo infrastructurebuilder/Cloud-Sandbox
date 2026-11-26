@@ -106,6 +106,19 @@ from the node before the node is removed.
 **Rationale**: FR-001 names that key; nodes already trust it by that
 fingerprint (`spack_site_mirror`), so the new cache needs no new trust.
 
+**Superseded 2026-11-24** (spec's session 2026-11-24, FR-007): the private
+half of that key cannot be obtained; it was kept on its owner's machine
+(`scp-secret.sh` copied it from there). A new key was made for the cache,
+`8D58116F59406FF3B70812BA065FBB8F66F38D66` (RSA 4096, signing, no expiry, no passphrase, its user ID naming the
+cache). Its public half ships in `csis-sandbox-provisioning`'s `spack` role,
+which copies it to `spack_key` (the path the script downloaded to) and trusts
+it pinned to `spack_key_fingerprint`; nodes no longer fetch a key from
+`ioos-cloud-sandbox`. Its private half is in the Keybase team folder
+`csimagesystem`, with a README, and is copied to a node as a file for a push
+(`scp` through a Session Manager tunnel, so that it is not pasted into a
+session whose input may be logged) and removed with `spack gpg untrust
+--signing` after.
+
 ## R7. The defaults switch
 
 **Decision**: the last task changes `group_vars/all.yml`:
@@ -115,8 +128,9 @@ hold the old defaults (`test_parity.py`'s `spack_site_mirror` case and the
 variable map's comments) change with them, each saying the script's value
 differs and why.
 
-**Rationale**: FR-004. `spack_key_url` keeps pointing at the old bucket's
-public key, which is the same key (R6); reading it changes nothing there.
+**Rationale**: FR-004. The key is no longer fetched (R6, superseded): the
+`spack` role trusts the new key from its own file whether or not the defaults
+have switched.
 
 ## R8. The scripts
 

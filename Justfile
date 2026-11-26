@@ -38,10 +38,10 @@ submodules-init:
 build: (each "build")
 
 # The acceptance tests: the units are checked out, each unit's copies are the original at its baseline plus its patches (owned units excepted), the constitutions agree; lint, type-check and fast tests pass everywhere.
-test: submodules-check export-baselines constitution-check (each "test")
+test: submodules-check export-baselines constitution-check configs-schema-check (each "test")
 
 # Everything in test, plus the slow tests, each unit's lineage from the original, and the sync rehearsal. (Since stage 22's step 0 the lineage check stands where the extraction proof stood: it reads this repository's history, not its originals.)
-full-test: submodules-check export-baselines constitution-check export-lineage sync-rehearse (each "full-test")
+full-test: submodules-check export-baselines constitution-check configs-schema-check export-lineage sync-rehearse (each "full-test")
 
 # Nothing is published from this repository.
 release: full-test
@@ -122,4 +122,8 @@ export-prove name:
 
 # Write sandbox-configs' schema again from cloudflow's code (after a change in what it reads).
 configs-schema:
-    uv run --project exportit/tools python exportit/tools/configs_schema.py --write
+    uv run --project exportit/tools python exportit/tools/configs_copy.py write
+
+# Fail unless csis-sandbox-configs' copies of cloudflow's schema and rules are cloudflow's (spec 005).
+configs-schema-check:
+    uv run --project exportit/tools python exportit/tools/configs_copy.py check

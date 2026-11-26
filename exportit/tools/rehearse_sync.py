@@ -45,6 +45,12 @@ class Scenario:
     change: Callable[[Path], None]
     carried: bool
     says: str
+    arriving: str | None = None
+    """For a change to a moved file: the unit the file moved to, which the sync must change too."""
+    arriving_path: str = ""
+    """And the file's path there, which must hold the upstream change afterwards."""
+    leaving_path: str = ""
+    """And its old path in the unit it left, where it must not come back."""
 
 
 def edit(path: str, how: Callable[[str], str]) -> Callable[[Path], None]:
@@ -79,6 +85,9 @@ def remove(path: str) -> Callable[[Path], None]:
 
 
 AWS = "cloudflow/cluster/AWSCluster.py"
+MOVED = "cloudflow/cluster/lambda_terminate_zombies.py"
+MOVED_LINE = "# A line added upstream to a moved file.\n"
+MOVED_CONFIG = "job.configs/OFS/cbofs.00z.plots"
 IMPORT = "from botocore.exceptions import ClientError\n"
 
 SCENARIOS = [
@@ -128,6 +137,26 @@ SCENARIOS = [
         says="conflict with the unit's own commits in src/cloudflow/cluster/AWSCluster.py",
     ),
     Scenario(
+        "a change to a moved file",
+        "cloudflow",
+        edit(MOVED, lambda text: text + MOVED_LINE),
+        carried=True,
+        says="moved files carried into sandbox-terraform",
+        arriving="sandbox-terraform",
+        arriving_path="reaper/functions/lambda_terminate_zombies.py",
+        leaving_path="src/cloudflow/cluster/lambda_terminate_zombies.py",
+    ),
+    Scenario(
+        "a change to a description moved to cloudflow",
+        "sandbox-configs",
+        edit(MOVED_CONFIG, lambda text: text + MOVED_LINE),
+        carried=True,
+        says="moved files carried into cloudflow",
+        arriving="cloudflow",
+        arriving_path="examples/configs/" + MOVED_CONFIG,
+        leaving_path=MOVED_CONFIG,
+    ),
+    Scenario(
         "a change to the script sandbox-provisioning translates",
         "sandbox-provisioning",
         edit("scripts/setup-instance.sh", lambda text: text + "# A line added upstream.\n"),
@@ -137,8 +166,19 @@ SCENARIOS = [
 ]
 
 
+def clone_unit(sandbox: Path, name: str) -> Path:
+    """Clone a unit's checked-out repository into the sandbox, its checkout standing for its develop."""
+    unit = sandbox / export.EXPORT_DIR / name
+    subprocess.run(["git", "clone", "--quiet", "--no-local", str(EXPORT / name), str(unit)], check=True)
+    git(unit, "remote", "remove", "origin")
+    # The unit as it is checked out here, which may be a feature branch of it,
+    # stands for its develop: that is what a sync starts from.
+    git(unit, "switch", "--quiet", "-C", "develop")
+    return unit
+
+
 def build(work: Path, scenario: Scenario, baseline: str) -> tuple[Path, Path, Path]:
-    """Make the changed original, a sandbox holding the maps, and a clone of the unit."""
+    """Make the changed original, a sandbox holding the maps, and clones of the unit and any arriving one."""
     original = work / "original"
     subprocess.run(
         ["git", "clone", "--quiet", "--shared", "--no-checkout", str(ROOT), str(original)], check=True
@@ -157,15 +197,31 @@ def build(work: Path, scenario: Scenario, baseline: str) -> tuple[Path, Path, Pa
             shutil.copytree(item, sandbox / export.EXPORT_DIR / item.name)
     shutil.copy2(export.manifest_path(ROOT), export.manifest_path(sandbox))
 
-    unit = sandbox / export.EXPORT_DIR / scenario.unit
-    subprocess.run(
-        ["git", "clone", "--quiet", "--no-local", str(EXPORT / scenario.unit), str(unit)], check=True
-    )
-    git(unit, "remote", "remove", "origin")
-    # The unit as it is checked out here, which may be a feature branch of it,
-    # stands for its develop: that is what a sync starts from.
-    git(unit, "switch", "--quiet", "-C", "develop")
+    unit = clone_unit(sandbox, scenario.unit)
+    if scenario.arriving:
+        clone_unit(sandbox, scenario.arriving)
     return original, sandbox, unit
+
+
+def arrived(sandbox: Path, scenario: Scenario) -> list[str]:
+    """Say what is wrong with the unit a moved file's change should have reached."""
+    if not scenario.arriving:
+        return []
+    unit = sandbox / export.EXPORT_DIR / scenario.arriving
+    wrong: list[str] = []
+    if git(unit, "branch", "--show-current") != "feature/sync-r":
+        wrong.append(f"{scenario.arriving} is not on feature/sync-r")
+    if git(unit, "rev-list", "--count", "develop..HEAD") != "1":
+        wrong.append(f"{scenario.arriving} did not get one commit")
+    if "Upstream: " + scenario.title not in git(unit, "log", "-1", "--format=%B"):
+        wrong.append(f"{scenario.arriving}'s commit does not name the upstream commit")
+    if not (unit / scenario.arriving_path).read_text().endswith(MOVED_LINE):
+        wrong.append(f"{scenario.arriving_path} does not hold the upstream change")
+    if (sandbox / export.EXPORT_DIR / scenario.unit / scenario.leaving_path).exists():
+        wrong.append(f"the file came back into {scenario.unit}")
+    if export.baselines(sandbox)[scenario.arriving] != export.baselines(ROOT)[scenario.arriving]:
+        wrong.append(f"moved {scenario.arriving}'s baseline")
+    return wrong
 
 
 def rehearse(scenario: Scenario, baseline: str) -> list[str]:
@@ -202,6 +258,7 @@ def rehearse(scenario: Scenario, baseline: str) -> list[str]:
             moved = export.baselines(sandbox)[scenario.unit]
             if moved != git(original, "rev-parse", "HEAD"):
                 wrong.append("did not move the baseline to the original's HEAD")
+            wrong += arrived(sandbox, scenario)
         else:
             if git(unit, "rev-parse", "HEAD") != before or git(unit, "branch", "--show-current") != "develop":
                 wrong.append("changed the unit although it refused")

@@ -79,7 +79,7 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 
 - [ ] T015 Commit the three units' work on their branches; record the submodules here; run the root `just test` and `just full-test`
 - [ ] T016 On the operator's word only: finish the three units' branches into their `develop` and push; record their commits
-- [ ] T017 **(AWS, asked)** A head node of this spec's own, as spec 001's tasks T017 to T022 (its stages A and B)
+- [ ] T017 **(AWS, asked)** A head node of this spec's own, as spec 001's tasks T017 to T022 (its stages A and B); its `proof.tfvars` sets `provisioning_version` to `csis-sandbox-provisioning` 0.0.5 (spec 009's tag) or a later one, and its record says whether the first boot ended `failed=0`, installed from the RHEL 10 cache, and ran the three `from_mirrors` steps with no prompt (spec 009's FR-007 and SC-004: this node is spec 009's proof on a real node)
 - [ ] T018 Before the playbook: `ls -la --time-style=full-iso /etc/spack` and the sandbox environment's `spack concretize --fresh` output saved
 - [ ] T019 [US1] `ufs-stack.yml` applied; its recap and the time it took recorded
 - [ ] T020 [US1] Applied again: `changed=0` (SC-001)
