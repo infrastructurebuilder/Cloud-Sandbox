@@ -7,7 +7,7 @@ Cloud-Sandbox can now raise its pin for the spack ansible collection to 0.0.3
 and replace its command workaround with `from_mirrors` … Make a spec to do
 that."
 
-**Status**: Draft. **Needs spec 002 merged first**: the workaround it removes
+**Status**: Draft; clarified 2026-11-25. **Needs spec 002 merged first** (done, 2026-11-25): the workaround it removes
 is spec 002's, merged in `csis-sandbox-provisioning` (`2a4980c`), and spec
 002's Cloud-Sandbox branch is not merged yet.
 
@@ -42,6 +42,16 @@ it unchanged.
   checkout can keep the 0.0.2 it has, which satisfies that range, and with
   0.0.2 the `from_mirrors` steps would stop at the prompt again. The floor has
   to say 0.0.3.
+
+## Clarifications
+
+### Session 2026-11-25
+
+- Q: How should spec 009's change be proved on a real head node? → A: the
+  container test now (FR-005), and the proof on spec 004's head node, which
+  needs one anyway: 009 goes before 004 in the build order, and 004's first
+  boot records that the `from_mirrors` steps ran with no prompt (the
+  operator, "C").
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -133,10 +143,13 @@ installed version is 0.0.3.
   replaced it: `csis-sandbox-provisioning`'s comments and tests, and
   Cloud-Sandbox's `exportit/MAP.md` where it names the collection's version or
   the workaround.
-- **FR-007**: A head node's first boot with the change MUST be shown to end
-  `failed=0` and to install from the RHEL 10 cache, on the operator's word for
-  the node, as spec 001's procedure does it; or, if the operator decides the
-  container's FR-005 test is enough, that decision is recorded instead.
+- **FR-007**: This spec builds no head node of its own. The container test of
+  FR-005 is its proof before merging; the proof on a real node is spec 004's
+  head node, the next one built, whose first boot, with this spec's release,
+  MUST end `failed=0`, install from the RHEL 10 cache, and run the three
+  `from_mirrors` steps with no prompt. Spec 004 records it; this spec is
+  complete when it is merged, and its outcome links 004's record once it
+  exists.
 
 ## Success Criteria *(mandatory)*
 
@@ -150,9 +163,9 @@ installed version is 0.0.3.
 - **SC-003**: The container test applies the playbooks twice with the
   `from_mirrors` steps against a mirror that publishes a key, finishes with no
   prompt, and the second apply changes nothing.
-- **SC-004**: A head node's first boot with the change ends `failed=0` and
-  installs the environment from the cache (or the operator's decision not to
-  build one is recorded, FR-007).
+- **SC-004**: Spec 004's head node, the first built with this change, ends its
+  first boot `failed=0`, installs the environment from the cache, and runs the
+  `from_mirrors` steps with no prompt (FR-007).
 
 ## Assumptions
 
@@ -169,6 +182,8 @@ installed version is 0.0.3.
   spec's head node uses; its Cloud-Sandbox branch must be merged before this
   spec's work starts.
 - **The collection's spec 003**, released as 0.0.3 (done, 2026-11-25).
+- **Spec 004 comes after this one**: its head node is this spec's proof on a
+  real node (FR-007).
 
 ## Out of Scope
 
