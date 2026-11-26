@@ -31,10 +31,10 @@ Every spec below is planned and tasked and none is started, so every one is
 | 3 | [005](005-configs-split-by-owner/spec.md) | `csis-sandbox-configs` split: the 23 unreadable repaired or retired, then 51 examples and the schema to cloudflow. **Complete**, 2026-11-23 | 003 (`moved`) | `feature/configs-split-by-owner` | 44 | none |
 | 4 | [001](001-live-proof-on-aws/spec.md) | **The live proof on AWS**: a head node built by 006's first boot, an image, and nothing left behind. **Complete**, 2026-11-24 (run 2026-11-23; [outcome](001-live-proof-on-aws/spec.md#outcome)) | 006 (its first boot) | `feature/live-proof` | 47 | **yes**: a head node in `noaa`, us-east-2, for an afternoon; all of it removed |
 | 5 | [002](002-rhel10-build-cache/spec.md) | A build cache for RHEL 10 in a bucket of its own, pushed by a playbook. **Complete**, 2026-11-25 ([outcome](002-rhel10-build-cache/spec.md#outcome)): the bucket made and kept, 24 packages pushed with a new key, and the defaults install from it since `csis-sandbox-provisioning` 0.0.4 | 001 (`proof/`, the procedure) | `feature/rhel10-build-cache` | 44 | **yes**: a bucket that stays, and a head node |
-| 6 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001 (`proof/`); 002 (the catalogue's `superseded_by` rule) | `feature/spack-stack-ufs-coastal` | 40 | **yes**: a head node of its own |
-| 7 | [007](007-private-playbooks-access/spec.md) | The first boot reads a private playbooks' repository, with a deploy key or a fine-grained token | 006 | `feature/private-playbooks-access` | 30 | only for its last proof, when someone wants a private repository |
-| 8 | [008](008-site-configs-at-first-boot/spec.md) | The first boot puts the site's private descriptions (`csis-sandbox-configs`) on the head node, with spec 007's credential | 006, 007 | `feature/site-configs-at-first-boot` | (not yet tasked) | for its proof, a head node |
-| 9 | [009](009-collection-from-mirrors/spec.md) | The playbooks take the collection's 0.0.3 and its `from_mirrors` again, in place of spec 002's `command` workaround | 002 (merged first) | `feature/collection-from-mirrors` | (not yet tasked) | for its proof, a head node |
+| 6 | [009](009-collection-from-mirrors/spec.md) | The playbooks take the collection's 0.0.3 and its `from_mirrors` again, in place of spec 002's `command` workaround | 002 (merged first); before 004, whose head node proves it | `feature/collection-from-mirrors` | (not yet tasked) | for its proof, a head node |
+| 7 | [004](004-spack-stack-ufs-coastal/spec.md) | spack-stack for UFS Coastal, in place of the broken `add-ufs-setup.sh` | 001 (`proof/`); 002 (the catalogue's `superseded_by` rule); 009 (its proof rides this node) | `feature/spack-stack-ufs-coastal` | 40 | **yes**: a head node of its own |
+| 8 | [007](007-private-playbooks-access/spec.md) | The first boot reads a private playbooks' repository, with a deploy key or a fine-grained token | 006 | `feature/private-playbooks-access` | 30 | only for its last proof, when someone wants a private repository |
+| 9 | [008](008-site-configs-at-first-boot/spec.md) | The first boot puts the site's private descriptions (`csis-sandbox-configs`) on the head node, with spec 007's credential | 006, 007 | `feature/site-configs-at-first-boot` | (not yet tasked) | for its proof, a head node |
 
 **Why this order:**
 
@@ -48,7 +48,10 @@ Every spec below is planned and tasked and none is started, so every one is
 5. **002, then 004**: each builds a head node as 001 does; 004 also uses the
    catalogue rule 002 adds to `csis-sandbox-ops`. If spec 002's cache is in
    place by 004, the sandbox's own build on 004's node is shorter.
-6. **007 last**: nothing needs it while the playbooks' repository is public;
+6. **009, then 004** (009's clarification, 2026-11-25): 009 goes back to the
+   collection's `from_mirrors` and builds no head node; 004's head node, the
+   next built, proves it on a real node.
+7. **007 last**: nothing needs it while the playbooks' repository is public;
    its code can be built any time after 006, its AWS proof when a private
    repository is wanted.
 

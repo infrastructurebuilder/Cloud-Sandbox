@@ -164,6 +164,11 @@ point where it has found its dependencies.
   node (FR-007).
 - Spec 002 leaves the two spack-stack push scripts to this spec, which leaves
   them as they are for a later spec on spack-stack's cache (FR-005).
+- Spec 009 (2026-11-25, its clarification), merged first: this spec's head
+  node is the first built with 009's change, and its first boot is 009's proof
+  on a real node; the record of that first boot says whether it ended
+  `failed=0`, installed from the RHEL 10 cache, and ran the `from_mirrors`
+  steps with no prompt.
 
 ## Out of Scope
 
