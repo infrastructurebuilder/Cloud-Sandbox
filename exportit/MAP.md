@@ -983,7 +983,7 @@ The detail, with the scripts that do each step, is in each `UNIT.md`.
 | nosofs | GitHub `asascience-open/NOSOFS-Code-Package` (`v3.6.6.dev`); fixed fields from `ioos-sandbox-use2` or NCO `nwprod` | its own module file: as eccofs, plus parallel-netcdf and ParallelIO | `/save/$USER/nosofs.v3.6.6` |
 | secofs | GitHub `jduckerOWP/schism` (`v5.13.0_NOS_Sandbox`); inputs from `ioos-sandbox-use2`, and from VIMS with a password | its own module file: Intel 2024.2.1, MKL, Intel MPI 2021.13 under `intel/...` names that Spack does not make, netcdf-fortran 4.6.2 | `/save/$USER/schism` |
 | ucla-roms | GitHub `CESR-lab/ucla-roms`, default branch | Spack modules loaded in the scripts: oneAPI 2023.1, Intel MPI 2021.9.0, compression libraries, NetCDF | `/save/$USER/ucla-roms` |
-| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack from `sandbox-provisioning`'s `ufs-stack.yml` (since 0.0.6, spec 004): the fork at `406b090aa4`, in `/save/environments/spack-stack-<commit>`; no GCC toolset | `/save/$USER/ufs-weather-model` |
+| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack from `sandbox-provisioning`'s `ufs-stack.yml` (since 0.0.6, spec 004; 0.0.7 builds it): the fork at `406b090aa4`, in `/save/environments/spack-stack-<commit>`; no GCC toolset | `/save/$USER/ufs-weather-model` |
 
 Three recipes follow a branch head (`ucla-roms`, `ufscoastal`,
 `liveocean`'s five repositories), so two builds a month apart need not
