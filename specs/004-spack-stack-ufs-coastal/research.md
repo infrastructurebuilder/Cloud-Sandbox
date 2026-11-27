@@ -77,12 +77,16 @@ replaces:
 | `config` | the three settings the script added, into the environment's scope | three `spack config add` |
 | `command` | `spack add sp` (unless present) | the same |
 
-then `spack_env` for the environment (`concretize`, `install`,
-`refresh_modules: when_needed`), then a `command` step for `spack stack
-setup-meta-modules` (`creates:` its `Core` directory).
+then `spack_env` for the environment (`concretize`, `install`), then
+`command` steps for `spack module tcl refresh -y --delete-tree` and `spack
+stack setup-meta-modules`, both `creates:` the meta-modules' `Core`
+directory, which the play removes when `spack_env` changed something.
+(Amended 2026-11-27, T020: it said `spack_env` with `refresh_modules:
+when_needed`, which regenerated the module files on every run and deleted
+the meta-modules.)
 
 **Rationale**: FR-003; idempotence comes from the modules (`spack_env`
-installs only what is missing; `creates:` guards the two commands), so the
+installs only what is missing; `creates:` guards the commands), so the
 second apply changes nothing (SC-001).
 
 ## R4. Scopes

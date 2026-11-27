@@ -72,6 +72,19 @@ sandbox's oneAPI 2024.2.1 at `/opt/intel/oneapi` and a template
   its template `ioos-ufscoastal` (the operator, 2026-11-26), in place of
   JCSDA 2.1.1's `linux.default` and `unified-dev`.
 
+### Session 2026-11-27
+
+- Q: T020 found that a second apply changes something: `spack_env`'s refresh
+  `when_needed` regenerated the module files with `--delete-tree` on every
+  run, deleting the meta-modules (the collection's `spack_env` does not
+  expand `$env` in spack-stack's module root, and `setup-meta-modules`
+  rewrites the Tcl module files, so the refresh could not settle). How should
+  the module files be made? → A: with the meta-modules, as two `command`
+  steps guarded by the meta-modules' directory, which the play removes
+  whenever `spack_env` concretized or installed something; FR-003 is amended,
+  and the collection's bug gets a spec of its own in
+  `ansible-collection-csis-spack`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - spack-stack built on a head node by a playbook (Priority: P1)
@@ -138,8 +151,11 @@ point where it has found its dependencies.
   spack-stack's `setup.sh` and the Intel modules, `command` steps for `spack
   stack create env` and `spack stack setup-meta-modules`, `detect` steps for its
   externals, a `config` step for its settings), each step naming the script's
-  line it replaces; then `spack_env` for the environment it creates, with
-  `refresh_modules: when_needed`.
+  line it replaces; then `spack_env` for the environment it creates, which
+  concretizes and installs it; then `command` steps for `spack module tcl
+  refresh` and `spack stack setup-meta-modules`, made again whenever
+  `spack_env` concretized or installed something (amended 2026-11-27, see
+  Clarifications: it named `spack_env`'s `refresh_modules: when_needed`).
 - **FR-004**: The playbook's `detect` and `config` steps MUST write to the
   environment's own scope and the site scope of spack-stack's Spack, never to
   the `system` scope (`/etc/spack`), which the sandbox's own Spack shares. The
