@@ -5,9 +5,10 @@ taken up
 
 **Created**: 2026-11-14, as stage 18; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
-spec 001's module and procedure** for its own head node: a real build takes
-hours.
+**Status**: Planned and tasked 2026-11-21; tasks corrected by the analysis of
+2026-11-26; in progress since 2026-11-26. Specs 001, 002 and 009 merged: this
+spec's head node is built with spec 001's module and procedure, and is spec
+009's proof on a real node. A real build of spack-stack takes hours.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -52,6 +53,24 @@ setup-meta-modules`.
 - Q: What head node should `ufs-stack.yml` be proved on? → A: one of its own,
   built with spec 001's module and procedure, removed at the end, each step
   asked first (spec 001 removes its own node, so that one is not there).
+
+### Session 2026-11-26
+
+FR-001's first task found: JCSDA's latest stable release is 2.1.1
+(2026-07-18; 2.2.0 is a pre-release), stating no RHEL 10 support; UFS
+Coastal's repository (`asascience-open/ufs-weather-model`) names spack-stack
+1.6.0 at its one tag, `v1.0.0b01`, and 1.9.2 on its active branch, as
+upstream's `develop` does, none of them on Spack 1.x; and the fork
+`asascience-open/spack-stack` has, on its branch `aws-rhel10`, commit
+`406b090aa4828fb7be840eea33c83963d88ac84e` (2026-10-05, "ufs weather app -
+coastal", on JCSDA's 2.1.0), adding a site `aws-rhel10` that declares this
+sandbox's oneAPI 2024.2.1 at `/opt/intel/oneapi` and a template
+`ioos-ufscoastal` that builds `ufs-weather-model-env` alone.
+
+- Q: Which spack-stack should the playbook build? → A: the fork at commit
+  `406b090aa4828fb7be840eea33c83963d88ac84e`, with its site `aws-rhel10` and
+  its template `ioos-ufscoastal` (the operator, 2026-11-26), in place of
+  JCSDA 2.1.1's `linux.default` and `unified-dev`.
 
 ## User Scenarios & Testing *(mandatory)*
 

@@ -4,15 +4,15 @@
 
 | Variable | Default | Notes |
 | --- | --- | --- |
-| `ufs_stack_repo` | `https://github.com/JCSDA/spack-stack.git` | the fork's URL if FR-001 falls back |
-| `ufs_stack_version` | the release chosen by R1 (a tag), or the operator's commit | never a branch (FR-001) |
+| `ufs_stack_repo` | `https://github.com/asascience-open/spack-stack.git` | the fork (FR-001; the operator's choice, 2026-11-26) |
+| `ufs_stack_version` | `406b090aa4828fb7be840eea33c83963d88ac84e` | the operator's commit; never a branch (FR-001) |
 | `ufs_stack_dir` | `/save/environments/spack-stack-{{ ufs_stack_version }}` | the clone |
 | `ufs_stack_env_name` | `aws-ioossb-rhel10` | |
-| `ufs_stack_site` | `linux.default` | |
-| `ufs_stack_template` | `unified-dev` | |
+| `ufs_stack_site` | `aws-rhel10` | the fork's site for this sandbox |
+| `ufs_stack_template` | `ioos-ufscoastal` | the fork's template: `ufs-weather-model-env` and its pins |
 | `ufs_stack_compiler` | `oneapi` | FR-002 |
 | `ufs_stack_install` | `true` | `false` stops after concretizing (the container, R6) |
-| `ufs_stack_setup` | the list of R3 | each step's `replaces:` names the legacy line |
+| `ufs_stack_setup` | the list of R3 | each step names the legacy line it replaces in a `# Replaces <file> L<n>` comment above it, held by `tests/test_traceability.py`; no `replaces:` key, which the collection's `setup` role refuses |
 
 ## The choice of FR-001, recorded
 

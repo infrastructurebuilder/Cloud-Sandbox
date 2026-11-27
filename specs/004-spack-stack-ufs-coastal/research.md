@@ -29,6 +29,27 @@ Sources: [spack-stack releases](https://github.com/JCSDA/spack-stack/releases);
 **Alternatives considered**: the fork first (its changes are undescribed);
 the `develop` branch (not a release; FR-001 names a tag or a commit).
 
+**Found, and decided, 2026-11-26 (T003)**: JCSDA's releases: 2.1.1 the latest
+stable (tag `2.1.1`, 2026-07-18), 2.2.0 a pre-release (2026-10-30), 2.1.0,
+2.0.0; none states RHEL 10. UFS Coastal's repository,
+`asascience-open/ufs-weather-model`, names spack-stack 1.6.0 in its module
+files at its one tag (`v1.0.0b01`, 2025-03-27) and 1.9.2 on its active branch
+`feature/coastal_app` (2026-10-07), as upstream's `develop` does; neither is
+on Spack 1.x, so (1) names no candidate. The fork `asascience-open/spack-stack`
+has, on its branch `aws-rhel10`, commit
+`406b090aa4828fb7be840eea33c83963d88ac84e` (2026-10-05, on JCSDA's 2.1.0: one
+commit ahead, seven behind 2.1.1), which adds a site `aws-rhel10`
+(`modules.yaml`, and `packages_oneapi.yaml` declaring oneAPI 2024.2.1 at
+`/opt/intel/oneapi` with this sandbox's module names) and a template
+`ioos-ufscoastal` (`ufs-weather-model-env ^esmf@=8.8.0 ^crtm@=3.1.3`,
+`crtm@3.1.3`, `mapl@2.53.4 ^esmf@8.8.0`, `esmf@=8.8.0`, and fewer besides).
+Its submodules are JCSDA's Spack and packages at `spack-stack-2.1.0`. **The
+operator chose the fork at that commit, with its site and template** (spec's
+session 2026-11-26): made for this sandbox and for UFS Coastal, and far
+smaller than `unified-dev`. A finding for SC-003: UFS Coastal's own module
+files name spack-stack 1.9.2's versions, which T014 and T023 bring to what
+this environment holds.
+
 ## R2. Where it is installed
 
 **Decision**: `/save/environments/spack-stack-<version>/` (the clone, with

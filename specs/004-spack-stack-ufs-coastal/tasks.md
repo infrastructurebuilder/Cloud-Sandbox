@@ -32,15 +32,19 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 
 ## Phase 1: Setup
 
-- [ ] T001 Start `feature/spack-stack-ufs-coastal` with git-flow in `exportit/sandbox-provisioning/`, `exportit/model-ufscoastal/` and `exportit/sandbox-ops/` from their `develop`, each clean and level with its origin
-- [ ] T002 Run `just init` in the three units and the root `just test`
-- [ ] T041 Before any other work, correct the design documents to what the analysis of 2026-11-26 found (I1, A1): in `specs/004-spack-stack-ufs-coastal/data-model.md` (the `ufs_stack_setup` row), `plan.md` (Technical Context's Testing line) and `quickstart.md` (step 1's comment), each step of `ufs_stack_setup` names the legacy line it replaces with a `# Replaces <file> L<n>` comment above it, held by `tests/test_traceability.py`, not with a `replaces:` key, which the collection's `setup` role refuses as an option no step kind has; and `spec.md`'s **Status** says it was planned and tasked on 2026-11-21, not that it is ready for `/speckit-plan`
+- [X] T001 Start `feature/spack-stack-ufs-coastal` with git-flow in `exportit/sandbox-provisioning/`, `exportit/model-ufscoastal/` and `exportit/sandbox-ops/` from their `develop`, each clean and level with its origin
+  - Done 2026-11-26: `feature/spack-stack-ufs-coastal` started with git-flow in `csis-sandbox-provisioning` (from `dbc46a2`, 0.0.5), `csis-model-ufscoastal` (`07d88fd`) and `csis-sandbox-ops` (`f9b64fe`), each clean and level with its origin; Cloud-Sandbox's branch of that name level with `develop`.
+- [X] T002 Run `just init` in the three units and the root `just test`
+  - Done 2026-11-26: `just init` in the three units; the root `just test` had passed on this tree (`develop` `37c5d9f`) that day.
+- [X] T041 Before any other work, correct the design documents to what the analysis of 2026-11-26 found (I1, A1): in `specs/004-spack-stack-ufs-coastal/data-model.md` (the `ufs_stack_setup` row), `plan.md` (Technical Context's Testing line) and `quickstart.md` (step 1's comment), each step of `ufs_stack_setup` names the legacy line it replaces with a `# Replaces <file> L<n>` comment above it, held by `tests/test_traceability.py`, not with a `replaces:` key, which the collection's `setup` role refuses as an option no step kind has; and `spec.md`'s **Status** says it was planned and tasked on 2026-11-21, not that it is ready for `/speckit-plan`
+  - Done 2026-11-26: `data-model.md`'s `ufs_stack_setup` row, `plan.md`'s Testing line and `quickstart.md`'s step 1 say `# Replaces` comments held by `tests/test_traceability.py`, not a `replaces:` key; `spec.md`'s status says planned, tasked, corrected and in progress. `research.md` R3's prose ("each step naming the line … it replaces") was right and stays.
 
 ---
 
 ## Phase 2: Foundational (which spack-stack, FR-001)
 
-- [ ] T003 Find the spack-stack version UFS Coastal's current tag names, if any (its documentation and its `ufs-weather-model` submodule's), and the supported platforms in the release notes of JCSDA's latest 2.1.x and of 2.0.0; record both under research R1 in `specs/004-spack-stack-ufs-coastal/research.md`
+- [X] T003 Find the spack-stack version UFS Coastal's current tag names, if any (its documentation and its `ufs-weather-model` submodule's), and the supported platforms in the release notes of JCSDA's latest 2.1.x and of 2.0.0; record both under research R1 in `specs/004-spack-stack-ufs-coastal/research.md`
+  - Done 2026-11-26, recorded under research R1: JCSDA's latest stable release 2.1.1 (2.2.0 a pre-release), none stating RHEL 10; UFS Coastal's repository (`asascience-open/ufs-weather-model`) names spack-stack 1.6.0 at its tag `v1.0.0b01` and 1.9.2 on its active branch, as upstream's `develop`, none on Spack 1.x; the fork `asascience-open/spack-stack`'s commit `406b090aa4828fb7be840eea33c83963d88ac84e` (branch `aws-rhel10`, on JCSDA 2.1.0) adds a site `aws-rhel10` for this sandbox's oneAPI and a template `ioos-ufscoastal`. **The operator chose the fork at that commit, with that site and template** (spec's clarification of 2026-11-26), so FR-001's choice is made before T004: T004 checks that it concretizes.
 - [ ] T004 Write the playbook's variables ([data-model.md](data-model.md)) with `ufs_stack_version` set to the candidate T003 points to, and the R6 container run (T009) with `ufs_stack_install: false`, and run it: if the candidate concretizes on the container, record it as FR-001's choice ([data-model.md](data-model.md)'s record); if not, the next candidate; if none does, **stop and ask the operator** for a commit of `asascience-open/spack-stack`, and record the answer
 
 **Checkpoint**: the release is chosen and recorded, or the operator has named the fork's commit.
