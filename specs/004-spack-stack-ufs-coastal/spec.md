@@ -5,9 +5,10 @@ taken up
 
 **Created**: 2026-11-14, as stage 18; carried into this spec 2026-11-19
 
-**Status**: Draft. Clarified 2026-11-21; ready for `/speckit-plan`. **Needs
-spec 001's module and procedure** for its own head node: a real build takes
-hours.
+**Status**: Planned and tasked 2026-11-21; tasks corrected by the analysis of
+2026-11-26; in progress since 2026-11-26. Specs 001, 002 and 009 merged: this
+spec's head node is built with spec 001's module and procedure, and is spec
+009's proof on a real node. A real build of spack-stack takes hours.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -52,6 +53,37 @@ setup-meta-modules`.
 - Q: What head node should `ufs-stack.yml` be proved on? → A: one of its own,
   built with spec 001's module and procedure, removed at the end, each step
   asked first (spec 001 removes its own node, so that one is not there).
+
+### Session 2026-11-26
+
+FR-001's first task found: JCSDA's latest stable release is 2.1.1
+(2026-07-18; 2.2.0 is a pre-release), stating no RHEL 10 support; UFS
+Coastal's repository (`asascience-open/ufs-weather-model`) names spack-stack
+1.6.0 at its one tag, `v1.0.0b01`, and 1.9.2 on its active branch, as
+upstream's `develop` does, none of them on Spack 1.x; and the fork
+`asascience-open/spack-stack` has, on its branch `aws-rhel10`, commit
+`406b090aa4828fb7be840eea33c83963d88ac84e` (2026-10-05, "ufs weather app -
+coastal", on JCSDA's 2.1.0), adding a site `aws-rhel10` that declares this
+sandbox's oneAPI 2024.2.1 at `/opt/intel/oneapi` and a template
+`ioos-ufscoastal` that builds `ufs-weather-model-env` alone.
+
+- Q: Which spack-stack should the playbook build? → A: the fork at commit
+  `406b090aa4828fb7be840eea33c83963d88ac84e`, with its site `aws-rhel10` and
+  its template `ioos-ufscoastal` (the operator, 2026-11-26), in place of
+  JCSDA 2.1.1's `linux.default` and `unified-dev`.
+
+### Session 2026-11-27
+
+- Q: T020 found that a second apply changes something: `spack_env`'s refresh
+  `when_needed` regenerated the module files with `--delete-tree` on every
+  run, deleting the meta-modules (the collection's `spack_env` does not
+  expand `$env` in spack-stack's module root, and `setup-meta-modules`
+  rewrites the Tcl module files, so the refresh could not settle). How should
+  the module files be made? → A: with the meta-modules, as two `command`
+  steps guarded by the meta-modules' directory, which the play removes
+  whenever `spack_env` concretized or installed something; FR-003 is amended,
+  and the collection's bug gets a spec of its own in
+  `ansible-collection-csis-spack`.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -119,8 +151,11 @@ point where it has found its dependencies.
   spack-stack's `setup.sh` and the Intel modules, `command` steps for `spack
   stack create env` and `spack stack setup-meta-modules`, `detect` steps for its
   externals, a `config` step for its settings), each step naming the script's
-  line it replaces; then `spack_env` for the environment it creates, with
-  `refresh_modules: when_needed`.
+  line it replaces; then `spack_env` for the environment it creates, which
+  concretizes and installs it; then `command` steps for `spack module tcl
+  refresh` and `spack stack setup-meta-modules`, made again whenever
+  `spack_env` concretized or installed something (amended 2026-11-27, see
+  Clarifications: it named `spack_env`'s `refresh_modules: when_needed`).
 - **FR-004**: The playbook's `detect` and `config` steps MUST write to the
   environment's own scope and the site scope of spack-stack's Spack, never to
   the `system` scope (`/etc/spack`), which the sandbox's own Spack shares. The

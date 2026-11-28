@@ -3,7 +3,7 @@
 ## 1. Without AWS (your local machine)
 
 ```sh
-cd exportit/sandbox-provisioning && just test        # syntax, lint, the steps' replaces: lines
+cd exportit/sandbox-provisioning && just test        # syntax, lint, the steps' # Replaces comments
 just full-test                                     # + the container concretizes ufs-stack.yml
 cd ../model-ufscoastal && just test                # setup.sh's shellcheck as recorded
 cd ../sandbox-ops && just test                     # the catalogue

@@ -28,7 +28,7 @@ oneAPI from the `intel_oneapi` role; RHEL 10's GCC 14
 
 **Storage**: the EFS volume, `/save/environments/`
 
-**Testing**: Ansible syntax and lint, and the steps' `replaces:` lines, in
+**Testing**: Ansible syntax and lint, and the steps' `# Replaces` comments (`tests/test_traceability.py`), in
 `just test`; the container concretization in `just full-test`; the build on a
 head node
 

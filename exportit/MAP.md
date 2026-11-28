@@ -983,7 +983,7 @@ The detail, with the scripts that do each step, is in each `UNIT.md`.
 | nosofs | GitHub `asascience-open/NOSOFS-Code-Package` (`v3.6.6.dev`); fixed fields from `ioos-sandbox-use2` or NCO `nwprod` | its own module file: as eccofs, plus parallel-netcdf and ParallelIO | `/save/$USER/nosofs.v3.6.6` |
 | secofs | GitHub `jduckerOWP/schism` (`v5.13.0_NOS_Sandbox`); inputs from `ioos-sandbox-use2`, and from VIMS with a password | its own module file: Intel 2024.2.1, MKL, Intel MPI 2021.13 under `intel/...` names that Spack does not make, netcdf-fortran 4.6.2 | `/save/$USER/schism` |
 | ucla-roms | GitHub `CESR-lab/ucla-roms`, default branch | Spack modules loaded in the scripts: oneAPI 2023.1, Intel MPI 2021.9.0, compression libraries, NetCDF | `/save/$USER/ucla-roms` |
-| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack 2.0 in `/save/environments/spack-stack.v2.0`; `gcc-toolset-13` | `/save/$USER/ufs-weather-model` |
+| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack from `sandbox-provisioning`'s `ufs-stack.yml` (since 0.0.6, spec 004; 0.0.10 builds it, settles, and UFS Coastal builds against it): the fork at `406b090aa4`, in `/save/environments/spack-stack-<commit>`; no GCC toolset | `/save/$USER/ufs-weather-model` |
 
 Three recipes follow a branch head (`ucla-roms`, `ufscoastal`,
 `liveocean`'s five repositories), so two builds a month apart need not
@@ -1370,7 +1370,11 @@ above its task:
 - **`add-ufs-setup.sh` calls `install_gcc_toolset_yum` (L27)**, which
   `funcs-setup-instance.sh` no longer defines, so the UFS add-on fails as
   written. `models/ufscoastal/README` still points to
-  `ufs-setup-instance.sh`, which is superseded.
+  `ufs-setup-instance.sh`, which is superseded. Since spec 004 (2026-11-27)
+  both are replaced: `sandbox-provisioning` 0.0.6's `ufs-stack.yml` builds
+  spack-stack, `add-ufs-setup.sh` and `ufs-envars.sh` are marked replaced by
+  it (they stay, in use), and `model-ufscoastal`'s README, `setup.sh` and
+  module files point at the new stack.
 - **The mirror tools carry RHEL 8 versions:** `spack-update-mirror.sh`
   lists gcc 11.2.1 and oneAPI 2023.1.0; `ufs-envars.sh` names Spack
   v0.22.5 and `linux-rhel8`. Since spec 002, `spack-update-mirror.sh` is
