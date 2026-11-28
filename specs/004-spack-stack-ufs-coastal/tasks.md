@@ -122,18 +122,18 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 
 - [ ] T026 [P] In `exportit/MAP.md`, the `sandbox-provisioning` and `model-ufscoastal` sections: `ufs-stack.yml`, the release, UFS Coastal's files
 - [ ] T027 [P] In `specs/README.md`, set 004's state
-- [ ] T028 [P] In `specs/004-spack-stack-ufs-coastal/spec.md`, an **Outcome** section: the release (or the fork's commit) and why, the build's time, the four criteria's evidence, any finding (the `ar` failure among them, if it came back)
+- [ ] T028 [P] In `specs/004-spack-stack-ufs-coastal/spec.md`, an **Outcome** section: the fork's commit and why (no JCSDA release fits); the releases that carry the work (T045); the build's time (about two hours by hand, 1 h 41 min from 0.0.8); the four criteria's evidence (T020 to T023) and that the model also built; and every finding, each with its fix and the release or spec that carries it: the account's patch scan taking dnf's downloads (`csis-sandbox-provisioning`'s spec 001), the Intel module files' `®` (0.0.7), RHEL 10's Perl without `FindBin` and the missed `install_spack-stack_prereqs` (0.0.8), zlib's static library (0.0.8), `spack_env`'s `$env` module root and the refresh that could not settle (0.0.9; the collection's spec 014), the stack's MPI module without `I_MPI_ROOT` (0.0.10), the 74 packages rebuilt when new system packages gave Spack more externals, check mode's false report on a built node (the collection's spec 014, FR-007), `setup.sh`'s module path (`csis-model-ufscoastal` `e6db006`), and that the `ar` failure did not come back; say that the fork itself is unchanged, its site's Intel entries overridden in the environment's own `site/` scope (Edge Cases); and bring the spec's **Status** line to the state of the day
 - [ ] T029 [P] For each finding, a line in `exportit/REMINDERS.md`
 - [ ] T030 Commit the units' last changes; record the submodules; `just constitution-check`
 - [ ] T031 Run the root `just test`
 - [ ] T032 Run the root `just full-test`
-- [ ] T033 Re-read [quickstart.md](quickstart.md) against what was run; correct it if a step differed
+- [ ] T033 Re-read [quickstart.md](quickstart.md) against what was run; correct it if a step differed: section 2 names the release the node's checkout must be on (`csis-sandbox-provisioning` 0.0.10 or later; 0.0.6 to 0.0.9 do not build on a head node), that the first apply builds for hours (about two), and that `just full-test` takes about an hour and a half; the evidence of each step is T017 to T025's records, the hand-run build (T019) among them. One pass serves T037 too
 - [ ] T034 [P] In `exportit/sandbox-provisioning/docs/`, a short page on building spack-stack (when, how long, the release, the scopes), linked from the playbook's header
 - [ ] T035 Check that nothing of `add-ufs-setup.sh` is still called by anything in any unit (`git grep` across `exportit/*`); record the result
-- [ ] T036 Run `/speckit-converge` on `specs/004-spack-stack-ufs-coastal/`; record that it appended nothing, or carry out what it appended (done condition 2)
+- [ ] T036 Run `/speckit-converge` on `specs/004-spack-stack-ufs-coastal/`; record that it appended nothing, or carry out what it appended (done condition 2). Its first run, 2026-11-28, appended T042 to T047 (Phase 7); record that here, and that T048 runs it again after them
 - [ ] T037 Walk `specs/004-spack-stack-ufs-coastal/quickstart.md`, each step's evidence from the tasks above (done condition 3)
 - [ ] T038 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
-- [ ] T039 Record the release: `csis-sandbox-provisioning` `0.0.6`, cut on the operator's word at T016; no other release applies unless the operator asks (done condition 5)
+- [ ] T039 Record the release: `csis-sandbox-provisioning` `0.0.6`, cut on the operator's word at T016; no other release applies unless the operator asks (done condition 5). Superseded by T045, which records all five releases and the decision on a sixth: check this task when T045 is, with a line pointing to it
 - [ ] T040 Mark the spec **complete**, with the date, only when T001 to T039 are checked (done conditions 1 and 6)
 
 ---
@@ -146,6 +146,7 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 - **US2 files (T012 to T014)**: after T004 (the release fixes the paths and versions).
 - **The proof (Phase 5)**: after T016; T017 to T025 in order.
 - **Polish**: after the proof; T036 to T040 in order.
+- **Convergence (Phase 7)**: T042 to T047 after T036's first run; T031 and T032, the root acceptance tests, are run (or run again) after T042 to T047 and T034, so that they test the units as they will be merged; T048 after all of them; T037, T038 and T040 after T048; T046 after T034, whose page it adds to.
 
 ### Parallel Opportunities
 
@@ -172,6 +173,12 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 - [ ] T042 In `exportit/model-ufscoastal/README`, name `csis-sandbox-provisioning` 0.0.10 as the release from which `ufs-stack.yml` builds spack-stack (0.0.6 to 0.0.9 do not, on a head node), in that unit on a branch, with its `just test` per FR-006 (partial)
 - [ ] T043 In `exportit/sandbox-provisioning/ufs-stack.yml`'s header, record that the playbook takes the sandbox's versions (`group_vars/all.yml`: oneAPI 2024.2.1, MPI 2021.13, RHEL 10's GCC 14), not `ufs-envars.sh`'s (MPI 2021.16.0, ESMF 8.5.0, GCC 13.3.1, Spack v0.22.5), and why; and a test in `tests/test_ufs_stack.py` holding it, per FR-005 and Constitution I (partial)
 - [ ] T044 Bring `specs/004-spack-stack-ufs-coastal/data-model.md` to the playbook as 0.0.10 has it: `ufs_stack_env_site_scope`, `ufs_stack_intel_externals`, `ufs_stack_tbb_version`, `ufs_stack_system_packages`, `ufs_stack_meta_modules_dir`; `ufs_stack_after_install` as the module files and the meta-modules; the meta-modules at `envs/aws-ioossb-rhel10/modules/Core`, per plan: data-model (partial)
-- [ ] T045 Record the releases that carry the spec's work, `csis-sandbox-provisioning` 0.0.6, 0.0.7, 0.0.8, 0.0.9 and 0.0.10, each cut on the operator's word, in T039's place and in `specs/README.md`'s Released in, per T039 (contradicts)
+- [ ] T045 Record the releases that carry the spec's work, `csis-sandbox-provisioning` 0.0.6, 0.0.7, 0.0.8, 0.0.9 and 0.0.10, each cut on the operator's word, in T039's place and in `specs/README.md`'s Released in, per T039 (contradicts). T034 and T043 change `csis-sandbox-provisioning` after 0.0.10: **ask the operator** whether they are released as 0.0.11 (tagged, pushed and named in `csis-cloud-sandbox`'s `units.toml`, `just test` green) or carried unreleased on `develop` until the next release, and record the answer and why (constitution, done condition 5)
 - [ ] T046 In `specs/004-spack-stack-ufs-coastal/contracts/ufs-stack-playbook.md` and T034's page, say that check mode on a built head node reports changes it would not make (the collection's `spack_env` previews a copy whose `$env/install` is empty; `ansible-collection-csis-spack`'s spec 014, FR-007), per contract: check mode (partial)
 - [ ] T047 In `exportit/model-ufscoastal/modulefiles/ufs_ioossb.intel`, the old file naming the RHEL 8 `spack-stack.v2.0`: point it at the new stack as `tcl/ufs_ioossb.intel.tcl` does, or say in it that nothing loads it, per FR-006 and SC-003 (unrequested)
+
+## Phase 8: Corrections from the analysis of 2026-11-28
+
+- [ ] T048 After T042 to T047, T049 and T050, run `/speckit-converge` on `specs/004-spack-stack-ufs-coastal/` again; record that it appended nothing, or carry out what it appended and run it again; set 004's Converged mark and Last converge check in `specs/README.md` from the result (done condition 2)
+- [ ] T049 In `specs/004-spack-stack-ufs-coastal/plan.md`, a dated amendment note in its Summary and its Order of the work: what was built is the fork `asascience-open/spack-stack` at `406b090aa4` with its `aws-rhel10` site and `ioos-ufscoastal` template (the clarification of 2026-11-26), not a JCSDA 2.1.x or 2.0.0 release with `unified-dev`; the variables are in the playbook's `vars`, not `group_vars/ufs_stack.yml`; the module files are made with the meta-modules (FR-003, amended 2026-11-27); and the five releases it took (T045)
+- [ ] T050 In `specs/004-spack-stack-ufs-coastal/research.md`, a dated amendment to R1's decision (the fork at `406b090aa4`, chosen by the operator on 2026-11-26 when no JCSDA release fitted; T004's concretization) and to R3's table row for `spack stack create env` (`--site aws-rhel10 --template ioos-ufscoastal`), leaving what was weighed as it was
