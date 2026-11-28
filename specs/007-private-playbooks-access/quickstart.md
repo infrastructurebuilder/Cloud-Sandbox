@@ -22,7 +22,15 @@ Expected, from `tests/access.tftest.hcl` (mocked providers) and
 ## 2. On AWS, when someone wants a private repository (not part of `just`)
 
 Needs a private copy of the playbooks' repository, made on the operator's
-word and removed after, and a head node built as spec 001 builds one.
+word and removed after, and a head node built as spec 001 builds one. This
+step is the only proof of SC-002 and SC-004; until it runs the spec stays
+**merged** (`exportit/REMINDERS.md` says so).
+
+A first boot that fails one minute in, at `base_system`'s package update, with
+a downloaded RPM missing from dnf's cache, is the noaa account's patch scan
+running `dnf clean all` (spec 004's T017; `csis-sandbox-provisioning`'s spec 001
+is to make the update retry), not this spec's: replace the node as
+`csis-sandbox-provisioning`'s `docs/LIVE-PROOF.md` box B2 says, and go on.
 
 1. Make the credential (the deploy key or the token,
    [data-model.md](data-model.md)) and put it in a new secret with the

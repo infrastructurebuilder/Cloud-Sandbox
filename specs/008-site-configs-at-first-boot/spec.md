@@ -109,6 +109,13 @@ carries the note of FR-006.
 - The descriptions' `CONFIGTMPL` paths name the old checkout's
   `Cloud-Sandbox/cloudflow/…`: spec 006's link serves them; the place chosen
   here must not break it.
+- A head node booted on an EFS volume an earlier node used (added by the
+  analysis of 2026-11-28; spec 001's open reminder about `/save` on a kept
+  volume is the same pattern): `/save/$RUNUSER/sandbox-configs` may be there
+  already. A clone of the configs repository at `configs_version` is kept as
+  it is, and the links are made again; a clone at another tag, or anything
+  else at that path, stops the first boot before the plays, naming the path
+  and what it found. Nothing on the volume is overwritten (FR-002).
 
 ## Requirements *(mandatory)*
 
@@ -126,7 +133,9 @@ carries the note of FR-006.
   cloudflow's git status; and in `/save/$RUNUSER/Cloud-Sandbox/`, beside spec
   006's `cloudflow` link, for the old absolute paths. A test MUST show a
   program opening `../job.configs/…` from the cloudflow link reaching the
-  site's file.
+  site's file. On a volume that already holds that directory, the first boot
+  MUST keep a clone at the tag and stop on anything else, as the Edge Cases
+  say.
 - **FR-003**: The clone MUST use a read-only deploy key on the configs
   repository, its private half in a Secrets Manager secret of its own, named to
   the module (`configs_secret_arn`), read, used and removed as spec 007's
@@ -172,7 +181,9 @@ carries the note of FR-006.
 
 - **The site's descriptions**: `csis-sandbox-configs`' `job.configs/` and
   `cluster.configs/`, at a tag.
-- **The credential**: spec 007's deploy key or token, kept in Secrets Manager.
+- **The credential**: a read-only deploy key on `csis-sandbox-configs`, its
+  private half in a Secrets Manager secret of its own (`configs_secret_arn`),
+  separate from spec 007's credential for the playbooks' repository (FR-003).
 
 ## Success Criteria *(mandatory)*
 

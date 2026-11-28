@@ -116,7 +116,7 @@ Paths are from the Cloud-Sandbox root; `csis-sandbox-terraform` is
 - [ ] T024 Commit `csis-sandbox-terraform`'s work on its branch; record the submodule here; run `just constitution-check`
 - [ ] T025 Run the root `just test` and `just full-test`
 - [ ] T026 Run `/speckit-converge` on `specs/007-private-playbooks-access/`; record that it appended nothing, or carry out what it appended (done condition 2)
-- [ ] T027 Walk `specs/007-private-playbooks-access/quickstart.md`'s step 1, recording each command and result; record that step 2, on AWS, waits for someone who needs a private repository and the operator's word to make one (done condition 3, as far as it reaches without AWS)
+- [ ] T027 Walk `specs/007-private-playbooks-access/quickstart.md`'s step 1, recording each command and result; record that step 2, on AWS, waits for someone who needs a private repository and the operator's word to make one (done condition 3, as far as it reaches without AWS); and add a line to `exportit/REMINDERS.md` saying that SC-002 and SC-004 are proved only by that step, what it needs (a private copy of the playbooks, a credential, a head node) and that the spec stays **merged** until it runs (the analysis of 2026-11-28)
 - [ ] T028 On the operator's word only: finish `csis-sandbox-terraform`'s branch into its `develop` and push, record its commit, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
 - [ ] T029 Record that no release applies, unless the operator asks for one (done condition 5)
 - [ ] T030 Mark the spec **complete**, with the date, only when T001 to T029 are checked and quickstart step 2 has been run; until then it stays **merged** (done conditions 1 and 6)
