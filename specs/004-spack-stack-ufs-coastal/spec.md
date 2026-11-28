@@ -5,10 +5,11 @@ taken up
 
 **Created**: 2026-11-14, as stage 18; carried into this spec 2026-11-19
 
-**Status**: Planned and tasked 2026-11-21; tasks corrected by the analysis of
-2026-11-26; in progress since 2026-11-26. Specs 001, 002 and 009 merged: this
-spec's head node is built with spec 001's module and procedure, and is spec
-009's proof on a real node. A real build of spack-stack takes hours.
+**Status**: **Complete**, 2026-11-28. Planned and tasked 2026-11-21; tasks
+corrected by the analyses of 2026-11-26 and 2026-11-28; implemented and
+proved on a head node of its own 2026-11-27 and 28, released in
+`csis-sandbox-provisioning` 0.0.6 to 0.0.10, the node removed; converged;
+merged into `develop` here and in its three units. Outcome below.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
@@ -214,3 +215,61 @@ spack-stack build cache.
 
 Stage 18, planned 2026-11-14, now in the ATTIC (`ATTIC/SPECS/STAGE-18.md`),
 as a pointer for a person reading; this spec stands without it.
+
+## Outcome
+
+Implemented 2026-11-26 to 28 by the agent, each merge, release and AWS step on
+the operator's word. The tasks' records (T004, T017 to T025) hold each step's
+evidence; this is their summary.
+
+**Which spack-stack** (FR-001): the fork `asascience-open/spack-stack` at
+`406b090aa4828fb7be840eea33c83963d88ac84e`, with its `aws-rhel10` site and
+`ioos-ufscoastal` template, chosen by the operator on 2026-11-26 when no JCSDA
+release fitted (2.1.1, the latest, has no RHEL 10 site and none of UFS
+Coastal's pins). The fork is unchanged: its site's Intel entries, which name an
+MPI the sandbox lacks and load Intel's modules, are overridden in the
+environment's own `site/` scope, which `spack stack create env` writes
+(Edge Cases).
+
+**Releases**: `csis-sandbox-provisioning` 0.0.6 (the playbook), and 0.0.7 to
+0.0.10, each a fix the head node found. Its last changes (a page on building
+spack-stack, the playbook's header and a test) stay unreleased on `develop`,
+on the operator's word of 2026-11-28. `csis-sandbox-ops` and
+`csis-model-ufscoastal` change on their `develop` and cut no release.
+
+**The proof**, on a head node of its own (`c6i.8xlarge`, the noaa account,
+us-east-2, the IOOS VPC), removed at the end with nothing left (FR-007):
+
+| Criterion | Evidence |
+| --- | --- |
+| SC-001 | from 0.0.9's checkout, two applies `changed=0` (T020); 0.0.10's change, applied by hand, `changed=4` then `changed=0` (T023) |
+| SC-002 | `stack-intel-oneapi-compilers/2024.2.1`, then `stack-intel-oneapi-mpi/2021.13`, then ESMF 8.8.0, FMS, MAPL, CRTM, HDF5, NetCDF and PIO at T014's versions (T021) |
+| SC-003 | UFS Coastal's `setup.sh` loaded its module file and CMake found every dependency; the model then built (`ufs_model`, eight minutes) (T023) |
+| SC-004 | `/etc/spack` absent before and after; the sandbox's environment concretizing to the same 36 hashes, its lock unchanged (T018, T022) |
+
+Its first boot was spec 009's proof on a real node: `failed=0`, the
+environment from the RHEL 10 cache, the three `from_mirrors` steps with no
+prompt (T017).
+
+**The build's time**: the clone of spack-stack, about ten minutes on the node;
+the environment, about two hours of compiling (a build by hand, 13:59 to
+16:01 UTC with one fix between); the first apply from 0.0.8, 1 h 41 min,
+since new system packages had given Spack more externals and 74 packages were
+built again; a second apply, two to three minutes.
+
+**Findings**, each with what carries it:
+
+| Finding | Fix |
+| --- | --- |
+| The account's patch scan (State Manager) ran `dnf clean all` during the first boot's update, which failed | the node replaced; `csis-sandbox-provisioning`'s spec 001 (dnf retries) |
+| Spack cannot read the sandbox's Intel module files (a `®` that is not UTF-8), which the fork's site names | 0.0.7: the sandbox's oneAPI declared with no modules |
+| RHEL 10's Perl lacks `FindBin`, which OpenSSL's build needs; and `install_spack-stack_prereqs`, which `add-ufs-setup.sh` called, had been missed | 0.0.8: that function's packages and Perl whole |
+| HDF5's CMake stops at the system zlib's CMake files without its static library | 0.0.8: `zlib-ng-compat-static` |
+| `spack_env` takes `$env/modules` literally and regenerated the module files every run, deleting the meta-modules; with the root found, `setup-meta-modules`' rewrites would keep it from settling | 0.0.9: the module files made with the meta-modules; the collection's spec 014 |
+| The module Spack makes for the external MPI sets no `I_MPI_ROOT`, so `use mpi` fails | 0.0.10: set in the stack's MPI module |
+| `setup.sh` put `modulefiles/`, not `modulefiles/tcl/`, on the module path | `csis-model-ufscoastal` `e6db006` |
+| Check mode on a built node reports changes it would not make (its preview's copy has an empty `$env/install`) | documented; the collection's spec 014, FR-007 |
+| The `ar` failure of RHEL 8, the reason for the GCC toolset, did not come back | none needed |
+
+The ones that outlive this spec are in [exportit/REMINDERS.md](../../exportit/REMINDERS.md).
+

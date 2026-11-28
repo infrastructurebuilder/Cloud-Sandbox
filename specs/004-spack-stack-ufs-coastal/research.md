@@ -5,6 +5,14 @@ Each item records a decision, why, and what else was weighed. Written on
 
 ## R1. Which spack-stack (FR-001's first task, begun)
 
+**Amended 2026-11-28**: what was built is the fork `asascience-open/spack-stack`
+at `406b090aa4828fb7be840eea33c83963d88ac84e`, the operator's choice of
+2026-11-26 (the spec's Clarifications) when T001 to T003 found no JCSDA
+release that fits (2.1.1 names no RHEL 10 site and none of UFS Coastal's
+pins), with its `aws-rhel10` site and `ioos-ufscoastal` template; T004
+concretized it in the container. The decision below is as written on
+2026-11-21, what was weighed.
+
 **Decision**: the candidate is JCSDA's latest 2.1.x release (2.1.1 when this
 was written), checked in this order when the work starts: (1) the spack-stack
 version UFS Coastal's current tag names, if it names one; (2) the release
@@ -72,7 +80,7 @@ replaces:
 | Step kind | What | Replaces |
 | --- | --- | --- |
 | `environment` | source spack-stack's `setup.sh`; the oneAPI modules | `source setup.sh`; `module load` |
-| `command` | `spack stack create env --site linux.default --template unified-dev --name aws-ioossb-rhel10 --compiler oneapi` (`creates:` the env's `spack.yaml`) | the same, `rhel8` |
+| `command` | `spack stack create env --site linux.default --template unified-dev --name aws-ioossb-rhel10 --compiler oneapi` (`creates:` the env's `spack.yaml`); as built (amended 2026-11-28): `--dir {{ ufs_stack_dir }}/envs --site aws-rhel10 --template ioos-ufscoastal` | the same, `rhel8` |
 | `detect` | externals, into the environment's scope (R4) | `spack external find --scope system` |
 | `config` | the three settings the script added, into the environment's scope | three `spack config add` |
 | `command` | `spack add sp` (unless present) | the same |
