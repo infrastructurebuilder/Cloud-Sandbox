@@ -166,3 +166,12 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
 - No GCC toolset is installed by any task (FR-002).
 - Nothing is written to `/etc/spack` (FR-004).
 - Nothing in `ATTIC/` is read for any task.
+
+## Phase 7: Convergence
+
+- [ ] T042 In `exportit/model-ufscoastal/README`, name `csis-sandbox-provisioning` 0.0.10 as the release from which `ufs-stack.yml` builds spack-stack (0.0.6 to 0.0.9 do not, on a head node), in that unit on a branch, with its `just test` per FR-006 (partial)
+- [ ] T043 In `exportit/sandbox-provisioning/ufs-stack.yml`'s header, record that the playbook takes the sandbox's versions (`group_vars/all.yml`: oneAPI 2024.2.1, MPI 2021.13, RHEL 10's GCC 14), not `ufs-envars.sh`'s (MPI 2021.16.0, ESMF 8.5.0, GCC 13.3.1, Spack v0.22.5), and why; and a test in `tests/test_ufs_stack.py` holding it, per FR-005 and Constitution I (partial)
+- [ ] T044 Bring `specs/004-spack-stack-ufs-coastal/data-model.md` to the playbook as 0.0.10 has it: `ufs_stack_env_site_scope`, `ufs_stack_intel_externals`, `ufs_stack_tbb_version`, `ufs_stack_system_packages`, `ufs_stack_meta_modules_dir`; `ufs_stack_after_install` as the module files and the meta-modules; the meta-modules at `envs/aws-ioossb-rhel10/modules/Core`, per plan: data-model (partial)
+- [ ] T045 Record the releases that carry the spec's work, `csis-sandbox-provisioning` 0.0.6, 0.0.7, 0.0.8, 0.0.9 and 0.0.10, each cut on the operator's word, in T039's place and in `specs/README.md`'s Released in, per T039 (contradicts)
+- [ ] T046 In `specs/004-spack-stack-ufs-coastal/contracts/ufs-stack-playbook.md` and T034's page, say that check mode on a built head node reports changes it would not make (the collection's `spack_env` previews a copy whose `$env/install` is empty; `ansible-collection-csis-spack`'s spec 014, FR-007), per contract: check mode (partial)
+- [ ] T047 In `exportit/model-ufscoastal/modulefiles/ufs_ioossb.intel`, the old file naming the RHEL 8 `spack-stack.v2.0`: point it at the new stack as `tcl/ufs_ioossb.intel.tcl` does, or say in it that nothing loads it, per FR-006 and SC-003 (unrequested)
