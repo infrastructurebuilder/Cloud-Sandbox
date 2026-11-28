@@ -8,6 +8,18 @@
 
 ## Summary
 
+**Amended 2026-11-28, after the work** (T049): what was built differs from
+what this plan foresaw in four ways, each recorded where it was decided. The
+stack is the fork `asascience-open/spack-stack` at `406b090aa4` with its
+`aws-rhel10` site and `ioos-ufscoastal` template (the operator's choice,
+2026-11-26; research R1), not a JCSDA 2.1.x or 2.0.0 release with
+`unified-dev`. The variables are in the playbook's `vars`, not
+`group_vars/ufs_stack.yml`. The module files are made with the meta-modules,
+as `command` steps, not by `spack_env` (FR-003, amended 2026-11-27). And the
+work took five releases of `csis-sandbox-provisioning`, 0.0.6 to 0.0.10, four
+of them fixes the head node found (T019 to T023). The text below is the plan
+as written on 2026-11-21.
+
 A playbook, `ufs-stack.yml`, replaces the broken `add-ufs-setup.sh`: it clones
 a JCSDA spack-stack release (2.1.x if it concretizes on RHEL 10, else 2.0.0,
 else the fork at a commit the operator names), creates the `unified-dev`
@@ -103,6 +115,9 @@ Cloud-Sandbox (the workshop)
 sits beside; UFS Coastal's files in their own unit.
 
 ## Order of the work, and of the merges
+
+(As planned; the work followed it, but step 2 sent four fixes back to step 1,
+each a release: see the amendment in the Summary.)
 
 1. **No AWS:** R1's checks (the release named by UFS Coastal's tag, the
    release notes), recorded; the playbook and its tests; the container

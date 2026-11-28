@@ -7,7 +7,7 @@ run by hand on a head node `site.yml` has built.
 | --- | --- |
 | first apply | spack-stack cloned at the ref; the environment created, concretized, installed; meta-modules set up; `module avail` shows them |
 | second apply | `changed=0` |
-| check mode | lists what would change; changes nothing |
+| check mode | lists what would change; changes nothing. On a built head node it reports more than would change (`changed=2` after two applies that changed nothing): the collection's `spack_env` previews from a copy whose `$env/install` is empty (`ansible-collection-csis-spack`'s spec 014, FR-007; found 2026-11-27) |
 | `ufs_stack_install: false` (the container) | stops after concretizing; the concretization succeeds |
 | the ref is a branch | fails before cloning, naming the variable |
 

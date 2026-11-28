@@ -72,3 +72,31 @@ aside and why, and where the details are.
   stage 12 tasks and `tasks/user_scope.yml` can be deleted, with their
   tests (`tests/test_user_scope.py`, the step's parity test, and the
   container test's seeding in `converge.sh` and check in `verify.yml`).
+- **The account's patch scan can take a first boot's downloads**
+  (2026-11-27, a finding of [spec 004](../specs/004-spack-stack-ufs-coastal/spec.md#outcome);
+  `csis-sandbox-provisioning`, and `csis-sandbox-terraform`'s first-boot
+  script). The noaa account's State Manager associations run a patch scan
+  as soon as a node's agent registers; its `dnf clean all` removed the
+  packages `base_system`'s update had just downloaded, and the first boot
+  failed one minute in. Planned as `csis-sandbox-provisioning`'s own spec
+  001 (the dnf tasks retry); the first-boot script's own `dnf install` of
+  `git` and `ansible-core` can meet the same race and is that unit's.
+- **`spack_env` and a module root written with `$env`** (2026-11-27, a
+  finding of spec 004; the collection). It took spack-stack's
+  `$env/modules` literally, regenerated the module files on every run
+  without saying so, and its check mode sees an `$env/install` tree as
+  empty. Planned as `ansible-collection-csis-spack`'s spec 014; until it is
+  released, `ufs-stack.yml` makes the module files itself, and its check
+  mode on a built node over-reports (`docs/SPACK-STACK.md`).
+- **No build cache for spack-stack** (2026-11-28, spec 004, FR-005;
+  `csis-sandbox-provisioning`, `csis-sandbox-ops`). Every head node that
+  runs `ufs-stack.yml` compiles the stack, about two hours. `sandbox-ops`'
+  `spack-stack-update-mirror.sh` and `spack-stack-mirror-create.sh` push to
+  the old RHEL 8 spack-stack mirror and are not replaced. To become a spec:
+  a cache for the fork's environment, as spec 002 made one for the sandbox's,
+  with its key and a push playbook.
+- **UFS Coastal builds with Intel's classic Fortran** (2026-11-28, spec 004;
+  `csis-model-ufscoastal`). Its module file sets `FC=mpiifort` and
+  `I_MPI_F90=ifort`; ifort is deprecated, and the stack's own packages are
+  built with oneAPI's ifx. It built (`ufs_model`), but a move to ifx, and
+  whether the model runs, is not proved.

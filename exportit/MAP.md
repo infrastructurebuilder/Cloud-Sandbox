@@ -767,6 +767,39 @@ through the collection's `command` step instead. The container test proves
 them against a mirror that publishes a key, made by a signed push with a
 throwaway key.
 
+### spack-stack for UFS Coastal (spec 004)
+
+`ufs-stack.yml`, beside `site.yml` and never imported by it, builds
+spack-stack on a head node by hand
+([docs/SPACK-STACK.md](sandbox-provisioning/docs/SPACK-STACK.md)): the fork
+`asascience-open/spack-stack` at commit `406b090aa4` (never a branch,
+checked before cloning), its `aws-rhel10` site and `ioos-ufscoastal`
+template, with the sandbox's oneAPI and RHEL 10's GCC 14, in
+`/save/environments/spack-stack-<commit>/`, beside the sandbox's Spack.
+Through the collection's `setup` role it installs the system packages the
+build needs, creates the environment, writes the externals, compilers and
+settings into the environment's own scopes (never `/etc/spack`), and declares
+the sandbox's oneAPI without modules in place of the fork's site's; `spack_env`
+concretizes and installs it; `command` steps make the Tcl module files and
+spack-stack's meta-modules together. It replaces three functions of
+`legacy/funcs-setup-instance.sh` that `setup-instance.sh` never called
+(`install_spack-stack_prereqs`, `setup_spack-stack`,
+`build_spack-stack-environment`), which `sandbox-ops`' `add-ufs-setup.sh`
+called; every line is replaced or listed in `tests/not_carried.yml`. The
+container test concretizes it (`ufs_stack_install: false`), twice and
+previewed, with `/etc/spack` checked.
+
+Proved on AWS by spec 004 (2026-11-27 and 28), on a head node of its own.
+It took five releases, 0.0.6 to 0.0.10: the node found the Intel module
+files' `®`, which Spack cannot read (0.0.7); RHEL 10's Perl without
+`FindBin`, a third function spec 004 had missed, and zlib's static library
+(0.0.8); `spack_env`'s refresh deleting the meta-modules every run (0.0.9;
+the collection's spec 014); and the MPI module without `I_MPI_ROOT` (0.0.10).
+From 0.0.10 a second apply changes nothing, `module avail` shows the
+meta-modules, `/etc/spack` and the sandbox's concretization are as they were,
+and UFS Coastal configures and builds against the stack. The build took about
+two hours on a `c6i.8xlarge`; there is no cache for spack-stack yet.
+
 ### What a real relocation would change
 
 - Create the repository, extract with `just export-filter
@@ -983,7 +1016,7 @@ The detail, with the scripts that do each step, is in each `UNIT.md`.
 | nosofs | GitHub `asascience-open/NOSOFS-Code-Package` (`v3.6.6.dev`); fixed fields from `ioos-sandbox-use2` or NCO `nwprod` | its own module file: as eccofs, plus parallel-netcdf and ParallelIO | `/save/$USER/nosofs.v3.6.6` |
 | secofs | GitHub `jduckerOWP/schism` (`v5.13.0_NOS_Sandbox`); inputs from `ioos-sandbox-use2`, and from VIMS with a password | its own module file: Intel 2024.2.1, MKL, Intel MPI 2021.13 under `intel/...` names that Spack does not make, netcdf-fortran 4.6.2 | `/save/$USER/schism` |
 | ucla-roms | GitHub `CESR-lab/ucla-roms`, default branch | Spack modules loaded in the scripts: oneAPI 2023.1, Intel MPI 2021.9.0, compression libraries, NetCDF | `/save/$USER/ucla-roms` |
-| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack from `sandbox-provisioning`'s `ufs-stack.yml` (since 0.0.6, spec 004; 0.0.10 builds it, settles, and UFS Coastal builds against it): the fork at `406b090aa4`, in `/save/environments/spack-stack-<commit>`; no GCC toolset | `/save/$USER/ufs-weather-model` |
+| ufscoastal | GitHub `asascience-open/ufs-weather-model`, default branch, recursive; inputs from `s3://ioos-transfers/` | spack-stack from `sandbox-provisioning`'s `ufs-stack.yml` (since 0.0.6, spec 004; 0.0.10 builds it, settles, and UFS Coastal builds against it); its `setup.sh` loads `modulefiles/tcl/ufs_ioossb.intel.tcl` (`e6db006`): the fork at `406b090aa4`, in `/save/environments/spack-stack-<commit>`; no GCC toolset | `/save/$USER/ufs-weather-model` |
 
 Three recipes follow a branch head (`ucla-roms`, `ufscoastal`,
 `liveocean`'s five repositories), so two builds a month apart need not
@@ -1371,7 +1404,7 @@ above its task:
   `funcs-setup-instance.sh` no longer defines, so the UFS add-on fails as
   written. `models/ufscoastal/README` still points to
   `ufs-setup-instance.sh`, which is superseded. Since spec 004 (2026-11-27)
-  both are replaced: `sandbox-provisioning` 0.0.6's `ufs-stack.yml` builds
+  both are replaced: `sandbox-provisioning`'s `ufs-stack.yml` (0.0.10 on a head node) builds
   spack-stack, `add-ufs-setup.sh` and `ufs-envars.sh` are marked replaced by
   it (they stay, in use), and `model-ufscoastal`'s README, `setup.sh` and
   module files point at the new stack.
