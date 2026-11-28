@@ -130,8 +130,10 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
   - Done 2026-11-28: four lines in `exportit/REMINDERS.md`: the account's patch scan (with `csis-sandbox-provisioning`'s spec 001 and the terraform first-boot script's own dnf), `spack_env`'s `$env` (the collection's spec 014), no build cache for spack-stack (FR-005), UFS Coastal on classic ifort. The other findings were fixed in a release and need none.
 - [X] T030 Commit the units' last changes; record the submodules; `just constitution-check`
   - Done 2026-11-28: the units' last changes committed on their `feature/spec-004-polish` branches, not yet pushed (T038): `csis-sandbox-provisioning` `e6bbcd5`, `csis-sandbox-ops` `92c63c9`, `csis-model-ufscoastal` `f633e04`; recorded here as the submodules; `just constitution-check`: the shared part (2.1.0), `CLAUDE.md` and `LICENSE` agree in every unit.
-- [ ] T031 Run the root `just test`
-- [ ] T032 Run the root `just full-test`
+- [X] T031 Run the root `just test`
+  - Done 2026-11-28: the root `just test`, 16 targets, passed after T042 to T050; and again inside T032's run, after T051.
+- [X] T032 Run the root `just full-test`
+  - Done 2026-11-28, after T051 (the last change): the root `just full-test` passed, 16 targets, the lineage check and the sync rehearsal (9 of 9) among them; `csis-sandbox-provisioning`'s 551 tests and 2 network tests, and its container run: `ufs-stack.yml` first `changed=11`, second and check mode `changed=0`, "PASSED".
 - [X] T033 Re-read [quickstart.md](quickstart.md) against what was run; correct it if a step differed: section 2 names the release the node's checkout must be on (`csis-sandbox-provisioning` 0.0.10 or later; 0.0.6 to 0.0.9 do not build on a head node), that the first apply builds for hours (about two), and that `just full-test` takes about an hour and a half; the evidence of each step is T017 to T025's records, the hand-run build (T019) among them. One pass serves T037 too
   - Done 2026-11-28: section 2 names 0.0.10 or later, the container test's hour and a half, the build's two hours (1 h 41 min from 0.0.8), the model's build from `e6db006`, and points to T017 to T025's records. Serves T037 as well.
 - [X] T034 [P] In `exportit/sandbox-provisioning/docs/`, a short page on building spack-stack (when, how long, the release, the scopes), linked from the playbook's header
@@ -140,7 +142,8 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
   - Done 2026-11-28: `git grep` across every unit for `add-ufs-setup`, `ufs-envars`, and the three functions: nothing calls them but `add-ufs-setup.sh` itself (it sources `ufs-envars.sh`), the units' attics, `legacy/` and documents that name them as replaced. `csis-sandbox-ops`' README row did not say so, as `spack-update-mirror.sh`'s does: now it does (`92c63c9`, on `feature/spec-004-polish`).
 - [X] T036 Run `/speckit-converge` on `specs/004-spack-stack-ufs-coastal/`; record that it appended nothing, or carry out what it appended (done condition 2). Its first run, 2026-11-28, appended T042 to T047 (Phase 7); record that here, and that T048 runs it again after them
   - Done 2026-11-28: its first run appended T042 to T047 (Phase 7), all done; T048 ran it again.
-- [ ] T037 Walk `specs/004-spack-stack-ufs-coastal/quickstart.md`, each step's evidence from the tasks above (done condition 3)
+- [X] T037 Walk `specs/004-spack-stack-ufs-coastal/quickstart.md`, each step's evidence from the tasks above (done condition 3)
+  - Done 2026-11-28, with T033: section 1, each unit's `just test` and `just full-test` and the root's, in T032's run; section 2, steps 1 to 7, in T017 (the node), T018 (before), T019 and T020 (applied, then `changed=0`), T021 (the meta-modules), T023 (the configure, and the model built), T022 (after) and T025 (removed). Each step ran as the quickstart says, from 0.0.9 and 0.0.10 as it now says.
 - [ ] T038 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
 - [X] T039 Record the release: `csis-sandbox-provisioning` `0.0.6`, cut on the operator's word at T016; no other release applies unless the operator asks (done condition 5). Superseded by T045, which records all five releases and the decision on a sixth: check this task when T045 is, with a line pointing to it
   - Done 2026-11-28, by T045, which supersedes it: all five releases and the decision on a sixth are recorded there.
