@@ -144,10 +144,12 @@ From the Cloud-Sandbox root: `exportit/sandbox-provisioning/`,
   - Done 2026-11-28: its first run appended T042 to T047 (Phase 7), all done; T048 ran it again.
 - [X] T037 Walk `specs/004-spack-stack-ufs-coastal/quickstart.md`, each step's evidence from the tasks above (done condition 3)
   - Done 2026-11-28, with T033: section 1, each unit's `just test` and `just full-test` and the root's, in T032's run; section 2, steps 1 to 7, in T017 (the node), T018 (before), T019 and T020 (applied, then `changed=0`), T021 (the meta-modules), T023 (the configure, and the model built), T022 (after) and T025 (removed). Each step ran as the quickstart says, from 0.0.9 and 0.0.10 as it now says.
-- [ ] T038 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+- [X] T038 On the operator's word only: finish the units' branches and push, record their commits, then squash Cloud-Sandbox's branch into `develop` and push, with `just submodules-pushed` first (done condition 4)
+  - Done 2026-11-28, on the operator's word ("Merge, push, complete"): each unit's `feature/spec-004-polish` squashed into its `develop` and pushed, the branch kept and pushed: `csis-sandbox-provisioning` `7e27b6e` (unreleased, the operator's answer at T045), `csis-sandbox-ops` `6f43108`, `csis-model-ufscoastal` `2136bda`; recorded here as the submodules; then `just submodules-pushed`, and Cloud-Sandbox's `feature/spack-stack-ufs-coastal` squashed into `develop` and pushed, the branch kept.
 - [X] T039 Record the release: `csis-sandbox-provisioning` `0.0.6`, cut on the operator's word at T016; no other release applies unless the operator asks (done condition 5). Superseded by T045, which records all five releases and the decision on a sixth: check this task when T045 is, with a line pointing to it
   - Done 2026-11-28, by T045, which supersedes it: all five releases and the decision on a sixth are recorded there.
-- [ ] T040 Mark the spec **complete**, with the date, only when T001 to T039 are checked (done conditions 1 and 6)
+- [X] T040 Mark the spec **complete**, with the date, only when T001 to T039 are checked (done conditions 1 and 6)
+  - Done 2026-11-28: T001 to T039 and T041 to T051 checked, each with its record; `spec.md` and `specs/README.md` say **complete**.
 
 ---
 

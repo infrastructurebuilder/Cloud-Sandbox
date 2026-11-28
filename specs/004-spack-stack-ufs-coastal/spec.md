@@ -5,12 +5,11 @@ taken up
 
 **Created**: 2026-11-14, as stage 18; carried into this spec 2026-11-19
 
-**Status**: In progress, 2026-11-28. Planned and tasked 2026-11-21; tasks
+**Status**: **Complete**, 2026-11-28. Planned and tasked 2026-11-21; tasks
 corrected by the analyses of 2026-11-26 and 2026-11-28; implemented and
 proved on a head node of its own 2026-11-27 and 28, released in
-`csis-sandbox-provisioning` 0.0.6 to 0.0.10, the node removed; its work so far
-on `develop` (`a8337a7`). Left: its converge's corrections and its last
-checks (see [tasks.md](tasks.md)); outcome below.
+`csis-sandbox-provisioning` 0.0.6 to 0.0.10, the node removed; converged;
+merged into `develop` here and in its three units. Outcome below.
 
 **Input**: the stage plan of 2026-11-14, carried from the ATTIC on the
 operator's instruction of 2026-11-19.
